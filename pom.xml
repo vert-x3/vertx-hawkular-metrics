@@ -32,13 +32,13 @@
   <description>Hawkular implementation of the Vert.x Metrics SPI</description>
 
   <scm>
-    <connection>scm:git:ssh://github.com/tsegismont/vertx-hawkular-metrics</connection>
-    <developerConnection>scm:git:ssh://github.com/tsegismont/vertx-hawkular-metrics</developerConnection>
-    <url>https://github.com/tsegismont/vertx-hawkular-metrics</url>
+    <connection>scm:git:ssh://github.com/vert-x3/vertx-hawkular-metrics</connection>
+    <developerConnection>scm:git:ssh://github.com/vert-x3/vertx-hawkular-metrics</developerConnection>
+    <url>https://github.com/vert-x3/vertx-hawkular-metrics</url>
   </scm>
   <ciManagement>
     <system>Travis-ci</system>
-    <url>https://travis-ci.org/tsegismont/vertx-hawkular-metrics</url>
+    <url>https://travis-ci.org/vert-x3/vertx-hawkular-metrics</url>
   </ciManagement>
 
   <properties>

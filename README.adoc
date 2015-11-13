@@ -20,7 +20,7 @@ NOTE: You can use a standalone https://github.com/hawkular/hawkular-metrics[Hawk
 Then clone this project and build it:
 [source, bash]
 ----
-git clone https://github.com/tsegismont/vertx-hawkular-metrics.git
+git clone https://github.com/vert-x3/vertx-hawkular-metrics.git
 cd vertx-hawkular-metrics
 mvn clean install
 ----
@@ -47,7 +47,7 @@ vertxOptions.setMetricsOptions(vertxHawkularOptions);
 Vertx vertx = Vertx.vertx(vertxOptions);
 ----
 
-https://github.com/tsegismont/vertx-hawkular-metrics/tree/master/src/main/java/org/hawkular/vertx/monitor/examples[Full samples]
+https://github.com/vert-x3/vertx-hawkular-metrics/tree/master/src/main/java/org/hawkular/vertx/monitor/examples[Full samples]
 can be found in the `org.hawkular.vertx.monitor.examples` package.
 
 == Configuration
