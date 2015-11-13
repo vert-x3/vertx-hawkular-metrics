@@ -1,4 +1,4 @@
-= vertx-monitor
+= vertx-hawkular-metrics
 :source-language: java
 
 == About
@@ -20,8 +20,8 @@ NOTE: You can use a standalone https://github.com/hawkular/hawkular-metrics[Hawk
 Then clone this project and build it:
 [source, bash]
 ----
-git clone https://github.com/tsegismont/vertx-monitor.git
-cd vertx-monitor
+git clone https://github.com/tsegismont/vertx-hawkular-metrics.git
+cd vertx-hawkular-metrics
 mvn clean install
 ----
 
@@ -30,7 +30,7 @@ Once the project is built, add the dependency to your Vert.x 3 project. For Mave
 ----
 <parent>
  <groupId>org.hawkular</groupId>
- <artifactId>vertx-monitor</artifactId>
+ <artifactId>vertx-hawkular-metrics</artifactId>
  <version>3.2.0-SNAPSHOT</version>
 </parent>
 ----
@@ -47,7 +47,7 @@ vertxOptions.setMetricsOptions(vertxHawkularOptions);
 Vertx vertx = Vertx.vertx(vertxOptions);
 ----
 
-https://github.com/tsegismont/vertx-monitor/tree/master/src/main/java/org/hawkular/vertx/monitor/examples[Full samples]
+https://github.com/tsegismont/vertx-hawkular-metrics/tree/master/src/main/java/org/hawkular/vertx/monitor/examples[Full samples]
 can be found in the `org.hawkular.vertx.monitor.examples` package.
 
 == Configuration

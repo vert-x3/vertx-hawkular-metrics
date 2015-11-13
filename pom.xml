@@ -25,20 +25,20 @@
     <version>17</version>
   </parent>
 
-  <artifactId>vertx-monitor</artifactId>
+  <artifactId>vertx-hawkular-metrics</artifactId>
   <version>3.2.0-SNAPSHOT</version>
 
   <name>Vert.x Monitor</name>
   <description>Hawkular implementation of the Vert.x Metrics SPI</description>
 
   <scm>
-    <connection>scm:git:ssh://github.com/tsegismont/vertx-monitor</connection>
-    <developerConnection>scm:git:ssh://github.com/tsegismont/vertx-monitor</developerConnection>
-    <url>https://github.com/tsegismont/vertx-monitor</url>
+    <connection>scm:git:ssh://github.com/tsegismont/vertx-hawkular-metrics</connection>
+    <developerConnection>scm:git:ssh://github.com/tsegismont/vertx-hawkular-metrics</developerConnection>
+    <url>https://github.com/tsegismont/vertx-hawkular-metrics</url>
   </scm>
   <ciManagement>
     <system>Travis-ci</system>
-    <url>https://travis-ci.org/tsegismont/vertx-monitor</url>
+    <url>https://travis-ci.org/tsegismont/vertx-hawkular-metrics</url>
   </ciManagement>
 
   <properties>

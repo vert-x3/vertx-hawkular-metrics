@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="862d674c-d376-48f3-8a70-aa22dbc6c941" name="Default" comment="Sender now pushes gauges and counters appropriately (vertx metrics are not only gauges)" />
-    <ignored path="vertx-monitor.iws" />
+    <ignored path="vertx-hawkular-metrics.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -23,7 +23,7 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
-    <favorites_list name="vertx-monitor" />
+    <favorites_list name="vertx-hawkular-metrics" />
   </component>
   <component name="FileEditorManager">
     <leaf>
@@ -594,7 +594,7 @@
         <subPane>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -604,7 +604,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -626,7 +626,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -644,7 +644,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -662,7 +662,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -684,7 +684,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -710,7 +710,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -740,7 +740,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -766,7 +766,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -796,7 +796,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -822,7 +822,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -848,7 +848,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -878,7 +878,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -896,7 +896,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -918,7 +918,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -932,7 +932,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -950,7 +950,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -976,7 +976,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -1006,7 +1006,7 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -1028,21 +1028,21 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -1056,11 +1056,11 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -1082,11 +1082,11 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -1100,11 +1100,11 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -1126,11 +1126,11 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="vertx-monitor" />
+              <option name="myItemId" value="vertx-hawkular-metrics" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -1175,7 +1175,7 @@
     <property name="extract.method.default.visibility" value="private" />
     <property name="full.screen.before.presentation.mode" value="false" />
     <property name="restartRequiresConfirmation" value="true" />
-    <property name="SearchEverywhereHistoryKey" value="event&#9;FILE&#9;file:///home/tsegismont/Projets/vertx-monitor/src/test/resources/verticles/event_bus_handler.groovy" />
+    <property name="SearchEverywhereHistoryKey" value="event&#9;FILE&#9;file:///home/tsegismont/Projets/vertx-hawkular-metrics/src/test/resources/verticles/event_bus_handler.groovy" />
   </component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
@@ -1257,7 +1257,7 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <module name="vertx-monitor" />
+      <module name="vertx-hawkular-metrics" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="io.vertx.ext.hawkular.impl" />
@@ -1283,7 +1283,7 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <module name="vertx-monitor" />
+      <module name="vertx-hawkular-metrics" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="io.vertx.ext.hawkular.impl" />
@@ -1309,7 +1309,7 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <module name="vertx-monitor" />
+      <module name="vertx-hawkular-metrics" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="io.vertx.ext.hawkular.impl" />
@@ -1335,7 +1335,7 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <module name="vertx-monitor" />
+      <module name="vertx-hawkular-metrics" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="io.vertx.ext.hawkular.impl" />
@@ -1361,7 +1361,7 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <module name="vertx-monitor" />
+      <module name="vertx-hawkular-metrics" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="io.vertx.ext.hawkular.impl" />
@@ -1738,7 +1738,7 @@
     </configuration>
     <configuration default="false" name="tests" type="JUnit" factoryName="JUnit">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-      <module name="vertx-monitor" />
+      <module name="vertx-hawkular-metrics" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="PACKAGE_NAME" value="" />
@@ -1757,7 +1757,7 @@
       <patterns />
       <method />
     </configuration>
-    <configuration default="false" name="vertx-monitor [clean,install]" type="MavenRunConfiguration" factoryName="Maven">
+    <configuration default="false" name="vertx-hawkular-metrics [clean,install]" type="MavenRunConfiguration" factoryName="Maven">
       <MavenSettings>
         <option name="myGeneralSettings" />
         <option name="myRunnerSettings" />
@@ -1782,7 +1782,7 @@
       </MavenSettings>
       <method />
     </configuration>
-    <configuration default="false" name="vertx-monitor [clean,compile]" type="MavenRunConfiguration" factoryName="Maven">
+    <configuration default="false" name="vertx-hawkular-metrics [clean,compile]" type="MavenRunConfiguration" factoryName="Maven">
       <MavenSettings>
         <option name="myGeneralSettings" />
         <option name="myRunnerSettings" />
@@ -1807,7 +1807,7 @@
       </MavenSettings>
       <method />
     </configuration>
-    <configuration default="false" name="vertx-monitor [clean,test]" type="MavenRunConfiguration" factoryName="Maven">
+    <configuration default="false" name="vertx-hawkular-metrics [clean,test]" type="MavenRunConfiguration" factoryName="Maven">
       <MavenSettings>
         <option name="myGeneralSettings" />
         <option name="myRunnerSettings" />
@@ -1835,9 +1835,9 @@
     <list size="10">
       <item index="0" class="java.lang.String" itemvalue="JBoss Server.Standalone Metrics on Wildfly" />
       <item index="1" class="java.lang.String" itemvalue="JUnit.tests" />
-      <item index="2" class="java.lang.String" itemvalue="Maven.vertx-monitor [clean,install]" />
-      <item index="3" class="java.lang.String" itemvalue="Maven.vertx-monitor [clean,compile]" />
-      <item index="4" class="java.lang.String" itemvalue="Maven.vertx-monitor [clean,test]" />
+      <item index="2" class="java.lang.String" itemvalue="Maven.vertx-hawkular-metrics [clean,install]" />
+      <item index="3" class="java.lang.String" itemvalue="Maven.vertx-hawkular-metrics [clean,compile]" />
+      <item index="4" class="java.lang.String" itemvalue="Maven.vertx-hawkular-metrics [clean,test]" />
       <item index="5" class="java.lang.String" itemvalue="JUnit.NetServerITest" />
       <item index="6" class="java.lang.String" itemvalue="JUnit.HttpServerITest" />
       <item index="7" class="java.lang.String" itemvalue="JUnit.NetClientITest" />
@@ -2987,7 +2987,7 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>vertx-monitor</last-edited>
+          <last-edited>vertx-hawkular-metrics</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
