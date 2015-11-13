@@ -28,7 +28,7 @@
   <artifactId>vertx-hawkular-metrics</artifactId>
   <version>3.2.0-SNAPSHOT</version>
 
-  <name>Vert.x Monitor</name>
+  <name>Vert.x Hawkular Metrics</name>
   <description>Hawkular implementation of the Vert.x Metrics SPI</description>
 
   <scm>

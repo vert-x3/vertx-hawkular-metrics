@@ -52,7 +52,7 @@ can be found in the `org.hawkular.vertx.monitor.examples` package.
 
 == Configuration
 
-Here's how to configure Vert.x Monitor
+Here's how to configure Vert.x Hawkular Metrics
 [source, java]
 ----
 VertxHawkularOptions vertxHawkularOptions = new VertxHawkularOptions() // <1>
