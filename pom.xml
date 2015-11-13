@@ -119,7 +119,7 @@
     <dependency>
       <groupId>org.hawkular.commons</groupId>
       <artifactId>hawkular-commons-embedded-cassandra-ear</artifactId>
-      <version>0.2.3.Final-SNAPSHOT</version>
+      <version>0.2.3.Final</version>
       <type>ear</type>
       <scope>test</scope>
     </dependency>
@@ -192,7 +192,7 @@
                 <javaOpt>-Dsun.rmi.dgc.client.gcInterval=3600000</javaOpt>
                 <javaOpt>-Dsun.rmi.dgc.server.gcInterval=3600000</javaOpt>
                 <javaOpt>-Djboss.socket.binding.port-offset=${test.port.offset}</javaOpt>
-                <javaOpt>-Dcassandra.keyspace=vertx_monitor_tests</javaOpt>
+                <javaOpt>-Dcassandra.keyspace=vertx_hawkular_metrics_tests</javaOpt>
                 <javaOpt>-Dcassandra.resetdb</javaOpt>
                 <javaOpt>-Dhawkular.metrics.waitForService</javaOpt>
                 <javaOpt>-Dhawkular.log.cassandra=ERROR</javaOpt>
