@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DynamicElementsStorage">
+    <option name="containingClasses">
+      <map>
+        <entry key="verticles.datagram_server">
+          <value>
+            <DClassElement>
+              <option name="name" value="verticles.datagram_server" />
+              <option name="myName" value="verticles.datagram_server" />
+              <option name="myProperties">
+                <set>
+                  <DPropertyElement>
+                    <option name="name" value="vertx" />
+                    <option name="static" value="false" />
+                    <option name="type" value="io.vertx.groovy.core.Vertx" />
+                    <option name="myType" value="io.vertx.groovy.core.Vertx" />
+                    <option name="myStatic" value="false" />
+                    <option name="myName" value="vertx" />
+                  </DPropertyElement>
+                </set>
+              </option>
+            </DClassElement>
+          </value>
+        </entry>
+        <entry key="verticles.event_bus_handler">
+          <value>
+            <DClassElement>
+              <option name="name" value="verticles.event_bus_handler" />
+              <option name="myName" value="verticles.event_bus_handler" />
+              <option name="myProperties">
+                <set>
+                  <DPropertyElement>
+                    <option name="name" value="vertx" />
+                    <option name="static" value="false" />
+                    <option name="type" value="io.vertx.groovy.core.Vertx" />
+                    <option name="myType" value="io.vertx.groovy.core.Vertx" />
+                    <option name="myStatic" value="false" />
+                    <option name="myName" value="vertx" />
+                  </DPropertyElement>
+                </set>
+              </option>
+            </DClassElement>
+          </value>
+        </entry>
+        <entry key="verticles.http_server">
+          <value>
+            <DClassElement>
+              <option name="name" value="verticles.http_server" />
+              <option name="myName" value="verticles.http_server" />
+              <option name="myProperties">
+                <set>
+                  <DPropertyElement>
+                    <option name="name" value="vertx" />
+                    <option name="static" value="false" />
+                    <option name="type" value="io.vertx.groovy.core.Vertx" />
+                    <option name="myType" value="io.vertx.groovy.core.Vertx" />
+                    <option name="myStatic" value="false" />
+                    <option name="myName" value="vertx" />
+                  </DPropertyElement>
+                </set>
+              </option>
+            </DClassElement>
+          </value>
+        </entry>
+        <entry key="verticles.net_server">
+          <value>
+            <DClassElement>
+              <option name="name" value="verticles.net_server" />
+              <option name="myName" value="verticles.net_server" />
+              <option name="myProperties">
+                <set>
+                  <DPropertyElement>
+                    <option name="name" value="vertx" />
+                    <option name="static" value="false" />
+                    <option name="type" value="io.vertx.groovy.core.Vertx" />
+                    <option name="myType" value="io.vertx.groovy.core.Vertx" />
+                    <option name="myStatic" value="false" />
+                    <option name="myName" value="vertx" />
+                  </DPropertyElement>
+                </set>
+              </option>
+            </DClassElement>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

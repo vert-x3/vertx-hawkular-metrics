@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: io.vertx:vertx-lang-groovy:3.2.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/io/vertx/vertx-lang-groovy/3.2.0-SNAPSHOT/vertx-lang-groovy-3.2.0-20151110.004100-82.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/io/vertx/vertx-lang-groovy/3.2.0-SNAPSHOT/vertx-lang-groovy-3.2.0-20151110.004100-82-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/io/vertx/vertx-lang-groovy/3.2.0-SNAPSHOT/vertx-lang-groovy-3.2.0-20151110.004100-82-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

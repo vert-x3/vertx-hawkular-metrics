@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.hawkular.metrics:hawkular-metrics-api-jaxrs:war:0.8.0.Final">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hawkular/metrics/hawkular-metrics-api-jaxrs/0.8.0.Final/hawkular-metrics-api-jaxrs-0.8.0.Final.war!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hawkular/metrics/hawkular-metrics-api-jaxrs/0.8.0.Final/hawkular-metrics-api-jaxrs-0.8.0.Final-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hawkular/metrics/hawkular-metrics-api-jaxrs/0.8.0.Final/hawkular-metrics-api-jaxrs-0.8.0.Final-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

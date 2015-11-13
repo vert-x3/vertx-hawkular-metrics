@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.hawkular.commons:hawkular-commons-embedded-cassandra-ear:ear:0.2.3.Final-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hawkular/commons/hawkular-commons-embedded-cassandra-ear/0.2.3.Final-SNAPSHOT/hawkular-commons-embedded-cassandra-ear-0.2.3.Final-SNAPSHOT.ear!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hawkular/commons/hawkular-commons-embedded-cassandra-ear/0.2.3.Final-SNAPSHOT/hawkular-commons-embedded-cassandra-ear-0.2.3.Final-SNAPSHOT-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hawkular/commons/hawkular-commons-embedded-cassandra-ear/0.2.3.Final-SNAPSHOT/hawkular-commons-embedded-cassandra-ear-0.2.3.Final-SNAPSHOT-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

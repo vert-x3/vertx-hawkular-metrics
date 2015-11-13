@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: io.vertx:vertx-codegen:3.2.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/io/vertx/vertx-codegen/3.2.0-SNAPSHOT/vertx-codegen-3.2.0-20151107.145536-22.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/io/vertx/vertx-codegen/3.2.0-SNAPSHOT/vertx-codegen-3.2.0-20151107.145536-22-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/io/vertx/vertx-codegen/3.2.0-SNAPSHOT/vertx-codegen-3.2.0-20151107.145536-22-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
