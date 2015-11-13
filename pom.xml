@@ -36,10 +36,6 @@
     <developerConnection>scm:git:ssh://github.com/vert-x3/vertx-hawkular-metrics</developerConnection>
     <url>https://github.com/vert-x3/vertx-hawkular-metrics</url>
   </scm>
-  <ciManagement>
-    <system>Travis-ci</system>
-    <url>https://travis-ci.org/vert-x3/vertx-hawkular-metrics</url>
-  </ciManagement>
 
   <properties>
     <!-- Versioning properties -->
