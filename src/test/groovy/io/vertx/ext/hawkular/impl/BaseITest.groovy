@@ -58,10 +58,18 @@ abstract class BaseITest {
   }
 
   protected def deployVerticle(String verticleName, Map config, int instances, TestContext testContext) {
+    def async = testContext.async()
     vertx.deployVerticle(verticleName, [
       'config'   : config,
       'instances': instances
-    ], assertAsyncSuccess(testContext))
+    ], { res ->
+      if (res.succeeded()) {
+        async.complete()
+      } else {
+        testContext.fail(res.cause())
+      }
+    })
+    async.await()
   }
 
   @After

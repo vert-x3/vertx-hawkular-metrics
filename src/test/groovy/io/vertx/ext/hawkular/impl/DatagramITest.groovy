@@ -38,7 +38,7 @@ class DatagramITest extends BaseITest {
   @Before
   void setup(TestContext context) {
     def verticleName = 'verticles/datagram_server.groovy'
-    def instances = 13
+    def instances = 1
     def config = [
       'host': testHost,
       'port': testPort

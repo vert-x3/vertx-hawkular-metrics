@@ -16,11 +16,13 @@
 
 package verticles
 
+import io.vertx.groovy.core.Future
+
 /**
  * @author Thomas Segismont
  */
 
-void vertxStart() {
+void vertxStart(Future startFuture) {
   def config = vertx.getOrCreateContext().config()
   httpServer = vertx.createHttpServer()
   httpServer.requestHandler({ req ->
@@ -29,5 +31,10 @@ void vertxStart() {
       req.response().setChunked(true).putHeader('Content-Type', 'text/plain').write(config.content as String).end()
     })
   }).listen(config.port as int, config.host as String, { res ->
+    if (res.failed()) {
+      startFuture.fail(res.cause().message)
+    } else {
+      startFuture.complete()
+    }
   })
 }

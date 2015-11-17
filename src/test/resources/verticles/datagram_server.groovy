@@ -15,12 +15,20 @@
  */
 
 package verticles
+
+import io.vertx.groovy.core.Future
+
 /**
  * @author Thomas Segismont
  */
 
-void vertxStart() {
+void vertxStart(Future startFuture) {
   def config = vertx.getOrCreateContext().config()
   vertx.createDatagramSocket().listen(config.port as int, config.host as String, { res ->
+    if (res.failed()) {
+      startFuture.fail(res.cause().message)
+    } else {
+      startFuture.complete()
+    }
   })
 }
