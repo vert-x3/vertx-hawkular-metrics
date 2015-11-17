@@ -108,7 +108,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     super(other);
     host = other.host;
     port = other.port;
-    httpOptions = other.httpOptions;
+    httpOptions = other.httpOptions != null ? new HttpClientOptions(other.httpOptions) : new HttpClientOptions();
     metricsServiceUri = other.metricsServiceUri;
     tenant = other.tenant;
     schedule = other.schedule;
