@@ -39,7 +39,7 @@ import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 /**
- * Metrcis SPI implementation.
+ * Metris SPI implementation.
  *
  * @author Thomas Segismont
  */
