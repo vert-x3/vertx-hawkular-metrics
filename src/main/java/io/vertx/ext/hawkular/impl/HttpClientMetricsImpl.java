@@ -81,7 +81,7 @@ public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientReques
   }
 
   @Override
-  public Void connected(SocketAddress remoteAddress) {
+  public Void connected(SocketAddress remoteAddress, String remoteName) {
     HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
     if (measurements == null) {
       measurements = connectionsMeasurements.computeIfAbsent(remoteAddress, address -> new HttpClientConnectionsMeasurements());

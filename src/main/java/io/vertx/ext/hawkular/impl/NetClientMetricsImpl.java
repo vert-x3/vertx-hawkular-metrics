@@ -39,7 +39,7 @@ public class NetClientMetricsImpl implements TCPMetrics<Void> {
   }
 
   @Override
-  public Void connected(SocketAddress remoteAddress) {
+  public Void connected(SocketAddress remoteAddress, String remoteName) {
     NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
     if (measurements == null) {
       measurements = connectionsMeasurements.computeIfAbsent(remoteAddress, address -> new NetClientConnectionsMeasurements());

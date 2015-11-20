@@ -42,7 +42,7 @@ public class NetServerMetricsImpl implements TCPMetrics<Void> {
   }
 
   @Override
-  public Void connected(SocketAddress remoteAddress) {
+  public Void connected(SocketAddress remoteAddress, String remoteName) {
     connections.increment();
     return null;
   }

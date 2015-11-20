@@ -61,7 +61,7 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
   }
 
   @Override
-  public EventBusHandlerMetrics handlerRegistered(String address, boolean replyHandler) {
+  public EventBusHandlerMetrics handlerRegistered(String address, String repliedAddress) {
     handlers.increment();
     EventBusHandlerMetrics handlerMetrics = new EventBusHandlerMetrics(address);
     while (true) {
@@ -80,6 +80,7 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
     }
     return handlerMetrics;
   }
+
 
   @Override
   public void handlerUnregistered(EventBusHandlerMetrics handlerMetrics) {

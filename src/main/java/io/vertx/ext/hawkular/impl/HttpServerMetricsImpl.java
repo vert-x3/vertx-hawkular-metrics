@@ -81,7 +81,7 @@ public class HttpServerMetricsImpl implements HttpServerMetrics<Long, Void, Void
   }
 
   @Override
-  public Void connected(SocketAddress remoteAddress) {
+  public Void connected(SocketAddress remoteAddress, String remoteName) {
     httpConnections.increment();
     return null;
   }
