@@ -14,52 +14,50 @@
 ^|Name | Type ^| Description
 |[[batchDelay]]`batchDelay`|`Number (int)`|
 +++
-Set the maximum delay between two consecutive batches (in seconds).
+@return the maximum delay between two consecutive batches
 +++
 |[[batchSize]]`batchSize`|`Number (int)`|
 +++
-Set the maximum number of metrics in a batch.
+@return the maximum number of metrics in a batch
 +++
 |[[enabled]]`enabled`|`Boolean`|-
 |[[host]]`host`|`String`|
 +++
-Set the Hawkular Metrics service host.
+@return the Hawkular Metrics service host
 +++
 |[[httpOptions]]`httpOptions`|`link:dataobjects.html#HttpClientOptions[HttpClientOptions]`|
 +++
-Set the configuration of the Hawkular Metrics HTTP client.
+@return the configuration of the Hawkular Metrics HTTP client
 +++
 |[[metricsBridgeAddress]]`metricsBridgeAddress`|`String`|
 +++
-Sets the metric bridge address on which the application is sending the custom metrics. Application can send
- metrics to this event bus address. The message is a JSON object specifying at least the <code>source</code> and
- <code>value</code> fields (<code>value</code> is a double).
- <p/>
- Don't forget to also enable the bridge with link.
+@return the metric bridge address. If enabled the metric bridge transfers metrics collected from the event bus to
+ the Hawkular server. The metrics are sent as message on the event bus to the return address. The message is a
+ JSON object specifying at least the <code>source</code> and <code>value</code> fields (<code>value</code> is a double).
 +++
 |[[metricsBridgeEnabled]]`metricsBridgeEnabled`|`Boolean`|
 +++
-Sets whether or not the metrics bridge should be enabled.
+Checks whether or not the metrics bridge is enabled.
 +++
 |[[metricsServiceUri]]`metricsServiceUri`|`String`|
 +++
-Set the Hawkular Metrics service URI.
+@return the Hawkular Metrics service URI
 +++
 |[[port]]`port`|`Number (int)`|
 +++
-Set the Hawkular Metrics service port.
+@return the Hawkular Metrics service port
 +++
 |[[prefix]]`prefix`|`String`|
 +++
-Set the metric name prefix.
+@return the metric name prefix
 +++
 |[[schedule]]`schedule`|`Number (int)`|
 +++
-Set the metric collection interval (in seconds).
+@return the metric collection interval (in seconds)
 +++
 |[[tenant]]`tenant`|`String`|
 +++
-Set the Hawkular tenant.
+@return the Hawkular tenant
 +++
 |===
 
