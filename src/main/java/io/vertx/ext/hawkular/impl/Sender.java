@@ -76,26 +76,8 @@ public class Sender implements Handler<List<SingleMetric>> {
         .setDefaultPort(options.getPort());
       httpClient = vertx.createHttpClient(httpClientOptions);
       timerId = vertx.setPeriodic(MILLISECONDS.convert(batchDelay, NANOSECONDS), this::flushIfIdle);
-
-      // Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
-      if (options.isMetricsBridgeEnabled() && options.getMetricsBridgeAddress() != null) {
-        vertx.eventBus().consumer(options.getMetricsBridgeAddress(), message -> {
-          // By spec, it is a json object.
-          JsonObject json = (JsonObject) message.body();
-
-          // source and value has to be set.
-          // the timestamp can have been set in the message using the 'timestamp' field. If not use 'now'
-          // the type of metrics can have been set in the message using the 'type' field. It not use 'gauge'. Only
-          // "counter" and "gauge" are supported.
-          SingleMetric metric = new SingleMetric(json.getString("source"),
-              json.getLong("timestamp", System.currentTimeMillis()),
-              json.getDouble("value"),
-              "counter".equals(json.getString("type", "")) ? MetricType.COUNTER : MetricType.GAUGE);
-
-          context.runOnContext(v -> handle(Collections.singletonList(metric)));
-        });
       }
-    });
+    );
     sendTime = System.nanoTime();
   }
 
@@ -119,6 +101,7 @@ public class Sender implements Handler<List<SingleMetric>> {
 
   private void send(List<SingleMetric> metrics) {
     JsonObject mixedData = toHawkularMixedData(metrics);
+    System.out.println("Sending  metrics => " + mixedData.encodePrettily());
     httpClient.post(metricsURI, this::onResponse)
       .putHeader("Content-Type", "application/json")
       .putHeader("Hawkular-Tenant", tenant)
