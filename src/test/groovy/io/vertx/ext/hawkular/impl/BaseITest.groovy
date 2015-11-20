@@ -93,6 +93,9 @@ abstract class BaseITest {
         tenant  : tenantId,
         prefix  : METRIC_PREFIX,
         schedule: SECONDS.convert(SCHEDULE, MILLISECONDS),
+        // Event bus bridge configuration
+        metricsBridgeEnabled : true,
+        metricsBridgeAddress: "metrics"
       ]
     ]
     vertxOptions
