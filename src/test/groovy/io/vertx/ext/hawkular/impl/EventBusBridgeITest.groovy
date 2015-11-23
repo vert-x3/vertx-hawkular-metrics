@@ -32,7 +32,7 @@ class EventBusBridgeITest extends BaseITest {
     def config = [
             'host': testHost,
             'port': testPort,
-            'timestamp': true,
+            'insert-timestamp': true,
             'source': 'my-metric-ts'
     ]
     deployVerticle(verticleName, config, instances, context)
