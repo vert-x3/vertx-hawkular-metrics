@@ -101,7 +101,6 @@ public class Sender implements Handler<List<SingleMetric>> {
 
   private void send(List<SingleMetric> metrics) {
     JsonObject mixedData = toHawkularMixedData(metrics);
-    System.out.println("Sending  metrics => " + mixedData.encodePrettily());
     httpClient.post(metricsURI, this::onResponse)
       .putHeader("Content-Type", "application/json")
       .putHeader("Hawkular-Tenant", tenant)

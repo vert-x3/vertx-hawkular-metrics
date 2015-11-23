@@ -142,7 +142,6 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
             json.getLong("timestamp", System.currentTimeMillis()),
             json.getDouble("value"),
             "counter".equals(json.getString("type", "")) ? MetricType.COUNTER : MetricType.GAUGE);
-        System.out.println("Sending custom metrics");
         sender.handle(Collections.singletonList(metric));
       });
     }
