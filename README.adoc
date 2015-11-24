@@ -1,6 +1,9 @@
 = vertx-hawkular-metrics
 :source-language: java
 
+[link=https://vertx.ci.cloudbees.com/job/vert.x3-hawkular-metrics/]
+image::https://vertx.ci.cloudbees.com/buildStatus/icon?job=vert.x3-hawkular-metrics
+
 == About
 
 Hawkular is an http://www.hawkular.org[open source monitoring and management solution].
