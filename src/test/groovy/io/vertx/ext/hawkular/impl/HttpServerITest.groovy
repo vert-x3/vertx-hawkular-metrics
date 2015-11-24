@@ -28,7 +28,7 @@ class HttpServerITest extends BaseITest {
   static final HTTP_SERVER_METRICS = ['bytesReceived', 'bytesSent', 'errorCount', 'httpConnections', 'processingTime',
                                       'requestCount', 'requests', 'wsConnections']
 
-  def testHost = '127.0.0.1'
+  def testHost = 'localhost'
   def testPort = getPort(9191)
   def metricPrefix = "${METRIC_PREFIX}.vertx.http.server.${testHost}:${testPort}."
   def requestDelay = 11L

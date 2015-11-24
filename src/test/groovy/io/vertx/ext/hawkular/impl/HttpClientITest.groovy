@@ -30,7 +30,7 @@ import java.util.concurrent.ForkJoinPool
 class HttpClientITest extends BaseITest {
   static final RESPONSE_CONTENT = 'some text'
 
-  def testHost = '127.0.0.1'
+  def testHost = 'localhost'
   def testPort = getPort(9195)
   def metricPrefix = "${METRIC_PREFIX}.vertx.http.client.${testHost}:${testPort}."
   def requestDelay = 11L

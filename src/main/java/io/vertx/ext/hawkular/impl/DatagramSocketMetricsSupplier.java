@@ -44,10 +44,7 @@ public class DatagramSocketMetricsSupplier implements MetricSupplier {
     Map<SocketAddress, Long> sent = new HashMap<>();
     long errorCount = 0;
     for (DatagramSocketMetricsImpl datagramSocketMetrics : metricsSet) {
-      SocketAddress serverAddress = datagramSocketMetrics.getServerAddress();
-      if (serverAddress != null) {
-        received.merge(serverAddress, datagramSocketMetrics.getBytesReceived(), Long::sum);
-      }
+      datagramSocketMetrics.getBytesReceived().forEach((address, bytes) -> received.merge(address, bytes, Long::sum));
       datagramSocketMetrics.getBytesSent().forEach((address, bytes) -> sent.merge(address, bytes, Long::sum));
       errorCount += datagramSocketMetrics.getErrorCount();
     }
