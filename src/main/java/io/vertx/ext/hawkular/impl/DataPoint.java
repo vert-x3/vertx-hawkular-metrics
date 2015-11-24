@@ -13,20 +13,27 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-
 package io.vertx.ext.hawkular.impl;
 
-
-import java.util.List;
-
 /**
- * Contract for objects supplying metrics.
+ * Base class for metric data points. Defines the metric name and timestamp of the point.
  *
  * @author Thomas Segismont
  */
-public interface MetricSupplier {
-  /**
-   * @return a list of metrics to send to the Hawkular server
-   */
-  List<DataPoint> collect();
+public abstract class DataPoint {
+  private final String name;
+  private final long timestamp;
+
+  public DataPoint(String name, long timestamp) {
+    this.name = name;
+    this.timestamp = timestamp;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
+  }
 }

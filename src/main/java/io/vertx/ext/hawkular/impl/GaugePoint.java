@@ -13,20 +13,22 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-
 package io.vertx.ext.hawkular.impl;
 
-
-import java.util.List;
-
 /**
- * Contract for objects supplying metrics.
+ * A gauge {@link DataPoint}. Gauge values may increase or decrease (e.g. room temperature).
  *
  * @author Thomas Segismont
  */
-public interface MetricSupplier {
-  /**
-   * @return a list of metrics to send to the Hawkular server
-   */
-  List<DataPoint> collect();
+public class GaugePoint extends DataPoint {
+  private final double value;
+
+  public GaugePoint(String name, long timestamp, double value) {
+    super(name, timestamp);
+    this.value = value;
+  }
+
+  public double getValue() {
+    return value;
+  }
 }

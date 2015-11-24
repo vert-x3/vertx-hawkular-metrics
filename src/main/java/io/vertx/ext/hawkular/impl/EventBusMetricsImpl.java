@@ -17,8 +17,6 @@ package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
-import org.hawkular.metrics.client.common.MetricType;
-import org.hawkular.metrics.client.common.SingleMetric;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -180,40 +178,36 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
   }
 
   @Override
-  public List<SingleMetric> collect() {
+  public List<DataPoint> collect() {
     long timestamp = System.currentTimeMillis();
-    List<SingleMetric> metrics = new ArrayList<>();
-    metrics.add(buildMetric("handlers", timestamp, handlers.sum(), MetricType.GAUGE));
+    List<DataPoint> dataPoints = new ArrayList<>();
+    dataPoints.add(new GaugePoint(baseName + "handlers", timestamp, handlers.sum()));
     handlersMeasurements.entrySet().forEach(e -> {
       String address = e.getKey();
       HandlersMeasurements measurements = e.getValue();
       String source = address + ".processingTime";
-      metrics.add(buildMetric(source, timestamp, measurements.processingTime(), MetricType.COUNTER));
+      dataPoints.add(new CounterPoint(baseName + source, timestamp, measurements.processingTime()));
     });
-    metrics.add(buildMetric("errorCount", timestamp, errorCount.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("bytesWritten", timestamp, bytesWritten.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("bytesRead", timestamp, bytesRead.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("pending", timestamp, pending.sum(), MetricType.GAUGE));
-    metrics.add(buildMetric("pendingLocal", timestamp, pendingLocal.sum(), MetricType.GAUGE));
-    metrics.add(buildMetric("pendingRemote", timestamp, pendingRemote.sum(), MetricType.GAUGE));
-    metrics.add(buildMetric("publishedMessages", timestamp, publishedMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("publishedLocalMessages", timestamp, publishedLocalMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("publishedRemoteMessages", timestamp, publishedRemoteMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("sentMessages", timestamp, sentMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("sentLocalMessages", timestamp, sentLocalMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("sentRemoteMessages", timestamp, sentRemoteMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("receivedMessages", timestamp, receivedMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("receivedLocalMessages", timestamp, receivedLocalMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("receivedRemoteMessages", timestamp, receivedRemoteMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("deliveredMessages", timestamp, deliveredMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("deliveredLocalMessages", timestamp, deliveredLocalMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("deliveredRemoteMessages", timestamp, deliveredRemoteMessages.sum(), MetricType.COUNTER));
-    metrics.add(buildMetric("replyFailures", timestamp, replyFailures.sum(), MetricType.COUNTER));
-    return metrics;
-  }
-
-  private SingleMetric buildMetric(String name, long timestamp, Number value, MetricType type) {
-    return new SingleMetric(baseName + name, timestamp, value.doubleValue(), type);
+    dataPoints.add(new CounterPoint(baseName + "errorCount", timestamp, errorCount.sum()));
+    dataPoints.add(new CounterPoint(baseName + "bytesWritten", timestamp, bytesWritten.sum()));
+    dataPoints.add(new CounterPoint(baseName + "bytesRead", timestamp, bytesRead.sum()));
+    dataPoints.add(new GaugePoint(baseName + "pending", timestamp, pending.sum()));
+    dataPoints.add(new GaugePoint(baseName + "pendingLocal", timestamp, pendingLocal.sum()));
+    dataPoints.add(new GaugePoint(baseName + "pendingRemote", timestamp, pendingRemote.sum()));
+    dataPoints.add(new CounterPoint(baseName + "publishedMessages", timestamp, publishedMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "publishedLocalMessages", timestamp, publishedLocalMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "publishedRemoteMessages", timestamp, publishedRemoteMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "sentMessages", timestamp, sentMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "sentLocalMessages", timestamp, sentLocalMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "sentRemoteMessages", timestamp, sentRemoteMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "receivedMessages", timestamp, receivedMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "receivedLocalMessages", timestamp, receivedLocalMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "receivedRemoteMessages", timestamp, receivedRemoteMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "deliveredMessages", timestamp, deliveredMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "deliveredLocalMessages", timestamp, deliveredLocalMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "deliveredRemoteMessages", timestamp, deliveredRemoteMessages.sum()));
+    dataPoints.add(new CounterPoint(baseName + "replyFailures", timestamp, replyFailures.sum()));
+    return dataPoints;
   }
 
   @Override

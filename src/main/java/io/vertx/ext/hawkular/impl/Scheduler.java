@@ -19,7 +19,6 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
-import org.hawkular.metrics.client.common.SingleMetric;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -33,7 +32,7 @@ import static java.util.concurrent.TimeUnit.*;
  */
 public class Scheduler {
   private final Vertx vertx;
-  private final Handler<List<SingleMetric>> sender;
+  private final Handler<List<DataPoint>> sender;
   private final List<MetricSupplier> suppliers;
 
   private long timerId;
@@ -44,7 +43,7 @@ public class Scheduler {
    * @param context the metric collection and sending execution context
    * @param sender  the object responsible for sending metrics to the Hawkular server
    */
-  public Scheduler(Vertx vertx, VertxHawkularOptions options, Context context, Handler<List<SingleMetric>> sender) {
+  public Scheduler(Vertx vertx, VertxHawkularOptions options, Context context, Handler<List<DataPoint>> sender) {
     this.vertx = vertx;
     this.sender = sender;
     suppliers = new CopyOnWriteArrayList<>();

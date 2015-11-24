@@ -16,8 +16,6 @@
 package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.net.SocketAddress;
-import org.hawkular.metrics.client.common.MetricType;
-import org.hawkular.metrics.client.common.SingleMetric;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import static org.hawkular.metrics.client.common.MetricType.*;
 
 /**
  * Aggregates values from {@link DatagramSocketMetricsImpl} instances and exposes metrics for collection.
@@ -42,7 +38,7 @@ public class DatagramSocketMetricsSupplier implements MetricSupplier {
   }
 
   @Override
-  public List<SingleMetric> collect() {
+  public List<DataPoint> collect() {
     long timestamp = System.currentTimeMillis();
     Map<SocketAddress, Long> received = new HashMap<>();
     Map<SocketAddress, Long> sent = new HashMap<>();
@@ -55,21 +51,17 @@ public class DatagramSocketMetricsSupplier implements MetricSupplier {
       datagramSocketMetrics.getBytesSent().forEach((address, bytes) -> sent.merge(address, bytes, Long::sum));
       errorCount += datagramSocketMetrics.getErrorCount();
     }
-    List<SingleMetric> res = new ArrayList<>(received.size() + sent.size() + 1);
+    List<DataPoint> res = new ArrayList<>(received.size() + sent.size() + 1);
     received.forEach((address, count) -> {
       String addressId = address.host() + ":" + address.port();
-      res.add(metric(addressId + ".bytesReceived", timestamp, count, COUNTER));
+      res.add(new CounterPoint(baseName + addressId + ".bytesReceived", timestamp, count));
     });
     sent.forEach((address, count) -> {
       String addressId = address.host() + ":" + address.port();
-      res.add(metric(addressId + ".bytesSent", timestamp, count, COUNTER));
+      res.add(new CounterPoint(baseName + addressId + ".bytesSent", timestamp, count));
     });
-    res.add(new SingleMetric(baseName + "errorCount", timestamp, Long.valueOf(errorCount).doubleValue(), COUNTER));
+    res.add(new CounterPoint(baseName + "errorCount", timestamp, errorCount));
     return res;
-  }
-
-  private SingleMetric metric(String name, long timestamp, Number value, MetricType type) {
-    return new SingleMetric(baseName + name, timestamp, value.doubleValue(), type);
   }
 
   public void register(DatagramSocketMetricsImpl datagramSocketMetrics) {

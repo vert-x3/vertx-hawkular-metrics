@@ -16,17 +16,21 @@
 
 package io.vertx.ext.hawkular.impl;
 
-
-import java.util.List;
-
 /**
- * Contract for objects supplying metrics.
+ * A counter {@link DataPoint}. Counters are used when we are more interested in changes of the values, rather than in
+ * the value themselves (e.g. number of requests processed since startup).
  *
  * @author Thomas Segismont
  */
-public interface MetricSupplier {
-  /**
-   * @return a list of metrics to send to the Hawkular server
-   */
-  List<DataPoint> collect();
+public class CounterPoint extends DataPoint {
+  private final long value;
+
+  public CounterPoint(String name, long timestamp, long value) {
+    super(name, timestamp);
+    this.value = value;
+  }
+
+  public long getValue() {
+    return value;
+  }
 }

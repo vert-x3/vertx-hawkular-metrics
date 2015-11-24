@@ -26,24 +26,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
-import org.hawkular.metrics.client.common.MetricType;
-import org.hawkular.metrics.client.common.SingleMetric;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.*;
-import static java.util.stream.Collectors.*;
-import static org.hawkular.metrics.client.common.MetricType.*;
 
 /**
  * Sends collected metrics to the Hawkular server.
  *
  * @author Thomas Segismont
  */
-public class Sender implements Handler<List<SingleMetric>> {
+public class Sender implements Handler<List<DataPoint>> {
   private static final Logger LOG = LoggerFactory.getLogger(Sender.class);
 
   private final Vertx vertx;
@@ -51,7 +46,7 @@ public class Sender implements Handler<List<SingleMetric>> {
   private final String tenant;
   private final int batchSize;
   private final long batchDelay;
-  private final List<SingleMetric> queue;
+  private final List<DataPoint> queue;
 
   private HttpClient httpClient;
   private long timerId;
@@ -82,25 +77,25 @@ public class Sender implements Handler<List<SingleMetric>> {
   }
 
   @Override
-  public void handle(List<SingleMetric> metrics) {
-    if (queue.size() + metrics.size() < batchSize) {
-      queue.addAll(metrics);
+  public void handle(List<DataPoint> dataPoints) {
+    if (queue.size() + dataPoints.size() < batchSize) {
+      queue.addAll(dataPoints);
       return;
     }
-    List<SingleMetric> temp = new ArrayList<>(queue.size() + metrics.size());
+    List<DataPoint> temp = new ArrayList<>(queue.size() + dataPoints.size());
     temp.addAll(queue);
-    temp.addAll(metrics);
+    temp.addAll(dataPoints);
     queue.clear();
     do {
-      List<SingleMetric> subList = temp.subList(0, batchSize);
+      List<DataPoint> subList = temp.subList(0, batchSize);
       send(subList);
       subList.clear();
     } while (temp.size() >= batchSize);
     queue.addAll(temp);
   }
 
-  private void send(List<SingleMetric> metrics) {
-    JsonObject mixedData = toHawkularMixedData(metrics);
+  private void send(List<DataPoint> dataPoints) {
+    JsonObject mixedData = toHawkularMixedData(dataPoints);
     httpClient.post(metricsURI, this::onResponse)
       .putHeader("Content-Type", "application/json")
       .putHeader("Hawkular-Tenant", tenant)
@@ -109,45 +104,50 @@ public class Sender implements Handler<List<SingleMetric>> {
     sendTime = System.nanoTime();
   }
 
-  private JsonObject toHawkularMixedData(List<SingleMetric> metrics) {
-    JsonObject mixedData = new JsonObject();
-    Map<MetricType, List<SingleMetric>> map = metrics.stream().collect(groupingBy(singleMetric -> {
-      // Hawkular only knows counters and gauges for now
-      if (singleMetric.getMetricType() == COUNTER) {
-        return COUNTER;
+  private JsonObject toHawkularMixedData(List<DataPoint> dataPoints) {
+    JsonArray gauges = new JsonArray();
+    JsonArray counters = new JsonArray();
+
+    dataPoints.forEach(metric -> {
+
+      if (metric instanceof GaugePoint) {
+        GaugePoint gaugePoint = (GaugePoint) metric;
+
+        JsonObject point = new JsonObject();
+        point.put("timestamp", gaugePoint.getTimestamp());
+        point.put("value", gaugePoint.getValue());
+
+        JsonObject gauge = new JsonObject();
+        gauge.put("id", gaugePoint.getName());
+        gauge.put("data", new JsonArray(Collections.singletonList(point)));
+
+        gauges.add(gauge);
       }
-      return GAUGE;
-    }));
-    List<SingleMetric> counterMetrics = map.get(COUNTER);
-    if (counterMetrics != null) {
-      // For now, gauges and counters are handled the same on the Vert.x side (Double value).
-      // But this is going to change
-      JsonArray counters = toHawkularGauges(counterMetrics);
-      mixedData.put("counters", counters);
-    }
-    List<SingleMetric> gaugeMetrics = map.get(GAUGE);
-    if (gaugeMetrics != null) {
-      JsonArray gauges = toHawkularGauges(gaugeMetrics);
+
+      if (metric instanceof CounterPoint) {
+        CounterPoint counterPoint = (CounterPoint) metric;
+
+        JsonObject point = new JsonObject();
+        point.put("timestamp", counterPoint.getTimestamp());
+        point.put("value", counterPoint.getValue());
+
+        JsonObject counter = new JsonObject();
+        counter.put("id", counterPoint.getName());
+        counter.put("data", new JsonArray(Collections.singletonList(point)));
+
+        counters.add(counter);
+      }
+
+    });
+
+    JsonObject mixedData = new JsonObject();
+    if (!gauges.isEmpty()) {
       mixedData.put("gauges", gauges);
     }
+    if (!counters.isEmpty()) {
+      mixedData.put("counters", counters);
+    }
     return mixedData;
-  }
-
-  private JsonArray toHawkularGauges(List<SingleMetric> metrics) {
-    JsonArray gauges = new JsonArray();
-    metrics.forEach(singleMetric -> {
-
-      JsonObject point = new JsonObject();
-      point.put("timestamp", singleMetric.getTimestamp());
-      point.put("value", singleMetric.getValue());
-
-      JsonObject counter = new JsonObject();
-      counter.put("id", singleMetric.getSource());
-      counter.put("data", new JsonArray(Collections.singletonList(point)));
-
-      gauges.add(counter);
-    });
-    return gauges;
   }
 
   private void onResponse(HttpClientResponse response) {

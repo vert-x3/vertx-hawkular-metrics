@@ -27,11 +27,17 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.impl.DummyVertxMetrics;
-import io.vertx.core.net.*;
-import io.vertx.core.spi.metrics.*;
+import io.vertx.core.net.NetClient;
+import io.vertx.core.net.NetClientOptions;
+import io.vertx.core.net.NetServer;
+import io.vertx.core.net.NetServerOptions;
+import io.vertx.core.net.SocketAddress;
+import io.vertx.core.spi.metrics.DatagramSocketMetrics;
+import io.vertx.core.spi.metrics.EventBusMetrics;
+import io.vertx.core.spi.metrics.HttpClientMetrics;
+import io.vertx.core.spi.metrics.HttpServerMetrics;
+import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
-import org.hawkular.metrics.client.common.MetricType;
-import org.hawkular.metrics.client.common.SingleMetric;
 
 import java.util.Collections;
 
@@ -138,11 +144,16 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
         // the timestamp can have been set in the message using the 'timestamp' field. If not use 'now'
         // the type of metrics can have been set in the message using the 'type' field. It not use 'gauge'. Only
         // "counter" and "gauge" are supported.
-        SingleMetric metric = new SingleMetric(json.getString("source"),
-            json.getLong("timestamp", System.currentTimeMillis()),
-            json.getDouble("value"),
-            "counter".equals(json.getString("type", "")) ? MetricType.COUNTER : MetricType.GAUGE);
-        sender.handle(Collections.singletonList(metric));
+        String type = json.getString("type", "");
+        String name = json.getString("source");
+        long timestamp = json.getLong("timestamp", System.currentTimeMillis());
+        DataPoint dataPoint;
+        if ("counter".equals(type)) {
+          dataPoint = new CounterPoint(name, timestamp, json.getLong("value"));
+        } else {
+          dataPoint = new GaugePoint(name, timestamp, json.getDouble("value"));
+        }
+        sender.handle(Collections.singletonList(dataPoint));
       });
     }
   }

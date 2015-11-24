@@ -18,8 +18,6 @@ package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.hawkular.impl.NetClientConnectionsMeasurements.Snapshot;
-import org.hawkular.metrics.client.common.MetricType;
-import org.hawkular.metrics.client.common.SingleMetric;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import static org.hawkular.metrics.client.common.MetricType.*;
 
 /**
  * Aggregates values from {@link NetClientMetricsImpl} instances and exposes metrics for collection.
@@ -44,7 +40,7 @@ public class NetClientMetricsSupplier implements MetricSupplier {
   }
 
   @Override
-  public List<SingleMetric> collect() {
+  public List<DataPoint> collect() {
     long timestamp = System.currentTimeMillis();
 
     Map<SocketAddress, Snapshot> values = new HashMap<>();
@@ -55,20 +51,16 @@ public class NetClientMetricsSupplier implements MetricSupplier {
       });
     }
 
-    List<SingleMetric> res = new ArrayList<>();
+    List<DataPoint> res = new ArrayList<>();
 
     values.forEach((address, snapshot) -> {
       String addressId = address.host() + ":" + address.port();
-      res.add(metric(addressId + ".connections", timestamp, snapshot.getConnections(), GAUGE));
-      res.add(metric(addressId + ".bytesReceived", timestamp, snapshot.getBytesReceived(), COUNTER));
-      res.add(metric(addressId + ".bytesSent", timestamp, snapshot.getBytesSent(), COUNTER));
-      res.add(metric(addressId + ".errorCount", timestamp, snapshot.getErrorCount(), COUNTER));
+      res.add(new GaugePoint(baseName + addressId + ".connections", timestamp, snapshot.getConnections()));
+      res.add(new CounterPoint(baseName + addressId + ".bytesReceived", timestamp, snapshot.getBytesReceived()));
+      res.add(new CounterPoint(baseName + addressId + ".bytesSent", timestamp, snapshot.getBytesSent()));
+      res.add(new CounterPoint(baseName + addressId + ".errorCount", timestamp, snapshot.getErrorCount()));
     });
     return res;
-  }
-
-  private SingleMetric metric(String name, long timestamp, Number value, MetricType type) {
-    return new SingleMetric(baseName + name, timestamp, value.doubleValue(), type);
   }
 
   public void register(NetClientMetricsImpl netClientMetrics) {

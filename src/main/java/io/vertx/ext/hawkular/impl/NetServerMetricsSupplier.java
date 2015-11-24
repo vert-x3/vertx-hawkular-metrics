@@ -16,8 +16,6 @@
 package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.net.SocketAddress;
-import org.hawkular.metrics.client.common.MetricType;
-import org.hawkular.metrics.client.common.SingleMetric;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import static org.hawkular.metrics.client.common.MetricType.*;
 
 /**
  * Aggregates values from {@link NetServerMetricsImpl} instances and exposes metrics for collection.
@@ -42,7 +38,7 @@ public class NetServerMetricsSupplier implements MetricSupplier {
   }
 
   @Override
-  public List<SingleMetric> collect() {
+  public List<DataPoint> collect() {
     long timestamp = System.currentTimeMillis();
 
     Map<SocketAddress, Long> connections = new HashMap<>();
@@ -58,11 +54,12 @@ public class NetServerMetricsSupplier implements MetricSupplier {
       merge(errorCount, serverAddress, netServerMetrics.getErrorCount());
     }
 
-    List<SingleMetric> res = new ArrayList<>();
-    res.addAll(metrics("connections", timestamp, connections, GAUGE));
-    res.addAll(metrics("bytesReceived", timestamp, bytesReceived, COUNTER));
-    res.addAll(metrics("bytesSent", timestamp, bytesSent, COUNTER));
-    res.addAll(metrics("errorCount", timestamp, errorCount, COUNTER));
+    List<DataPoint> res = new ArrayList<>();
+    res.addAll(gauges("connections", timestamp, connections));
+    res.addAll(counters("bytesReceived", timestamp, bytesReceived));
+    res.addAll(counters("bytesSent", timestamp, bytesSent));
+    res.addAll(counters("errorCount", timestamp, errorCount));
+
     return res;
   }
 
@@ -70,17 +67,22 @@ public class NetServerMetricsSupplier implements MetricSupplier {
     values.merge(serverAddress, value, Long::sum);
   }
 
-  private List<SingleMetric> metrics(String name, long timestamp, Map<SocketAddress, ? extends Number> values, MetricType type) {
-    List<SingleMetric> res = new ArrayList<>(values.size());
+  private List<DataPoint> gauges(String id, long timestamp, Map<SocketAddress, Long> values) {
+    List<DataPoint> res = new ArrayList<>(values.size());
     values.forEach((address, count) -> {
-      String addressId = address.host() + ":" + address.port();
-      res.add(metric(addressId + "." + name, timestamp, count, type));
+      String name = baseName + address.host() + ":" + address.port() + "." + id;
+      res.add(new GaugePoint(name, timestamp, count));
     });
     return res;
   }
 
-  private SingleMetric metric(String name, long timestamp, Number value, MetricType type) {
-    return new SingleMetric(baseName + name, timestamp, value.doubleValue(), type);
+  private List<DataPoint> counters(String id, long timestamp, Map<SocketAddress, Long> values) {
+    List<DataPoint> res = new ArrayList<>(values.size());
+    values.forEach((address, count) -> {
+      String name = baseName + address.host() + ":" + address.port() + "." + id;
+      res.add(new CounterPoint(name, timestamp, count));
+    });
+    return res;
   }
 
   public void register(NetServerMetricsImpl netServerMetrics) {
