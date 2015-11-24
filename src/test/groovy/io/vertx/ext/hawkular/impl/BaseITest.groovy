@@ -120,7 +120,7 @@ abstract class BaseITest {
       if (System.currentTimeMillis() - start > 2 * SCHEDULE) break;
       sleep(SCHEDULE / 10 as long)
     }
-    fail("Expected: ${expected}, actual: ${actual}")
+    fail("Expected: ${expected.sort()}, actual: ${actual.sort()}")
   }
 
   protected static def void assertGaugeEquals(Double expected, String tenantId, String gauge) {

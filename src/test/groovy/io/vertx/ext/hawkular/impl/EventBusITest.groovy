@@ -33,6 +33,7 @@ class EventBusITest extends BaseITest {
   def String address = "testSubject"
   def baseName = "${METRIC_PREFIX}.vertx.eventbus."
   def baseNameWithAddress = "${baseName}${address}."
+  def baseNameWithMetricsAddress = "${baseName}metrics."
   def eventBus = vertx.eventBus()
   def instances = 3
 
@@ -53,12 +54,18 @@ class EventBusITest extends BaseITest {
 
     def nameFilter = { String id -> id.startsWith(baseName) }
     def nameTransformer = { String id ->
-      id.startsWith(baseNameWithAddress) ? id.substring(baseNameWithAddress.length()) : id.substring(baseName.length())
+      if (id.startsWith(baseNameWithMetricsAddress)) {
+        return id.substring(baseNameWithMetricsAddress.length())
+      }
+      if (id.startsWith(baseNameWithAddress)) {
+        return id.substring(baseNameWithAddress.length())
+      }
+      return id.substring(baseName.length())
     }
     assertMetricsEquals(EVENT_BUS_METRICS as Set, tenantId, nameFilter, nameTransformer)
 
     def allPublished = publishedNofail + publishedFail
-    assertGaugeEquals(instances, tenantId, "${baseName}handlers")
+    assertGaugeEquals(instances + 1 /* take metrics bridge handler into account*/, tenantId, "${baseName}handlers")
     assertCounterGreaterThan(handlerSleep * allPublished, tenantId, "${baseNameWithAddress}processingTime")
     assertCounterEquals(instances * publishedFail, tenantId, "${baseName}errorCount")
     assertCounterEquals(allPublished, tenantId, "${baseName}publishedMessages")
