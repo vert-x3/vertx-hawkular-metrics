@@ -140,12 +140,13 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
         // By spec, it is a json object.
         JsonObject json = (JsonObject) message.body();
 
-        // source and value has to be set.
+        // id (source) and value has to be set.
+        // `id` is used to be homogeneous with Hawkular (using `id` as series identifier).
         // the timestamp can have been set in the message using the 'timestamp' field. If not use 'now'
         // the type of metrics can have been set in the message using the 'type' field. It not use 'gauge'. Only
         // "counter" and "gauge" are supported.
         String type = json.getString("type", "");
-        String name = json.getString("source");
+        String name = json.getString("id");
         long timestamp = json.getLong("timestamp", System.currentTimeMillis());
         DataPoint dataPoint;
         if ("counter".equals(type)) {

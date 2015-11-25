@@ -20,7 +20,7 @@ class EventBusBridgeITest extends BaseITest {
     def config = [
             'host': testHost,
             'port': testPort,
-            'source': 'my-metric'
+            'id': 'my-metric'
     ]
     deployVerticle(verticleName, config, instances, context)
     assertGaugeEquals(1.0, tenantId, "my-metric")
@@ -33,7 +33,7 @@ class EventBusBridgeITest extends BaseITest {
             'host': testHost,
             'port': testPort,
             'insert-timestamp': true,
-            'source': 'my-metric-ts'
+            'id': 'my-metric-ts'
     ]
     deployVerticle(verticleName, config, instances, context)
     assertGaugeEquals(1.0, tenantId, "my-metric-ts")
@@ -46,7 +46,7 @@ class EventBusBridgeITest extends BaseITest {
             'host': testHost,
             'port': testPort,
             'counter' : true,
-            'source': 'my-metric-counter'
+            'id': 'my-metric-counter'
     ]
     deployVerticle(verticleName, config, instances, context)
     assertCounterEquals(1L, tenantId, "my-metric-counter")

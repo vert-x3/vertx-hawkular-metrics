@@ -25,10 +25,10 @@ import io.vertx.groovy.core.eventbus.EventBus
 
 void vertxStart(Future startFuture) {
   def config = vertx.getOrCreateContext().config()
-  def source = config['source']
+  def id = config['id']
   def EventBus eb = vertx.eventBus()
   def metric = [
-          "source": source,
+          "id": id,
           "value" : 1.0d
   ];
   if (config["insert-timestamp"]) {
