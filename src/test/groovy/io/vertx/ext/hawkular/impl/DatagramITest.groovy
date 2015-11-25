@@ -28,7 +28,7 @@ class DatagramITest extends BaseITest {
   static final CONTENT = 'some text'
   static final DATAGRAM_METRICS = ['bytesReceived', 'bytesSent', 'errorCount']
 
-  def testHost = '127.0.0.1'
+  def testHost = 'localhost'
   def testPort = getPort(9192)
   def baseName = "${METRIC_PREFIX}.vertx.datagram."
   def baseNameWithAddress = "${baseName}${testHost}:${testPort}."

@@ -32,12 +32,12 @@ import static java.util.stream.Collectors.*;
  * @author Thomas Segismont
  */
 public class DatagramSocketMetricsImpl implements DatagramSocketMetrics {
-  private final LongAdder bytesReceived = new LongAdder();
+  private final ConcurrentMap<SocketAddress, LongAdder> bytesReceived = new ConcurrentHashMap<>(0);
   private final ConcurrentMap<SocketAddress, LongAdder> bytesSent = new ConcurrentHashMap<>(0);
   private final LongAdder errors = new LongAdder();
   private final DatagramSocketMetricsSupplier datagramSocketMetricsSupplier;
 
-  private SocketAddress localAddress;
+  private volatile SocketAddress localAddress;
 
   public DatagramSocketMetricsImpl(DatagramSocketMetricsSupplier datagramSocketMetricsSupplier) {
     this.datagramSocketMetricsSupplier = datagramSocketMetricsSupplier;
@@ -51,7 +51,11 @@ public class DatagramSocketMetricsImpl implements DatagramSocketMetrics {
 
   @Override
   public void bytesRead(Void socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
-    bytesReceived.add(numberOfBytes);
+    LongAdder counter = bytesReceived.get(localAddress);
+    if (counter == null) {
+      counter = bytesReceived.computeIfAbsent(localAddress, address -> new LongAdder());
+    }
+    counter.add(numberOfBytes);
   }
 
   @Override
@@ -69,17 +73,10 @@ public class DatagramSocketMetricsImpl implements DatagramSocketMetrics {
   }
 
   /**
-   * @return the local {@link SocketAddress} for listening {@link io.vertx.core.datagram.DatagramSocket}, null otherwise
+   * @return bytes received per remote {@link SocketAddress}
    */
-  public SocketAddress getServerAddress() {
-    return localAddress;
-  }
-
-  /**
-   * @return the number of bytes received for listening {@link io.vertx.core.datagram.DatagramSocket}, 0 otherwise
-   */
-  public long getBytesReceived() {
-    return bytesReceived.sum();
+  public Map<SocketAddress, Long> getBytesReceived() {
+    return bytesReceived.entrySet().stream().collect(toMap(Entry::getKey, e -> e.getValue().sum()));
   }
 
   /**

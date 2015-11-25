@@ -27,7 +27,7 @@ class NetServerITest extends BaseITest {
   static final RESPONSE_CONTENT = 'some text'
   static final NET_SERVER_METRICS = ['bytesReceived', 'bytesSent', 'errorCount', 'connections']
 
-  def testHost = '127.0.0.1'
+  def testHost = 'localhost'
   def testPort = getPort(9193)
   def metricPrefix = "${METRIC_PREFIX}.vertx.net.server.${testHost}:${testPort}."
 

@@ -1,7 +1,6 @@
 package io.vertx.ext.hawkular.impl
 
 import io.vertx.groovy.ext.unit.TestContext
-import org.junit.Before
 import org.junit.Test
 
 /**
@@ -9,7 +8,7 @@ import org.junit.Test
  */
 class EventBusBridgeITest extends BaseITest {
 
-  def testHost = '127.0.0.1'
+  def testHost = 'localhost'
   def testPort = getPort(9192)
   def verticleName = 'verticles/metrics_sender.groovy'
 

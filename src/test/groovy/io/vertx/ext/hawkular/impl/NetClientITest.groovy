@@ -30,7 +30,7 @@ import java.util.concurrent.ForkJoinPool
 class NetClientITest extends BaseITest {
   static final RESPONSE_CONTENT = 'some text'
 
-  def testHost = '127.0.0.1'
+  def testHost = 'localhost'
   def testPort = getPort(9194)
   def metricPrefix = "${METRIC_PREFIX}.vertx.net.client.${testHost}:${testPort}."
 

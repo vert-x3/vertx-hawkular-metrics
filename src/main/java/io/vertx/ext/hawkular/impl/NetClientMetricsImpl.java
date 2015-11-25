@@ -17,6 +17,7 @@
 package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.net.SocketAddress;
+import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.hawkular.impl.NetClientConnectionsMeasurements.Snapshot;
 
@@ -29,7 +30,7 @@ import static java.util.stream.Collectors.*;
 /**
  * @author Thomas Segismont
  */
-public class NetClientMetricsImpl implements TCPMetrics<Void> {
+public class NetClientMetricsImpl implements TCPMetrics<SocketAddress> {
   private final ConcurrentMap<SocketAddress, NetClientConnectionsMeasurements> connectionsMeasurements = new ConcurrentHashMap<>(0);
   private final NetClientMetricsSupplier netClientMetricsSupplier;
 
@@ -39,42 +40,43 @@ public class NetClientMetricsImpl implements TCPMetrics<Void> {
   }
 
   @Override
-  public Void connected(SocketAddress remoteAddress, String remoteName) {
-    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public SocketAddress connected(SocketAddress remoteAddress, String remoteName) {
+    SocketAddress key = new SocketAddressImpl(remoteAddress.port(), remoteName);
+    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements == null) {
-      measurements = connectionsMeasurements.computeIfAbsent(remoteAddress, address -> new NetClientConnectionsMeasurements());
+      measurements = connectionsMeasurements.computeIfAbsent(key, address -> new NetClientConnectionsMeasurements());
     }
     measurements.incrementConnections();
-    return null;
+    return key;
   }
 
   @Override
-  public void disconnected(Void socketMetric, SocketAddress remoteAddress) {
-    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public void disconnected(SocketAddress key, SocketAddress remoteAddress) {
+    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.decrementConnections();
     }
   }
 
   @Override
-  public void bytesRead(Void socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
-    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public void bytesRead(SocketAddress key, SocketAddress remoteAddress, long numberOfBytes) {
+    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.addBytesReceived(numberOfBytes);
     }
   }
 
   @Override
-  public void bytesWritten(Void socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
-    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public void bytesWritten(SocketAddress key, SocketAddress remoteAddress, long numberOfBytes) {
+    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.addBytesSent(numberOfBytes);
     }
   }
 
   @Override
-  public void exceptionOccurred(Void socketMetric, SocketAddress remoteAddress, Throwable t) {
-    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public void exceptionOccurred(SocketAddress key, SocketAddress remoteAddress, Throwable t) {
+    NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.incrementErrorCount();
     }

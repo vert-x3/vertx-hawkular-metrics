@@ -20,6 +20,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
+import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.ext.hawkular.impl.HttpClientConnectionsMeasurements.Snapshot;
 
@@ -33,7 +34,7 @@ import static java.util.stream.Collectors.*;
 /**
  * @author Thomas Segismont
  */
-public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientRequestMetrics, SocketAddress, Void> {
+public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientRequestMetrics, SocketAddress, SocketAddress> {
   private final ConcurrentMap<SocketAddress, HttpClientConnectionsMeasurements> connectionsMeasurements = new ConcurrentHashMap<>(0);
   private final HttpClientMetricsSupplier httpClientMetricsSupplier;
 
@@ -43,12 +44,12 @@ public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientReques
   }
 
   @Override
-  public HttpClientRequestMetrics requestBegin(Void socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public HttpClientRequestMetrics requestBegin(SocketAddress key, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.requestBegin();
     }
-    HttpClientRequestMetrics httpClientRequestMetrics = new HttpClientRequestMetrics(remoteAddress);
+    HttpClientRequestMetrics httpClientRequestMetrics = new HttpClientRequestMetrics(key);
     httpClientRequestMetrics.resetTimer();
     return httpClientRequestMetrics;
   }
@@ -63,60 +64,60 @@ public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientReques
   }
 
   @Override
-  public SocketAddress connected(Void socketMetric, WebSocket webSocket) {
-    SocketAddress remoteAddress = webSocket.remoteAddress();
-    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public SocketAddress connected(SocketAddress key, WebSocket webSocket) {
+    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.incrementWsConnectionCount();
     }
-    return remoteAddress;
+    return key;
   }
 
   @Override
-  public void disconnected(SocketAddress address) {
-    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(address);
+  public void disconnected(SocketAddress key) {
+    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.decrementWsConnectionCount();
     }
   }
 
   @Override
-  public Void connected(SocketAddress remoteAddress, String remoteName) {
-    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public SocketAddress connected(SocketAddress remoteAddress, String remoteName) {
+    SocketAddress key = new SocketAddressImpl(remoteAddress.port(), remoteName);
+    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements == null) {
-      measurements = connectionsMeasurements.computeIfAbsent(remoteAddress, address -> new HttpClientConnectionsMeasurements());
+      measurements = connectionsMeasurements.computeIfAbsent(key, address -> new HttpClientConnectionsMeasurements());
     }
     measurements.incrementConnections();
-    return null;
+    return key;
   }
 
   @Override
-  public void disconnected(Void socketMetric, SocketAddress remoteAddress) {
-    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public void disconnected(SocketAddress key, SocketAddress remoteAddress) {
+    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.decrementConnections();
     }
   }
 
   @Override
-  public void bytesRead(Void socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
-    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public void bytesRead(SocketAddress key, SocketAddress remoteAddress, long numberOfBytes) {
+    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.addBytesReceived(numberOfBytes);
     }
   }
 
   @Override
-  public void bytesWritten(Void socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
-    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public void bytesWritten(SocketAddress key, SocketAddress remoteAddress, long numberOfBytes) {
+    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.addBytesSent(numberOfBytes);
     }
   }
 
   @Override
-  public void exceptionOccurred(Void socketMetric, SocketAddress remoteAddress, Throwable t) {
-    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(remoteAddress);
+  public void exceptionOccurred(SocketAddress key, SocketAddress remoteAddress, Throwable t) {
+    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.incrementErrorCount();
     }
