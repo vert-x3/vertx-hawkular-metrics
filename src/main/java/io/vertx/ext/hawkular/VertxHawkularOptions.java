@@ -132,7 +132,7 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * Set the Hawkular Metrics service host.
+   * Set the Hawkular Metrics service host. Defaults to {@code localhost}.
    */
   public VertxHawkularOptions setHost(String host) {
     this.host = host;
@@ -140,14 +140,14 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * @return the Hawkular Metrics service port
+   * @return the Hawkular Metrics service port.
    */
   public int getPort() {
     return port;
   }
 
   /**
-   * Set the Hawkular Metrics service port.
+   * Set the Hawkular Metrics service port.  Defaults to {@code 8080}.
    */
   public VertxHawkularOptions setPort(int port) {
     this.port = port;
@@ -177,7 +177,8 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * Set the Hawkular Metrics service URI.
+   * Set the Hawkular Metrics service URI. Defaults to {@code /hawkular/metrics}. This can be useful if you host the
+   * Hawkular server behind a proxy and manipulate the default service URI.
    */
   public VertxHawkularOptions setMetricsServiceUri(String metricsServiceUri) {
     this.metricsServiceUri = metricsServiceUri;
@@ -192,7 +193,7 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * Set the Hawkular tenant.
+   * Set the Hawkular tenant. Defaults to {@code default}.
    */
   public VertxHawkularOptions setTenant(String tenant) {
     this.tenant = tenant;
@@ -207,7 +208,7 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * Set the metric collection interval (in seconds).
+   * Set the metric collection interval (in seconds). Defaults to {@code 1}.
    */
   public VertxHawkularOptions setSchedule(int schedule) {
     this.schedule = schedule;
@@ -222,7 +223,8 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * Set the metric name prefix.
+   * Set the metric name prefix. Metric names are not prefixed by default. Prefixing metric names is required to
+   * distinguish data sent by different Vert.x instances.
    */
   public VertxHawkularOptions setPrefix(String prefix) {
     this.prefix = prefix;
@@ -237,7 +239,9 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * Set the maximum number of metrics in a batch.
+   * Set the maximum number of metrics in a batch. To reduce the number of HTTP exchanges, metric data is sent to the
+   * Hawkular server in batches. A batch is sent as soon as the number of metrics collected reaches the configured
+   * {@code batchSize}, or after the {@code batchDelay} expires. Defaults to {@code 50}.
    */
   public VertxHawkularOptions setBatchSize(int batchSize) {
     this.batchSize = batchSize;
@@ -252,13 +256,18 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * Set the maximum delay between two consecutive batches (in seconds).
+   * Set the maximum delay between two consecutive batches (in seconds). To reduce the number of HTTP exchanges, metric
+   * data is sent to the Hawkular server in batches. A batch is sent as soon as the number of metrics collected reaches
+   * the configured {@code batchSize}, or after the {@code batchDelay} expires. Defaults to {@code 1} second.
    */
   public VertxHawkularOptions setBatchDelay(int batchDelay) {
     this.batchDelay = batchDelay;
     return this;
   }
 
+  /**
+   * Set whether metrics will be enabled on the Vert.x instance. Metrics are not enabled by default.
+   */
   @Override
   public VertxHawkularOptions setEnabled(boolean enable) {
     super.setEnabled(enable);
@@ -276,10 +285,10 @@ public class VertxHawkularOptions extends MetricsOptions {
 
   /**
    * Sets the metric bridge address on which the application is sending the custom metrics. Application can send
-   * metrics to this event bus address. The message is a JSON object specifying at least the {@code source} and
-   * {@code value} fields ({@code value} is a double).
+   * metrics to this event bus address. The message is a JSON object specifying at least the {@code id} and
+   * {@code value} fields.
    * <p/>
-   * Don't forget to also enable the bridge with {@link #setMetricsBridgeEnabled(boolean)}.
+   * Don't forget to also enable the bridge with {@code metricsBridgeEnabled}.
    *
    * @param metricsBridgeAddress the address
    * @return the current {@link VertxHawkularOptions} instance
@@ -299,7 +308,7 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * Sets whether or not the metrics bridge should be enabled.
+   * Sets whether or not the metrics bridge should be enabled. The metrics bridge is disabled by default.
    *
    * @param metricsBridgeEnabled {@code true} to enable the bridge, {@code false} to disable it.
    * @return the current {@link VertxHawkularOptions} instance
