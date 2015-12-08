@@ -28,7 +28,7 @@ And Gradle users, to their build file:
 
 [source,groovy,subs="+attributes"]
 ----
-compile io.vertx:vertx-hawkular-metrics:3.2.0-SNAPSHOT
+compile 'io.vertx:vertx-hawkular-metrics:3.2.0-SNAPSHOT'
 ----
 
 Vert.x does not enable SPI implementations by default. You must enable metric collection in the Vert.x options:
@@ -362,8 +362,8 @@ Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
 ));
 ----
 
-By default, the metrics bus handler is listening to the `metrics` address. But the bridge address can be
-configured:
+By default, the metrics bus handler is listening to the `hawkular.metrics` address. But the bridge address
+can be configured:
 
 [source,java]
 ----
