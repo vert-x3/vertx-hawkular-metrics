@@ -1,1 +1,0 @@
-# vertx-hawkular-metrics
