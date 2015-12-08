@@ -28,7 +28,7 @@ class EventBusITest extends BaseITest {
                              'pendingLocal', 'pendingRemote', 'publishedMessages', 'publishedLocalMessages',
                              'publishedRemoteMessages', 'sentMessages', 'sentLocalMessages', 'sentRemoteMessages',
                              'receivedMessages', 'receivedLocalMessages', 'receivedRemoteMessages', 'deliveredMessages',
-                             'deliveredLocalMessages', 'deliveredRemoteMessages', 'replyFailures']
+                             'deliveredLocalMessages', 'deliveredRemoteMessages', 'replyFailures', 'hawkular.metrics.processingTime']
 
   def String address = "testSubject"
   def baseName = "${METRIC_PREFIX}.vertx.eventbus."
