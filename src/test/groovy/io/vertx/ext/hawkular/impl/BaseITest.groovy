@@ -95,7 +95,7 @@ abstract class BaseITest {
         schedule: SECONDS.convert(SCHEDULE, MILLISECONDS),
         // Event bus bridge configuration
         metricsBridgeEnabled : true,
-        metricsBridgeAddress: "metrics"
+        metricsBridgeAddress: "hawkular.metrics"
       ]
     ]
     vertxOptions

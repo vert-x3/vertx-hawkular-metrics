@@ -45,7 +45,7 @@
  *
  * [source,groovy,subs="+attributes"]
  * ----
- * compile ${maven.groupId}:${maven.artifactId}:${maven.version}
+ * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
  * Vert.x does not enable SPI implementations by default. You must enable metric collection in the Vert.x options:
@@ -358,8 +358,8 @@
  * {@link io.vertx.ext.hawkular.examples.MetricsExamples#enableMetricsBridge()}
  * ----
  *
- * By default, the metrics bus handler is listening to the {@code metrics} address. But the bridge address can be
- * configured:
+ * By default, the metrics bus handler is listening to the {@code hawkular.metrics} address. But the bridge address
+ * can be configured:
  *
  * [source,$lang]
  * ----

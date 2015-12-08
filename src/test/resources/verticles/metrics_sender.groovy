@@ -38,7 +38,7 @@ void vertxStart(Future startFuture) {
     metric.put("type", "counter")
     metric.put("value", 1L)
   }
-  eb.send("metrics", metric)
+  eb.send("hawkular.metrics", metric)
 
   startFuture.complete()
 }
