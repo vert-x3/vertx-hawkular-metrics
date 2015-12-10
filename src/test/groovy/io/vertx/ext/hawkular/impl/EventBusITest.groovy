@@ -28,12 +28,12 @@ class EventBusITest extends BaseITest {
                              'pendingLocal', 'pendingRemote', 'publishedMessages', 'publishedLocalMessages',
                              'publishedRemoteMessages', 'sentMessages', 'sentLocalMessages', 'sentRemoteMessages',
                              'receivedMessages', 'receivedLocalMessages', 'receivedRemoteMessages', 'deliveredMessages',
-                             'deliveredLocalMessages', 'deliveredRemoteMessages', 'replyFailures', 'hawkular.metrics.processingTime']
+                             'deliveredLocalMessages', 'deliveredRemoteMessages', 'replyFailures']
 
   def String address = "testSubject"
   def baseName = "${METRIC_PREFIX}.vertx.eventbus."
   def baseNameWithAddress = "${baseName}${address}."
-  def baseNameWithMetricsAddress = "${baseName}metrics."
+  def baseNameWithMetricsAddress = "${baseName}hawkular.metrics."
   def eventBus = vertx.eventBus()
   def instances = 3
 
