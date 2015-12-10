@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.hawkular.examples;
+package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;

@@ -52,7 +52,7 @@
  *
  * [source,$lang]
  * ----
- * {@link io.vertx.ext.hawkular.examples.MetricsExamples#setup()}
+ * {@link examples.MetricsExamples#setup()}
  * ----
  *
  * == Configuration
@@ -64,7 +64,7 @@
  *
  * [source,$lang]
  * ----
- * {@link io.vertx.ext.hawkular.examples.MetricsExamples#setupRemote()}
+ * {@link examples.MetricsExamples#setupRemote()}
  * ----
  *
  * === Hawkular tenant selection
@@ -73,7 +73,7 @@
  *
  * [source,$lang]
  * ----
- * {@link io.vertx.ext.hawkular.examples.MetricsExamples#setupTenant()}
+ * {@link examples.MetricsExamples#setupTenant()}
  * ----
  *
  * === HTTPS and over HTTP related options
@@ -83,7 +83,7 @@
  *
  * [source,$lang]
  * ----
- * {@link io.vertx.ext.hawkular.examples.MetricsExamples#setupSecured()}
+ * {@link examples.MetricsExamples#setupSecured()}
  * ----
  *
  * Note that all the usual {@link io.vertx.core.http.HttpClientOptions} properties can be used for SSL setup or client
@@ -355,7 +355,7 @@
  *
  * [source,$lang]
  * ----
- * {@link io.vertx.ext.hawkular.examples.MetricsExamples#enableMetricsBridge()}
+ * {@link examples.MetricsExamples#enableMetricsBridge()}
  * ----
  *
  * By default, the metrics bus handler is listening to the {@code hawkular.metrics} address. But the bridge address
@@ -363,7 +363,7 @@
  *
  * [source,$lang]
  * ----
- * {@link io.vertx.ext.hawkular.examples.MetricsExamples#customMetricsBridgeAddress()}
+ * {@link examples.MetricsExamples#customMetricsBridgeAddress()}
  * ----
  *
  * The metrics bridge handler expects messages in the JSON format. The JSON object must at least provide a metric
@@ -371,7 +371,7 @@
  *
  * [source,$lang]
  * ----
- * {@link io.vertx.ext.hawkular.examples.MetricsExamples#userDefinedMetric()}
+ * {@link examples.MetricsExamples#userDefinedMetric()}
  * ----
  *
  * The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message
@@ -380,7 +380,7 @@
  *
  * [source,$lang]
  * ----
- * {@link io.vertx.ext.hawkular.examples.MetricsExamples#userDefinedMetricExplicit()}
+ * {@link examples.MetricsExamples#userDefinedMetricExplicit()}
  * ----
  *
  * Note that Hawkular understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.
