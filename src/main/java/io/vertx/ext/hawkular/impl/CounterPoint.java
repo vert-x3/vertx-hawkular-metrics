@@ -33,4 +33,10 @@ public class CounterPoint extends DataPoint {
   public long getValue() {
     return value;
   }
+
+
+  @Override
+  public String toString() {
+    return "CounterPoint{" + "name=" + getName() + ", timestamp=" + getTimestamp() + ", value=" + value + '}';
+  }
 }

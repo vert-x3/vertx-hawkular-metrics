@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.*;
+import static java.util.stream.Collectors.*;
 
 /**
  * Sends collected metrics to the Hawkular server.
@@ -78,6 +79,13 @@ public class Sender implements Handler<List<DataPoint>> {
 
   @Override
   public void handle(List<DataPoint> dataPoints) {
+    if (LOG.isTraceEnabled()) {
+      String lineSeparator = System.getProperty("line.separator");
+      String msg = "Handling data points: " + lineSeparator +
+        dataPoints.stream().map(DataPoint::toString).collect(joining(lineSeparator));
+      LOG.trace(msg);
+    }
+
     if (queue.size() + dataPoints.size() < batchSize) {
       queue.addAll(dataPoints);
       return;

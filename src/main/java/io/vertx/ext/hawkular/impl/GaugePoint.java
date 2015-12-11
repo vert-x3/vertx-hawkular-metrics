@@ -31,4 +31,9 @@ public class GaugePoint extends DataPoint {
   public double getValue() {
     return value;
   }
+
+  @Override
+  public String toString() {
+    return "GaugePoint{" + "name=" + getName() + ", timestamp=" + getTimestamp() + ", value=" + value + '}';
+  }
 }
