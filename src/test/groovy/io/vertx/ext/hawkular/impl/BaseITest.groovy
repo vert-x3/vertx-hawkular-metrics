@@ -44,6 +44,8 @@ abstract class BaseITest {
   public static final DELTA = 0.001D
   public static final LOOPS = Integer.getInteger('test.hawkular.check.loops', 2);
 
+  private static final Closure<Long> DATAPOINT_COMPARATOR = { p1, p2 -> Long.compare(p2.timestamp, p1.timestamp) }
+
   protected static RESTClient hawkularMetrics
 
   @Rule
@@ -143,7 +145,7 @@ abstract class BaseITest {
       path   : "gauges/${gauge}/data",
       headers: [(TENANT_HEADER_NAME): tenantId]
     ]).data ?: []
-    data.isEmpty() ? null : data[0].value as Double
+    data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as Double
   }
 
   protected static def void assertCounterEquals(Long expected, String tenantId, String counter) {
@@ -177,7 +179,7 @@ abstract class BaseITest {
       path   : "counters/${counter}/data",
       headers: [(TENANT_HEADER_NAME): tenantId]
     ]).data ?: []
-    data.isEmpty() ? null : data[0].value as Long
+    data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as Long
   }
 
   protected static def Handler<AsyncResult> assertAsyncSuccess(TestContext context) {
