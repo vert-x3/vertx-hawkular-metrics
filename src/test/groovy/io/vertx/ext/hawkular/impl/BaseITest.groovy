@@ -42,6 +42,7 @@ abstract class BaseITest {
   public static final METRIC_PREFIX = 'mars01.host13'
   public static final SCHEDULE = MILLISECONDS.convert(2, SECONDS)
   public static final DELTA = 0.001D
+  public static final LOOPS = Integer.getInteger('test.hawkular.check.loops', 2);
 
   protected static RESTClient hawkularMetrics
 
@@ -117,7 +118,7 @@ abstract class BaseITest {
         nameTransformer.call(metric.id as String)
       } as Set
       if (actual.equals(expected)) return;
-      if (System.currentTimeMillis() - start > 2 * SCHEDULE) break;
+      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
       sleep(SCHEDULE / 10 as long)
     }
     fail("Expected: ${expected.sort()}, actual: ${actual.sort()}")
@@ -131,7 +132,7 @@ abstract class BaseITest {
       if (actual != null) {
         if (Double.compare(expected, actual) == 0 || Math.abs(expected - actual) <= DELTA) return
       }
-      if (System.currentTimeMillis() - start > 2 * SCHEDULE) break;
+      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
       sleep(SCHEDULE / 10 as long)
     }
     fail("Expected: ${expected}, actual: ${actual}")
@@ -151,7 +152,7 @@ abstract class BaseITest {
     while (true) {
       actual = getCounterValue(tenantId, counter)
       if (expected.equals(actual)) return
-      if (System.currentTimeMillis() - start > 2 * SCHEDULE) break;
+      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
       sleep(SCHEDULE / 10 as long)
     }
     fail("Expected: ${expected}, actual: ${actual}")
@@ -165,7 +166,7 @@ abstract class BaseITest {
       if (actual != null) {
         if (Long.compare(expected, actual) < 0) return
       }
-      if (System.currentTimeMillis() - start > 2 * SCHEDULE) break;
+      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
       sleep(SCHEDULE / 10 as long)
     }
     fail("Expected ${counter} value ${actual} to be greater than ${expected}")
