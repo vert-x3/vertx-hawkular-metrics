@@ -23,6 +23,8 @@ import io.vertx.core.spi.metrics.HttpServerMetrics;
 
 import java.util.concurrent.atomic.LongAdder;
 
+import static java.util.concurrent.TimeUnit.*;
+
 /**
  * @author Thomas Segismont
  */
@@ -117,7 +119,7 @@ public class HttpServerMetricsImpl implements HttpServerMetrics<Long, Void, Void
    * @return cumulated processing time of http requests
    */
   public Long getProcessingTime() {
-    return processingTime.sum();
+    return MILLISECONDS.convert(processingTime.sum(), NANOSECONDS);
   }
 
   /**
