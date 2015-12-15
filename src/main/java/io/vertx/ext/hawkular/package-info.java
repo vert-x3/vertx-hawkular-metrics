@@ -76,7 +76,7 @@
  * {@link examples.MetricsExamples#setupTenant()}
  * ----
  *
- * === HTTPS and over HTTP related options
+ * === HTTPS and other HTTP related options
  *
  * _${maven.artifactId}_ communicates with the Hawkular server over HTTP. In order to communicate over HTTPS, set the
  * `ssl` flag to true:
