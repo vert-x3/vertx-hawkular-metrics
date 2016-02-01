@@ -51,6 +51,7 @@
     <test.hawkular.server.base-url>http://127.0.0.1:8083/hawkular/metrics/</test.hawkular.server.base-url>
     <test.hawkular.server.logging.console.level>INFO</test.hawkular.server.logging.console.level>
     <test.hawkular.check.loops>2</test.hawkular.check.loops>
+    <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -170,7 +171,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.18.1</version>
+        <version>${maven-failsafe-plugin.version}</version>
         <configuration>
           <includes>
             <include>**/*ITest*</include>
@@ -300,4 +301,70 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>coverage</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${maven-failsafe-plugin.version}</version>
+            <configuration>
+              <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+              <includes>
+                <include>**/*ITest*</include>
+              </includes>
+              <systemPropertyVariables>
+                <test.hawkular.server.base-url>${test.hawkular.server.base-url}</test.hawkular.server.base-url>
+                <java.util.logging.config.file>${project.basedir}/log-test.properties</java.util.logging.config.file>
+                <test.hawkular.check.loops>${test.hawkular.check.loops}</test.hawkular.check.loops>
+              </systemPropertyVariables>
+              <argLine>@{surefireArgLine}</argLine>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${maven.jacoco.plugin.version}</version>
+            <executions>
+              <execution>
+                <id>pre-integration-test</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <phase>pre-integration-test</phase>
+                <configuration>
+                  <destFile>${sonar.jacoco.reportPath}</destFile>
+                  <propertyName>surefireArgLine</propertyName>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>post-integration-test</id>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <phase>post-integration-test</phase>
+                <configuration>
+                  <dataFile>${sonar.jacoco.reportPath}</dataFile>
+                  <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
