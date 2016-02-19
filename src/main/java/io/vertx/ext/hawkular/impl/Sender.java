@@ -20,14 +20,20 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.hawkular.HawkularServerOptions;
+import io.vertx.ext.hawkular.ServerType;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,9 +48,18 @@ import static java.util.stream.Collectors.*;
 public class Sender implements Handler<List<DataPoint>> {
   private static final Logger LOG = LoggerFactory.getLogger(Sender.class);
 
+  private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
+  private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
+  private static final CharSequence HTTP_HEADER_HAWKULAR_PERSONA = HttpHeaders.createOptimized("Hawkular-Persona");
+
   private final Vertx vertx;
   private final String metricsURI;
+
+  private final ServerType serverType;
   private final String tenant;
+  private final String auth;
+  private final String persona;
+
   private final int batchSize;
   private final long batchDelay;
   private final List<DataPoint> queue;
@@ -62,7 +77,29 @@ public class Sender implements Handler<List<DataPoint>> {
   public Sender(Vertx vertx, VertxHawkularOptions options, Context context) {
     this.vertx = vertx;
     metricsURI = options.getMetricsServiceUri() + "/metrics/data";
-    tenant = options.getTenant();
+
+    serverType = options.getServerType();
+    switch (serverType) {
+      case METRICS:
+        tenant = options.getStandaloneMetricsOptions().getTenant();
+        auth = null;
+        persona = null;
+        break;
+      case HAWKULAR:
+        tenant = null;
+        HawkularServerOptions hawkularServerOptions = options.getHawkularServerOptions();
+        String authString = hawkularServerOptions.getId() + ":" + hawkularServerOptions.getSecret();
+        try {
+          auth = "Basic: " + Base64.getEncoder().encodeToString(authString.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+          throw new RuntimeException(e);
+        }
+        persona = hawkularServerOptions.getPersona().trim().isEmpty() ? null : hawkularServerOptions.getPersona().trim();
+        break;
+      default:
+        throw new UnsupportedServerTypeException(serverType);
+    }
+
     batchSize = options.getBatchSize();
     batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
     queue = new ArrayList<>(batchSize);
@@ -104,11 +141,25 @@ public class Sender implements Handler<List<DataPoint>> {
 
   private void send(List<DataPoint> dataPoints) {
     JsonObject mixedData = toHawkularMixedData(dataPoints);
-    httpClient.post(metricsURI, this::onResponse)
-      .putHeader("Content-Type", "application/json")
-      .putHeader("Hawkular-Tenant", tenant)
-      .exceptionHandler(err -> LOG.trace("Could not send metrics", err))
-      .end(mixedData.encode(), "UTF-8");
+    HttpClientRequest request = httpClient.post(metricsURI, this::onResponse)
+      .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON)
+      .exceptionHandler(err -> LOG.trace("Could not send metrics", err));
+
+    switch (serverType) {
+      case METRICS:
+        request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
+        break;
+      case HAWKULAR:
+        request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+        if (persona != null) {
+          request.putHeader(HTTP_HEADER_HAWKULAR_PERSONA, persona);
+        }
+        break;
+      default:
+        throw new UnsupportedServerTypeException(serverType);
+    }
+
+    request.end(mixedData.encode(), "UTF-8");
     sendTime = System.nanoTime();
   }
 

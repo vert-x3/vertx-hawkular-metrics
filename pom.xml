@@ -40,7 +40,7 @@
   <properties>
     <!-- Versioning properties -->
     <stack.version>3.3.0-SNAPSHOT</stack.version>
-    <version.org.wildfly>9.0.1.Final</version.org.wildfly>
+    <version.org.wildfly>10.0.0.Final</version.org.wildfly>
     <version.org.hawkular.metrics>0.12.1.Final</version.org.hawkular.metrics>
     <version.org.hawkular.embedded-cassandra>0.3.5.Final</version.org.hawkular.embedded-cassandra>
     <!-- Test setup properties -->

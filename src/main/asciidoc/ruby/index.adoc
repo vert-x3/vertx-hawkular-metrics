@@ -64,9 +64,10 @@ vertx = Vertx::Vertx.vertx({
 
 ----
 
-=== Hawkular tenant selection
+=== Server type
 
-Hawkular is a multi-tenant solution, and _vertx-hawkular-metrics_ can send metrics for a tenant other than `default`:
+_vertx-hawkular-metrics_ is able to communicate with a standalone Hawkular Metrics server as well as a full-fledged Hawkular server.
+Set the server type option to select your server flavor:
 
 [source,ruby]
 ----
@@ -74,7 +75,47 @@ require 'vertx/vertx'
 vertx = Vertx::Vertx.vertx({
   'metricsOptions' => {
     'enabled' => true,
-    'tenant' => "sales-department"
+    'serverType' => :HAWKULAR
+  }
+})
+
+----
+
+Standalone Metrics server is the default.
+
+==== Tenant selection with a standalone Metrics server
+
+Hawkular Metrics is a multi-tenant solution, and _vertx-hawkular-metrics_ can send metrics for a tenant other than `default`:
+
+[source,ruby]
+----
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'standaloneMetricsOptions' => {
+      'tenant' => "sales-department"
+    }
+  }
+})
+
+----
+
+==== Authentication with a Hawkular server
+
+Requests sent to an Hawkular server must be authenticated:
+
+[source,ruby]
+----
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'serverType' => :HAWKULAR,
+    'hawkularServerOptions' => {
+      'id' => "username",
+      'secret' => "password"
+    }
   }
 })
 

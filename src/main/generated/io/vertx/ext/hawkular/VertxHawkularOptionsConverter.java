@@ -36,6 +36,9 @@ public class VertxHawkularOptionsConverter {
     if (json.getValue("enabled") instanceof Boolean) {
       obj.setEnabled((Boolean)json.getValue("enabled"));
     }
+    if (json.getValue("hawkularServerOptions") instanceof JsonObject) {
+      obj.setHawkularServerOptions(new io.vertx.ext.hawkular.HawkularServerOptions((JsonObject)json.getValue("hawkularServerOptions")));
+    }
     if (json.getValue("host") instanceof String) {
       obj.setHost((String)json.getValue("host"));
     }
@@ -60,8 +63,11 @@ public class VertxHawkularOptionsConverter {
     if (json.getValue("schedule") instanceof Number) {
       obj.setSchedule(((Number)json.getValue("schedule")).intValue());
     }
-    if (json.getValue("tenant") instanceof String) {
-      obj.setTenant((String)json.getValue("tenant"));
+    if (json.getValue("serverType") instanceof String) {
+      obj.setServerType(io.vertx.ext.hawkular.ServerType.valueOf((String)json.getValue("serverType")));
+    }
+    if (json.getValue("standaloneMetricsOptions") instanceof JsonObject) {
+      obj.setStandaloneMetricsOptions(new io.vertx.ext.hawkular.StandaloneMetricsOptions((JsonObject)json.getValue("standaloneMetricsOptions")));
     }
   }
 
@@ -84,8 +90,8 @@ public class VertxHawkularOptionsConverter {
       json.put("prefix", obj.getPrefix());
     }
     json.put("schedule", obj.getSchedule());
-    if (obj.getTenant() != null) {
-      json.put("tenant", obj.getTenant());
+    if (obj.getServerType() != null) {
+      json.put("serverType", obj.getServerType().name());
     }
   }
 }

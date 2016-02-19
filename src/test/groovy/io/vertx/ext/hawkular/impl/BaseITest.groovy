@@ -90,15 +90,17 @@ abstract class BaseITest {
   static def Map createMetricsOptions(String tenantId) {
     def vertxOptions = [
       metricsOptions: [
-        enabled : true,
-        host    : SERVER_URL_PROPS.host,
-        port    : SERVER_URL_PROPS.port,
-        tenant  : tenantId,
-        prefix  : METRIC_PREFIX,
-        schedule: SECONDS.convert(SCHEDULE, MILLISECONDS),
+        enabled                 : true,
+        host                    : SERVER_URL_PROPS.host,
+        port                    : SERVER_URL_PROPS.port,
+        standaloneMetricsOptions: [
+          tenant: tenantId
+        ],
+        prefix                  : METRIC_PREFIX,
+        schedule                : SECONDS.convert(SCHEDULE, MILLISECONDS),
         // Event bus bridge configuration
-        metricsBridgeEnabled : true,
-        metricsBridgeAddress: "hawkular.metrics"
+        metricsBridgeEnabled    : true,
+        metricsBridgeAddress    : "hawkular.metrics"
       ]
     ]
     vertxOptions
