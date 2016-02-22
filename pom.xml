@@ -22,7 +22,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>19</version>
+    <version>20</version>
   </parent>
 
   <artifactId>vertx-hawkular-metrics</artifactId>
@@ -41,8 +41,8 @@
     <!-- Versioning properties -->
     <stack.version>3.3.0-SNAPSHOT</stack.version>
     <version.org.wildfly>9.0.1.Final</version.org.wildfly>
-    <version.org.hawkular.metrics>0.8.0.Final</version.org.hawkular.metrics>
-    <version.org.hawkular.embedded-cassandra>0.2.3.Final</version.org.hawkular.embedded-cassandra>
+    <version.org.hawkular.metrics>0.12.1.Final</version.org.hawkular.metrics>
+    <version.org.hawkular.embedded-cassandra>0.3.5.Final</version.org.hawkular.embedded-cassandra>
     <!-- Test setup properties -->
     <test.port.offset>3</test.port.offset>
     <!-- IMPORTANT: The management port must be the port offset + 9990. -->
@@ -110,7 +110,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -121,7 +121,7 @@
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-all</artifactId>
-      <version>2.3.8</version>
+      <version>2.4.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>
