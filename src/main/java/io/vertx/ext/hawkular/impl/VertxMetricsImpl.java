@@ -39,6 +39,7 @@ import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
 import io.vertx.core.spi.metrics.TCPMetrics;
+import io.vertx.ext.hawkular.MetricsTypeEnum;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 /**
@@ -121,12 +122,18 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     Context context = vertx.getOrCreateContext();
     sender = new Sender(vertx, options, context);
     scheduler = new Scheduler(vertx, options, context, sender);
-    scheduler.register(httpServerMetricsSupplier);
-    scheduler.register(httpClientMetricsSupplier);
-    scheduler.register(netServerMetricsSupplier);
-    scheduler.register(netClientMetricsSupplier);
-    scheduler.register(datagramSocketMetricsSupplier);
-    scheduler.register(eventBusMetrics);
+    if(this.options.isMetricsTypeDisabled(MetricsTypeEnum.HTTP_SERVER_TYPE))
+      scheduler.register(httpServerMetricsSupplier);
+    if(this.options.isMetricsTypeDisabled(MetricsTypeEnum.HTTP_CLIENT_TYPE))
+      scheduler.register(httpClientMetricsSupplier);
+    if(this.options.isMetricsTypeDisabled(MetricsTypeEnum.NET_SERVER_TYPE))
+      scheduler.register(netServerMetricsSupplier);
+    if(this.options.isMetricsTypeDisabled(MetricsTypeEnum.NET_CLIENT_TYPE))
+      scheduler.register(netClientMetricsSupplier);
+    if(this.options.isMetricsTypeDisabled(MetricsTypeEnum.DATAGRAM_SOCKET_TYPE))
+      scheduler.register(datagramSocketMetricsSupplier);
+    if(this.options.isMetricsTypeDisabled(MetricsTypeEnum.EVENT_BUS_TYPE))
+      scheduler.register(eventBusMetrics);
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
     if (options.isMetricsBridgeEnabled() && options.getMetricsBridgeAddress() != null) {
