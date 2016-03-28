@@ -22,7 +22,7 @@ import io.vertx.core.metrics.MetricsOptions;
 
 import static io.vertx.ext.hawkular.ServerType.*;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 /**
@@ -112,7 +112,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     batchDelay = DEFAULT_BATCH_DELAY;
     metricsBridgeEnabled = DEFAULT_METRICS_BRIDGE_ENABLED;
     metricsBridgeAddress = DEFAULT_METRICS_BRIDGE_ADDRESS;
-    disabledMetricsTypes = new HashSet<>();
+    disabledMetricsTypes = EnumSet.noneOf(MetricsTypeEnum.class);
   }
 
   public VertxHawkularOptions(VertxHawkularOptions other) {
@@ -368,7 +368,7 @@ public class VertxHawkularOptions extends MetricsOptions {
    * @param metricsType the type of metrics
    * @return the current {@link VertxHawkularOptions} instance
    */
-  public VertxHawkularOptions disabledMetricsType(MetricsTypeEnum metricsType) {
+  public VertxHawkularOptions setDisabledMetricsType(MetricsTypeEnum metricsType) {
     this.disabledMetricsTypes.add(metricsType);
     return this;
   }
