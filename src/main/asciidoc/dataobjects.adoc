@@ -68,6 +68,11 @@ Set the maximum number of metrics in a batch. To reduce the number of HTTP excha
  Hawkular server in batches. A batch is sent as soon as the number of metrics collected reaches the configured
  <code>batchSize</code>, or after the <code>batchDelay</code> expires. Defaults to <code>50</code>.
 +++
+|[[disabledMetricsType]]`disabledMetricsType`|`link:enums.html#MetricsTypeEnum[MetricsTypeEnum]`|
++++
+Set metric that will not be registered. Schedulers will check the set <code>disabledMetricsTypes</code> when
+ registering metrics suppliers
++++
 |[[enabled]]`enabled`|`Boolean`|
 +++
 Set whether metrics will be enabled on the Vert.x instance. Metrics are not enabled by default.

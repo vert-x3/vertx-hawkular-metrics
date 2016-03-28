@@ -33,6 +33,9 @@ public class VertxHawkularOptionsConverter {
     if (json.getValue("batchSize") instanceof Number) {
       obj.setBatchSize(((Number)json.getValue("batchSize")).intValue());
     }
+    if (json.getValue("disabledMetricsType") instanceof String) {
+      obj.setDisabledMetricsType(io.vertx.ext.hawkular.MetricsTypeEnum.valueOf((String)json.getValue("disabledMetricsType")));
+    }
     if (json.getValue("enabled") instanceof Boolean) {
       obj.setEnabled((Boolean)json.getValue("enabled"));
     }

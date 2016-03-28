@@ -130,6 +130,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     batchDelay = other.batchDelay;
     metricsBridgeAddress = other.metricsBridgeAddress;
     metricsBridgeEnabled = other.metricsBridgeEnabled;
+    disabledMetricsTypes = other.disabledMetricsTypes != null ? other.disabledMetricsTypes : EnumSet.noneOf(MetricsTypeEnum.class);
   }
 
   public VertxHawkularOptions(JsonObject json) {
