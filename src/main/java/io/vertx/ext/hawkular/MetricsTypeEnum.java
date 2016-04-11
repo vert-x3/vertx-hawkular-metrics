@@ -1,4 +1,7 @@
 package io.vertx.ext.hawkular;
+
+import io.vertx.codegen.annotations.VertxGen;
+
 /*
  * Copyright 2015 Red Hat, Inc.
  *
@@ -14,6 +17,35 @@ package io.vertx.ext.hawkular;
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
+
+/**
+ *  Metrics types for each metrics.
+ */
+@VertxGen
 public enum MetricsTypeEnum {
-    NET_SERVER_TYPE, NET_CLIENT_TYPE, HTTP_SERVER_TYPE, HTTP_CLIENT_TYPE, DATAGRAM_SOCKET_TYPE, EVENT_BUS_TYPE
+
+    /**
+     * Type for net server metrics
+     */
+    NET_SERVER_TYPE,
+    /**
+     * Type for net client metrics
+     */
+    NET_CLIENT_TYPE,
+    /**
+     * Type for http server metrics
+     */
+    HTTP_SERVER_TYPE,
+    /**
+     * Type for http client metrics
+     */
+    HTTP_CLIENT_TYPE,
+    /**
+     * Type for datagram socket metrics
+     */
+    DATAGRAM_SOCKET_TYPE,
+    /**
+     * Type for event bus metrics
+     */
+    EVENT_BUS_TYPE
 }
