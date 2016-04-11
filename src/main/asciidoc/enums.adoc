@@ -1,5 +1,39 @@
 = Enums
 
+[[MetricsTypeEnum]]
+== MetricsTypeEnum
+
+++++
+  Metrics types for each metrics.
+++++
+'''
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[NET_SERVER_TYPE]]`NET_SERVER_TYPE`|
++++
+Type for net server metrics
++++
+|[[NET_CLIENT_TYPE]]`NET_CLIENT_TYPE`|
++++
+Type for net client metrics
++++
+|[[HTTP_SERVER_TYPE]]`HTTP_SERVER_TYPE`|
++++
+Type for http server metrics
++++
+|[[HTTP_CLIENT_TYPE]]`HTTP_CLIENT_TYPE`|
++++
+Type for http client metrics
++++
+|[[DATAGRAM_SOCKET_TYPE]]`DATAGRAM_SOCKET_TYPE`|
++++
+Type for datagram socket metrics
++++
+|===
+
 [[ServerType]]
 == ServerType
 
