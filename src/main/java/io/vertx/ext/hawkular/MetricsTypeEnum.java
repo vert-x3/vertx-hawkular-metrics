@@ -24,28 +24,28 @@ import io.vertx.codegen.annotations.VertxGen;
 @VertxGen
 public enum MetricsTypeEnum {
 
-    /**
-     * Type for net server metrics
-     */
-    NET_SERVER_TYPE,
-    /**
-     * Type for net client metrics
-     */
-    NET_CLIENT_TYPE,
-    /**
-     * Type for http server metrics
-     */
-    HTTP_SERVER_TYPE,
-    /**
-     * Type for http client metrics
-     */
-    HTTP_CLIENT_TYPE,
-    /**
-     * Type for datagram socket metrics
-     */
-    DATAGRAM_SOCKET_TYPE,
-    /**
-     * Type for event bus metrics
-     */
-    EVENT_BUS_TYPE
+  /**
+   * Type for net server metrics
+   */
+  NET_SERVER_TYPE,
+  /**
+   * Type for net client metrics
+   */
+  NET_CLIENT_TYPE,
+  /**
+   * Type for http server metrics
+   */
+  HTTP_SERVER_TYPE,
+  /**
+   * Type for http client metrics
+   */
+  HTTP_CLIENT_TYPE,
+  /**
+   * Type for datagram socket metrics
+   */
+  DATAGRAM_SOCKET_TYPE,
+  /**
+   * Type for event bus metrics
+   */
+  EVENT_BUS_TYPE
 }
