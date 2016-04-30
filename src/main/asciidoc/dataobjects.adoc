@@ -28,6 +28,10 @@ Set the maximum number of metrics in a batch. To reduce the number of HTTP excha
 +++
 Set whether metrics will be enabled on the Vert.x instance. Metrics are not enabled by default.
 +++
+|[[hawkularServerOptions]]`hawkularServerOptions`|`link:dataobjects.html#HawkularServerOptions[HawkularServerOptions]`|
++++
+Set the options specific to a Hawkular server.
++++
 |[[host]]`host`|`String`|
 +++
 Set the Hawkular Metrics service host. Defaults to <code>localhost</code>.
@@ -66,6 +70,54 @@ Set the metric name prefix. Metric names are not prefixed by default. Prefixing 
 +++
 Set the metric collection interval (in seconds). Defaults to <code>1</code>.
 +++
+|[[serverType]]`serverType`|`link:enums.html#ServerType[ServerType]`|
++++
+Set the Hawkular server type (standalone Metrics, Hawkular, ... etc). Defaults to <code>METRICS</code>.
++++
+|[[standaloneMetricsOptions]]`standaloneMetricsOptions`|`link:dataobjects.html#StandaloneMetricsOptions[StandaloneMetricsOptions]`|
++++
+Set the options specific to a standalone Metrics server.
++++
+|===
+
+[[HawkularServerOptions]]
+== HawkularServerOptions
+
+++++
+ Options specific to a Hawkular server.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[id]]`id`|`String`|
++++
+Set the identifier used for authentication.
++++
+|[[persona]]`persona`|`String`|
++++
+Set the Hawkular Persona identifier. This is used to impersonate an organization with user credentials.
++++
+|[[secret]]`secret`|`String`|
++++
+Set the secret used for authentication.
++++
+|===
+
+[[StandaloneMetricsOptions]]
+== StandaloneMetricsOptions
+
+++++
+ Options specific to a standalone Metrics server.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
 |[[tenant]]`tenant`|`String`|
 +++
 Set the Hawkular tenant. Defaults to <code>default</code>.

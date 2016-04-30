@@ -1,0 +1,24 @@
+= Enums
+
+[[ServerType]]
+== ServerType
+
+++++
+ Remote server flavor (standalone Metrics server, Hawkular server, ... etc).
+++++
+'''
+
+[cols=">25%,75%"]
+[frame="topbot"]
+|===
+^|Name | Description
+|[[METRICS]]`METRICS`|
++++
+Standalone Metrics server.
++++
+|[[HAWKULAR]]`HAWKULAR`|
++++
+Hawkular server.
++++
+|===
+

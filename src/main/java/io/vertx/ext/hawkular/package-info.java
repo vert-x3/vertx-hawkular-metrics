@@ -67,13 +67,34 @@
  * {@link examples.MetricsExamples#setupRemote()}
  * ----
  *
- * === Hawkular tenant selection
+ * === Server type
  *
- * Hawkular is a multi-tenant solution, and _${maven.artifactId}_ can send metrics for a tenant other than `default`:
+ * _${maven.artifactId}_ is able to communicate with a standalone Hawkular Metrics server as well as a full-fledged Hawkular server.
+ * Set the server type option to select your server flavor:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupServerType()}
+ * ----
+ *
+ * Standalone Metrics server is the default.
+ *
+ * ==== Tenant selection with a standalone Metrics server
+ *
+ * Hawkular Metrics is a multi-tenant solution, and _${maven.artifactId}_ can send metrics for a tenant other than `default`:
  *
  * [source,$lang]
  * ----
  * {@link examples.MetricsExamples#setupTenant()}
+ * ----
+ *
+ * ==== Authentication with a Hawkular server
+ *
+ * Requests sent to an Hawkular server must be authenticated:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupHawkularAuth()}
  * ----
  *
  * === HTTPS and other HTTP related options

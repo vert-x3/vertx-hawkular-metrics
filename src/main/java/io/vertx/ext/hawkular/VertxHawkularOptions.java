@@ -20,6 +20,8 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 
+import static io.vertx.ext.hawkular.ServerType.*;
+
 /**
  * Vert.x Hawkular monitoring configuration.
  *
@@ -43,9 +45,9 @@ public class VertxHawkularOptions extends MetricsOptions {
   public static final String DEFAULT_METRICS_URI = "/hawkular/metrics";
 
   /**
-   * The default Hawkular tenant = default.
+   * The default server type = METRICS.
    */
-  public static final String DEFAULT_TENANT = "default";
+  public static final ServerType DEFAULT_SERVER_TYPE = METRICS;
 
   /**
    * Default value for metric collection interval (in seconds) = 1.
@@ -82,7 +84,9 @@ public class VertxHawkularOptions extends MetricsOptions {
   private int port;
   private HttpClientOptions httpOptions;
   private String metricsServiceUri;
-  private String tenant;
+  private ServerType serverType;
+  private StandaloneMetricsOptions standaloneMetricsOptions;
+  private HawkularServerOptions hawkularServerOptions;
   private int schedule;
   private String prefix;
   private int batchSize;
@@ -95,7 +99,9 @@ public class VertxHawkularOptions extends MetricsOptions {
     port = DEFAULT_PORT;
     httpOptions = new HttpClientOptions();
     metricsServiceUri = DEFAULT_METRICS_URI;
-    tenant = DEFAULT_TENANT;
+    serverType = DEFAULT_SERVER_TYPE;
+    standaloneMetricsOptions = new StandaloneMetricsOptions();
+    hawkularServerOptions = new HawkularServerOptions();
     schedule = DEFAULT_SCHEDULE;
     prefix = DEFAULT_PREFIX;
     batchSize = DEFAULT_BATCH_SIZE;
@@ -110,7 +116,9 @@ public class VertxHawkularOptions extends MetricsOptions {
     port = other.port;
     httpOptions = other.httpOptions != null ? new HttpClientOptions(other.httpOptions) : new HttpClientOptions();
     metricsServiceUri = other.metricsServiceUri;
-    tenant = other.tenant;
+    serverType = other.serverType;
+    standaloneMetricsOptions = other.standaloneMetricsOptions;
+    hawkularServerOptions = other.hawkularServerOptions;
     schedule = other.schedule;
     prefix = other.prefix;
     batchSize = other.batchSize;
@@ -186,17 +194,48 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * @return the Hawkular tenant
+   * @return the server type
    */
-  public String getTenant() {
-    return tenant;
+  public ServerType getServerType() {
+    return serverType;
   }
 
   /**
-   * Set the Hawkular tenant. Defaults to {@code default}.
+   * Set the Hawkular server type (standalone Metrics, Hawkular, ... etc). Defaults to {@code METRICS}.
    */
-  public VertxHawkularOptions setTenant(String tenant) {
-    this.tenant = tenant;
+  public VertxHawkularOptions setServerType(ServerType serverType) {
+    this.serverType = serverType;
+    return this;
+  }
+
+  /**
+   * @return the options specific to a standalone Metrics server
+   */
+  public StandaloneMetricsOptions getStandaloneMetricsOptions() {
+    return standaloneMetricsOptions;
+  }
+
+  /**
+   * Set the options specific to a standalone Metrics server.
+   */
+  public VertxHawkularOptions setStandaloneMetricsOptions(StandaloneMetricsOptions standaloneMetricsOptions) {
+    this.standaloneMetricsOptions = standaloneMetricsOptions;
+    return this;
+  }
+
+  /**
+   * @return the options specific to a Hawkular server
+   */
+  public HawkularServerOptions getHawkularServerOptions() {
+    return hawkularServerOptions;
+  }
+
+
+  /**
+   * Set the options specific to a Hawkular server.
+   */
+  public VertxHawkularOptions setHawkularServerOptions(HawkularServerOptions hawkularServerOptions) {
+    this.hawkularServerOptions = hawkularServerOptions;
     return this;
   }
 

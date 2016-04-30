@@ -57,16 +57,50 @@ Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
 ));
 ----
 
-=== Hawkular tenant selection
+=== Server type
 
-Hawkular is a multi-tenant solution, and _vertx-hawkular-metrics_ can send metrics for a tenant other than `default`:
+_vertx-hawkular-metrics_ is able to communicate with a standalone Hawkular Metrics server as well as a full-fledged Hawkular server.
+Set the server type option to select your server flavor:
 
 [source,java]
 ----
 Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
   new VertxHawkularOptions()
     .setEnabled(true)
-    .setTenant("sales-department")
+    .setServerType(ServerType.HAWKULAR)
+));
+----
+
+Standalone Metrics server is the default.
+
+==== Tenant selection with a standalone Metrics server
+
+Hawkular Metrics is a multi-tenant solution, and _vertx-hawkular-metrics_ can send metrics for a tenant other than `default`:
+
+[source,java]
+----
+Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+  new VertxHawkularOptions()
+    .setEnabled(true)
+    .setStandaloneMetricsOptions(new StandaloneMetricsOptions().setTenant("sales-department"))
+));
+----
+
+==== Authentication with a Hawkular server
+
+Requests sent to an Hawkular server must be authenticated:
+
+[source,java]
+----
+Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+  new VertxHawkularOptions()
+    .setEnabled(true)
+    .setServerType(ServerType.HAWKULAR)
+    .setHawkularServerOptions(
+      new HawkularServerOptions()
+        .setId("username")
+        .setSecret("password")
+    )
 ));
 ----
 
