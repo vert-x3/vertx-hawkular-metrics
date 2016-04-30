@@ -1,7 +1,3 @@
-package io.vertx.ext.hawkular;
-
-import io.vertx.codegen.annotations.VertxGen;
-
 /*
  * Copyright 2015 Red Hat, Inc.
  *
@@ -17,6 +13,10 @@ import io.vertx.codegen.annotations.VertxGen;
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
+package io.vertx.ext.hawkular;
+
+import io.vertx.codegen.annotations.VertxGen;
+
 
 /**
  *  Metrics types for each metrics.
