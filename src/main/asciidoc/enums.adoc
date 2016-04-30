@@ -12,23 +12,23 @@
 [frame="topbot"]
 |===
 ^|Name | Description
-|[[NET_SERVER_TYPE]]`NET_SERVER_TYPE`|
+|[[NET_SERVER]]`NET_SERVER`|
 +++
 Type for net server metrics
 +++
-|[[NET_CLIENT_TYPE]]`NET_CLIENT_TYPE`|
+|[[NET_CLIENT]]`NET_CLIENT`|
 +++
 Type for net client metrics
 +++
-|[[HTTP_SERVER_TYPE]]`HTTP_SERVER_TYPE`|
+|[[HTTP_SERVER]]`HTTP_SERVER`|
 +++
 Type for http server metrics
 +++
-|[[HTTP_CLIENT_TYPE]]`HTTP_CLIENT_TYPE`|
+|[[HTTP_CLIENT]]`HTTP_CLIENT`|
 +++
 Type for http client metrics
 +++
-|[[DATAGRAM_SOCKET_TYPE]]`DATAGRAM_SOCKET_TYPE`|
+|[[DATAGRAM_SOCKET]]`DATAGRAM_SOCKET`|
 +++
 Type for datagram socket metrics
 +++
