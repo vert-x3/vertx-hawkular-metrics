@@ -1,7 +1,7 @@
 = Enums
 
-[[MetricsTypeEnum]]
-== MetricsTypeEnum
+[[MetricsType]]
+== MetricsType
 
 ++++
   Metrics types for each metrics.

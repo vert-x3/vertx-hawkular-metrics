@@ -96,7 +96,7 @@ public class VertxHawkularOptions extends MetricsOptions {
   private int batchDelay;
   private boolean metricsBridgeEnabled;
   private String metricsBridgeAddress;
-  private Set<MetricsTypeEnum> disabledMetricsTypes;
+  private Set<MetricsType> disabledMetricsTypes;
 
   public VertxHawkularOptions() {
     host = DEFAULT_HOST;
@@ -112,7 +112,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     batchDelay = DEFAULT_BATCH_DELAY;
     metricsBridgeEnabled = DEFAULT_METRICS_BRIDGE_ENABLED;
     metricsBridgeAddress = DEFAULT_METRICS_BRIDGE_ADDRESS;
-    disabledMetricsTypes = EnumSet.noneOf(MetricsTypeEnum.class);
+    disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
   }
 
   public VertxHawkularOptions(VertxHawkularOptions other) {
@@ -130,7 +130,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     batchDelay = other.batchDelay;
     metricsBridgeAddress = other.metricsBridgeAddress;
     metricsBridgeEnabled = other.metricsBridgeEnabled;
-    disabledMetricsTypes = other.disabledMetricsTypes != null ? EnumSet.copyOf(other.disabledMetricsTypes) : EnumSet.noneOf(MetricsTypeEnum.class);
+    disabledMetricsTypes = other.disabledMetricsTypes != null ? EnumSet.copyOf(other.disabledMetricsTypes) : EnumSet.noneOf(MetricsType.class);
   }
 
   public VertxHawkularOptions(JsonObject json) {
@@ -369,12 +369,12 @@ public class VertxHawkularOptions extends MetricsOptions {
    * @param metricsType the type of metrics
    * @return the current {@link VertxHawkularOptions} instance
    */
-  public VertxHawkularOptions setDisabledMetricsType(MetricsTypeEnum metricsType) {
+  public VertxHawkularOptions setDisabledMetricsType(MetricsType metricsType) {
     this.disabledMetricsTypes.add(metricsType);
     return this;
   }
 
-  public boolean isMetricsTypeDisabled(MetricsTypeEnum metricsType) {
+  public boolean isMetricsTypeDisabled(MetricsType metricsType) {
     return this.disabledMetricsTypes.contains(metricsType);
   }
 }
