@@ -1,5 +1,49 @@
 = Cheatsheets
 
+[[HawkularServerOptions]]
+== HawkularServerOptions
+
+++++
+ Options specific to a Hawkular server.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[id]]`id`|`String`|
++++
+Set the identifier used for authentication.
++++
+|[[persona]]`persona`|`String`|
++++
+Set the Hawkular Persona identifier. This is used to impersonate an organization with user credentials.
++++
+|[[secret]]`secret`|`String`|
++++
+Set the secret used for authentication.
++++
+|===
+
+[[StandaloneMetricsOptions]]
+== StandaloneMetricsOptions
+
+++++
+ Options specific to a standalone Metrics server.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[tenant]]`tenant`|`String`|
++++
+Set the Hawkular tenant. Defaults to <code>default</code>.
++++
+|===
+
 [[VertxHawkularOptions]]
 == VertxHawkularOptions
 
@@ -77,50 +121,6 @@ Set the Hawkular server type (standalone Metrics, Hawkular, ... etc). Defaults t
 |[[standaloneMetricsOptions]]`standaloneMetricsOptions`|`link:dataobjects.html#StandaloneMetricsOptions[StandaloneMetricsOptions]`|
 +++
 Set the options specific to a standalone Metrics server.
-+++
-|===
-
-[[HawkularServerOptions]]
-== HawkularServerOptions
-
-++++
- Options specific to a Hawkular server.
-++++
-'''
-
-[cols=">25%,^25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[id]]`id`|`String`|
-+++
-Set the identifier used for authentication.
-+++
-|[[persona]]`persona`|`String`|
-+++
-Set the Hawkular Persona identifier. This is used to impersonate an organization with user credentials.
-+++
-|[[secret]]`secret`|`String`|
-+++
-Set the secret used for authentication.
-+++
-|===
-
-[[StandaloneMetricsOptions]]
-== StandaloneMetricsOptions
-
-++++
- Options specific to a standalone Metrics server.
-++++
-'''
-
-[cols=">25%,^25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[tenant]]`tenant`|`String`|
-+++
-Set the Hawkular tenant. Defaults to <code>default</code>.
 +++
 |===
 

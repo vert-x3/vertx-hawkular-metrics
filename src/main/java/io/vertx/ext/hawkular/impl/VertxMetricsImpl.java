@@ -16,6 +16,8 @@
 
 package io.vertx.ext.hawkular.impl;
 
+import java.util.Collections;
+
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.datagram.DatagramSocket;
@@ -39,50 +41,42 @@ import io.vertx.core.spi.metrics.HttpServerMetrics;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
-import java.util.Collections;
-
 /**
  * Metrics SPI implementation.
  *
  * @author Thomas Segismont
  */
 public class VertxMetricsImpl extends DummyVertxMetrics {
-  private final String prefix;
+  private final Vertx vertx;
+  private final VertxHawkularOptions options;
   private final HttpServerMetricsSupplier httpServerMetricsSupplier;
   private final HttpClientMetricsSupplier httpClientMetricsSupplier;
   private final NetServerMetricsSupplier netServerMetricsSupplier;
   private final NetClientMetricsSupplier netClientMetricsSupplier;
   private final DatagramSocketMetricsSupplier datagramSocketMetricsSupplier;
-  private final VertxHawkularOptions options;
+  private final EventBusMetricsImpl eventBusMetrics;
 
-  private final Sender sender;
-  private final Scheduler scheduler;
+  private Sender sender;
+  private Scheduler scheduler;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
    * @param options Vertx Hawkular options
    */
   public VertxMetricsImpl(Vertx vertx, VertxHawkularOptions options) {
-    prefix = options.getPrefix();
+    this.vertx = vertx;
     this.options = options;
+    String prefix = options.getPrefix();
     httpServerMetricsSupplier = new HttpServerMetricsSupplier(prefix);
     httpClientMetricsSupplier = new HttpClientMetricsSupplier(prefix);
     netServerMetricsSupplier = new NetServerMetricsSupplier(prefix);
     netClientMetricsSupplier = new NetClientMetricsSupplier(prefix);
     datagramSocketMetricsSupplier = new DatagramSocketMetricsSupplier(prefix);
-    Context context = vertx.getOrCreateContext();
-    sender = new Sender(vertx, options, context);
-    scheduler = new Scheduler(vertx, options, context, sender);
-    scheduler.register(httpServerMetricsSupplier);
-    scheduler.register(httpClientMetricsSupplier);
-    scheduler.register(netServerMetricsSupplier);
-    scheduler.register(netClientMetricsSupplier);
-    scheduler.register(datagramSocketMetricsSupplier);
+    eventBusMetrics = new EventBusMetricsImpl(prefix);
   }
 
   @Override
-  public HttpServerMetrics<Long, Void, Void> createMetrics(HttpServer server, SocketAddress localAddress,
-                                                           HttpServerOptions options) {
+  public HttpServerMetrics<Long, Void, Void> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
     return new HttpServerMetricsImpl(localAddress, httpServerMetricsSupplier);
   }
 
@@ -108,7 +102,7 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
 
   @Override
   public EventBusMetrics createMetrics(EventBus eventBus) {
-    return new EventBusMetricsImpl(prefix, scheduler);
+    return eventBusMetrics;
   }
 
   @Override
@@ -122,18 +116,18 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   }
 
   @Override
-  public void close() {
-    scheduler.unregister(httpServerMetricsSupplier);
-    scheduler.unregister(httpClientMetricsSupplier);
-    scheduler.unregister(netServerMetricsSupplier);
-    scheduler.unregister(netClientMetricsSupplier);
-    scheduler.unregister(datagramSocketMetricsSupplier);
-    scheduler.stop();
-    sender.stop();
-  }
-
-  @Override
   public void eventBusInitialized(EventBus bus) {
+    // Finish setup
+    Context context = vertx.getOrCreateContext();
+    sender = new Sender(vertx, options, context);
+    scheduler = new Scheduler(vertx, options, context, sender);
+    scheduler.register(httpServerMetricsSupplier);
+    scheduler.register(httpClientMetricsSupplier);
+    scheduler.register(netServerMetricsSupplier);
+    scheduler.register(netClientMetricsSupplier);
+    scheduler.register(datagramSocketMetricsSupplier);
+    scheduler.register(eventBusMetrics);
+
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
     if (options.isMetricsBridgeEnabled() && options.getMetricsBridgeAddress() != null) {
       bus.consumer(options.getMetricsBridgeAddress(), message -> {
@@ -157,6 +151,18 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
         sender.handle(Collections.singletonList(dataPoint));
       });
     }
+  }
+
+  @Override
+  public void close() {
+    scheduler.unregister(httpServerMetricsSupplier);
+    scheduler.unregister(httpClientMetricsSupplier);
+    scheduler.unregister(netServerMetricsSupplier);
+    scheduler.unregister(netClientMetricsSupplier);
+    scheduler.unregister(datagramSocketMetricsSupplier);
+    scheduler.unregister(eventBusMetrics);
+    scheduler.stop();
+    sender.stop();
   }
 
 
