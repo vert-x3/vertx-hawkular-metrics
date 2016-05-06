@@ -15,8 +15,7 @@
  */
 package io.vertx.ext.hawkular.impl;
 
-import io.vertx.core.net.SocketAddress;
-import io.vertx.core.spi.metrics.DatagramSocketMetrics;
+import static java.util.stream.Collectors.*;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,7 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.LongAdder;
 
-import static java.util.stream.Collectors.*;
+import io.vertx.core.net.SocketAddress;
+import io.vertx.core.net.impl.SocketAddressImpl;
+import io.vertx.core.spi.metrics.DatagramSocketMetrics;
 
 /**
  * Implementation of {@link DatagramSocketMetrics} which relays data to {@link DatagramSocketMetricsSupplier}.
@@ -45,8 +46,8 @@ public class DatagramSocketMetricsImpl implements DatagramSocketMetrics {
   }
 
   @Override
-  public void listening(SocketAddress localAddress) {
-    this.localAddress = localAddress;
+  public void listening(String localName, SocketAddress localAddress) {
+    this.localAddress = new SocketAddressImpl(localAddress.port(), localName);
   }
 
   @Override

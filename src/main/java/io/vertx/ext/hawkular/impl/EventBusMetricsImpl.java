@@ -15,21 +15,20 @@
  */
 package io.vertx.ext.hawkular.impl;
 
-import io.vertx.core.eventbus.ReplyFailure;
-import io.vertx.core.spi.metrics.EventBusMetrics;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.LongAdder;
 
+import io.vertx.core.eventbus.ReplyFailure;
+import io.vertx.core.spi.metrics.EventBusMetrics;
+
 /**
  * @author Thomas Segismont
  */
 public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetrics>, MetricSupplier {
   private final String baseName;
-  private final Scheduler scheduler;
   private final LongAdder handlers = new LongAdder();
   private final ConcurrentMap<String, HandlersMeasurements> handlersMeasurements = new ConcurrentHashMap<>(0);
   private final LongAdder errorCount = new LongAdder();
@@ -52,10 +51,8 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
   private final LongAdder deliveredRemoteMessages = new LongAdder();
   private final LongAdder replyFailures = new LongAdder();
 
-  public EventBusMetricsImpl(String prefix, Scheduler scheduler) {
+  public EventBusMetricsImpl(String prefix) {
     baseName = prefix + (prefix.isEmpty() ? "" : ".") + "vertx.eventbus.";
-    this.scheduler = scheduler;
-    scheduler.register(this);
   }
 
   @Override
@@ -217,7 +214,6 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
 
   @Override
   public void close() {
-    scheduler.unregister(this);
   }
 
 }

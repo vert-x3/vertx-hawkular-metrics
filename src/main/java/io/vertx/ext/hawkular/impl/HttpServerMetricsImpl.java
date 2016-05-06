@@ -15,15 +15,16 @@
  */
 package io.vertx.ext.hawkular.impl;
 
+import static java.util.concurrent.TimeUnit.*;
+
+import java.util.concurrent.atomic.LongAdder;
+
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
-
-import java.util.concurrent.atomic.LongAdder;
-
-import static java.util.concurrent.TimeUnit.*;
 
 /**
  * @author Thomas Segismont
@@ -56,6 +57,15 @@ public class HttpServerMetricsImpl implements HttpServerMetrics<Long, Void, Void
   public Long requestBegin(Void socketMetric, HttpServerRequest request) {
     requests.increment();
     return System.nanoTime();
+  }
+
+  @Override
+  public void requestReset(Long requestMetric) {
+  }
+
+  @Override
+  public Long responsePushed(Void socketMetric, HttpMethod method, String uri, HttpServerResponse response) {
+    return null;
   }
 
   @Override
