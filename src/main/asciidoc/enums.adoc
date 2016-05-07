@@ -32,6 +32,10 @@ Type for http client metrics
 +++
 Type for datagram socket metrics
 +++
+|[[EVENT_BUS]]`EVENT_BUS`|
++++
+Type for event bus metrics
++++
 |===
 
 [[ServerType]]
