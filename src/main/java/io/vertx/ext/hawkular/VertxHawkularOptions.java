@@ -386,7 +386,7 @@ public class VertxHawkularOptions extends MetricsOptions {
    * @param metricsType the type of metrics
    * @return the current {@link VertxHawkularOptions} instance
    */
-  public VertxHawkularOptions setDisabledMetricsType(MetricsType metricsType) {
+  public VertxHawkularOptions addDisabledMetricsType(MetricsType metricsType) {
     this.disabledMetricsTypes.add(metricsType);
     return this;
   }
