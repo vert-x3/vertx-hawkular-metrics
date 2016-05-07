@@ -362,6 +362,23 @@ public class VertxHawkularOptions extends MetricsOptions {
     this.metricsBridgeEnabled = metricsBridgeEnabled;
     return this;
   }
+
+  /**
+   * @return the disabled metrics types.
+   */
+  public Set<MetricsType> getDisabledMetricsTypes() {
+    return disabledMetricsTypes;
+  }
+
+  /**
+   * Sets metrics types that are disabled.
+   *
+   * @param disabledMetricsTypes to specify the set of metrics types to be disabled.
+   */
+  public void setDisabledMetricsTypes(Set<MetricsType> disabledMetricsTypes) {
+    this.disabledMetricsTypes = disabledMetricsTypes;
+  }
+
   /**
    * Set metric that will not be registered. Schedulers will check the set {@code disabledMetricsTypes} when
    * registering metrics suppliers
