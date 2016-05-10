@@ -122,17 +122,17 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     Context context = vertx.getOrCreateContext();
     sender = new Sender(vertx, options, context);
     scheduler = new Scheduler(vertx, options, context, sender);
-    if(this.options.isMetricsTypeDisabled(MetricsType.HTTP_SERVER))
+    if(!this.options.isMetricsTypeDisabled(MetricsType.HTTP_SERVER))
       scheduler.register(httpServerMetricsSupplier);
-    if(this.options.isMetricsTypeDisabled(MetricsType.HTTP_CLIENT))
+    if(!this.options.isMetricsTypeDisabled(MetricsType.HTTP_CLIENT))
       scheduler.register(httpClientMetricsSupplier);
-    if(this.options.isMetricsTypeDisabled(MetricsType.NET_SERVER))
+    if(!this.options.isMetricsTypeDisabled(MetricsType.NET_SERVER))
       scheduler.register(netServerMetricsSupplier);
-    if(this.options.isMetricsTypeDisabled(MetricsType.NET_CLIENT))
+    if(!this.options.isMetricsTypeDisabled(MetricsType.NET_CLIENT))
       scheduler.register(netClientMetricsSupplier);
-    if(this.options.isMetricsTypeDisabled(MetricsType.DATAGRAM_SOCKET))
+    if(!this.options.isMetricsTypeDisabled(MetricsType.DATAGRAM_SOCKET))
       scheduler.register(datagramSocketMetricsSupplier);
-    if(this.options.isMetricsTypeDisabled(MetricsType.EVENT_BUS))
+    if(!this.options.isMetricsTypeDisabled(MetricsType.EVENT_BUS))
       scheduler.register(eventBusMetrics);
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
