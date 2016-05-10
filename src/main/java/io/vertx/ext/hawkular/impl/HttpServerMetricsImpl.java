@@ -61,11 +61,14 @@ public class HttpServerMetricsImpl implements HttpServerMetrics<Long, Void, Void
 
   @Override
   public void requestReset(Long requestMetric) {
+    requestCount.increment();
+    requests.decrement();
   }
 
   @Override
   public Long responsePushed(Void socketMetric, HttpMethod method, String uri, HttpServerResponse response) {
-    return null;
+    requests.increment();
+    return System.nanoTime();
   }
 
   @Override
