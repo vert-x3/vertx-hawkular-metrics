@@ -33,6 +33,12 @@ public class VertxHawkularOptionsConverter {
     if (json.getValue("batchSize") instanceof Number) {
       obj.setBatchSize(((Number)json.getValue("batchSize")).intValue());
     }
+    if (json.getValue("disabledMetricsTypes") instanceof JsonArray) {
+      json.getJsonArray("disabledMetricsTypes").forEach(item -> {
+        if (item instanceof String)
+          obj.addDisabledMetricsType(io.vertx.ext.hawkular.MetricsType.valueOf((String)item));
+      });
+    }
     if (json.getValue("enabled") instanceof Boolean) {
       obj.setEnabled((Boolean)json.getValue("enabled"));
     }
@@ -74,6 +80,13 @@ public class VertxHawkularOptionsConverter {
   public static void toJson(VertxHawkularOptions obj, JsonObject json) {
     json.put("batchDelay", obj.getBatchDelay());
     json.put("batchSize", obj.getBatchSize());
+    if (obj.getDisabledMetricsTypes() != null) {
+      json.put("disabledMetricsTypes", new JsonArray(
+          obj.getDisabledMetricsTypes().
+              stream().
+              map(item -> item.name()).
+              collect(java.util.stream.Collectors.toList())));
+    }
     json.put("enabled", obj.isEnabled());
     if (obj.getHost() != null) {
       json.put("host", obj.getHost());

@@ -22,6 +22,9 @@ import io.vertx.core.metrics.MetricsOptions;
 
 import static io.vertx.ext.hawkular.ServerType.*;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
  * Vert.x Hawkular monitoring configuration.
  *
@@ -93,6 +96,7 @@ public class VertxHawkularOptions extends MetricsOptions {
   private int batchDelay;
   private boolean metricsBridgeEnabled;
   private String metricsBridgeAddress;
+  private Set<MetricsType> disabledMetricsTypes;
 
   public VertxHawkularOptions() {
     host = DEFAULT_HOST;
@@ -108,6 +112,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     batchDelay = DEFAULT_BATCH_DELAY;
     metricsBridgeEnabled = DEFAULT_METRICS_BRIDGE_ENABLED;
     metricsBridgeAddress = DEFAULT_METRICS_BRIDGE_ADDRESS;
+    disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
   }
 
   public VertxHawkularOptions(VertxHawkularOptions other) {
@@ -125,6 +130,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     batchDelay = other.batchDelay;
     metricsBridgeAddress = other.metricsBridgeAddress;
     metricsBridgeEnabled = other.metricsBridgeEnabled;
+    disabledMetricsTypes = other.disabledMetricsTypes != null ? EnumSet.copyOf(other.disabledMetricsTypes) : EnumSet.noneOf(MetricsType.class);
   }
 
   public VertxHawkularOptions(JsonObject json) {
@@ -355,5 +361,37 @@ public class VertxHawkularOptions extends MetricsOptions {
   public VertxHawkularOptions setMetricsBridgeEnabled(boolean metricsBridgeEnabled) {
     this.metricsBridgeEnabled = metricsBridgeEnabled;
     return this;
+  }
+
+  /**
+   * @return the disabled metrics types.
+   */
+  public Set<MetricsType> getDisabledMetricsTypes() {
+    return disabledMetricsTypes;
+  }
+
+  /**
+   * Sets metrics types that are disabled.
+   *
+   * @param disabledMetricsTypes to specify the set of metrics types to be disabled.
+   */
+  public void setDisabledMetricsTypes(Set<MetricsType> disabledMetricsTypes) {
+    this.disabledMetricsTypes = disabledMetricsTypes;
+  }
+
+  /**
+   * Set metric that will not be registered. Schedulers will check the set {@code disabledMetricsTypes} when
+   * registering metrics suppliers
+   *
+   * @param metricsType the type of metrics
+   * @return the current {@link VertxHawkularOptions} instance
+   */
+  public VertxHawkularOptions addDisabledMetricsType(MetricsType metricsType) {
+    this.disabledMetricsTypes.add(metricsType);
+    return this;
+  }
+
+  public boolean isMetricsTypeDisabled(MetricsType metricsType) {
+    return this.disabledMetricsTypes.contains(metricsType);
   }
 }
