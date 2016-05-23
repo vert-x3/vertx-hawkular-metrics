@@ -15,6 +15,15 @@
  */
 package io.vertx.ext.hawkular.impl;
 
+import static java.util.concurrent.TimeUnit.*;
+import static java.util.stream.Collectors.*;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -30,15 +39,6 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.hawkular.HawkularServerOptions;
 import io.vertx.ext.hawkular.ServerType;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
-
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-
-import static java.util.concurrent.TimeUnit.*;
-import static java.util.stream.Collectors.*;
 
 /**
  * Sends collected metrics to the Hawkular server.
@@ -90,7 +90,7 @@ public class Sender implements Handler<List<DataPoint>> {
         HawkularServerOptions hawkularServerOptions = options.getHawkularServerOptions();
         String authString = hawkularServerOptions.getId() + ":" + hawkularServerOptions.getSecret();
         try {
-          auth = "Basic: " + Base64.getEncoder().encodeToString(authString.getBytes("UTF-8"));
+          auth = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
           throw new RuntimeException(e);
         }
