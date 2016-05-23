@@ -94,7 +94,7 @@ public class Sender implements Handler<List<DataPoint>> {
         } catch (UnsupportedEncodingException e) {
           throw new RuntimeException(e);
         }
-        persona = hawkularServerOptions.getPersona().trim().isEmpty() ? null : hawkularServerOptions.getPersona().trim();
+        persona = hawkularServerOptions.getPersona();
         break;
       default:
         throw new UnsupportedServerTypeException(serverType);
