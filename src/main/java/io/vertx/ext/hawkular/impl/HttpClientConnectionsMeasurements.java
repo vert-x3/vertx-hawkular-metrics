@@ -16,9 +16,9 @@
 
 package io.vertx.ext.hawkular.impl;
 
-import static java.util.concurrent.TimeUnit.*;
-
 import java.util.concurrent.atomic.LongAdder;
+
+import static java.util.concurrent.TimeUnit.*;
 
 /**
  * Holds measurements for all connections of a {@link io.vertx.core.http.HttpClient} to a remote

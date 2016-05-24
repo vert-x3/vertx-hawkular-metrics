@@ -15,16 +15,16 @@
  */
 package io.vertx.ext.hawkular.impl;
 
-import static java.util.concurrent.TimeUnit.*;
-
-import java.util.concurrent.atomic.LongAdder;
-
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
+
+import java.util.concurrent.atomic.LongAdder;
+
+import static java.util.concurrent.TimeUnit.*;
 
 /**
  * @author Thomas Segismont

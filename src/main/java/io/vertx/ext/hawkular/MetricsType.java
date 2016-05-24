@@ -47,5 +47,9 @@ public enum MetricsType {
   /**
    * Type for event bus metrics
    */
-  EVENT_BUS
+  EVENT_BUS,
+  /**
+   * Named pools metrics
+   */
+  NAMED_POOLS
 }

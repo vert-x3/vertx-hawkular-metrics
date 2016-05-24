@@ -16,15 +16,6 @@
 
 package io.vertx.ext.hawkular.impl
 
-import static java.util.concurrent.TimeUnit.*
-
-import static org.junit.Assert.fail
-
-import org.junit.After
-import org.junit.BeforeClass
-import org.junit.Rule
-import org.junit.runner.RunWith
-
 import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
 import io.vertx.core.AsyncResult
@@ -33,6 +24,13 @@ import io.vertx.ext.unit.junit.Timeout
 import io.vertx.groovy.core.Vertx
 import io.vertx.groovy.ext.unit.TestContext
 import io.vertx.groovy.ext.unit.junit.VertxUnitRunner
+import org.junit.After
+import org.junit.BeforeClass
+import org.junit.Rule
+import org.junit.runner.RunWith
+
+import static java.util.concurrent.TimeUnit.*
+import static org.junit.Assert.fail
 
 @RunWith(VertxUnitRunner.class)
 abstract class BaseITest {

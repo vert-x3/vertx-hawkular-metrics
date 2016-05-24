@@ -16,8 +16,6 @@
 
 package io.vertx.ext.hawkular.impl;
 
-import java.util.Collections;
-
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.datagram.DatagramSocket;
@@ -38,9 +36,16 @@ import io.vertx.core.spi.metrics.DatagramSocketMetrics;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
+import io.vertx.core.spi.metrics.PoolMetrics;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.hawkular.MetricsType;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
+
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+
+import static io.vertx.ext.hawkular.MetricsType.*;
 
 /**
  * Metrics SPI implementation.
@@ -50,12 +55,7 @@ import io.vertx.ext.hawkular.VertxHawkularOptions;
 public class VertxMetricsImpl extends DummyVertxMetrics {
   private final Vertx vertx;
   private final VertxHawkularOptions options;
-  private final HttpServerMetricsSupplier httpServerMetricsSupplier;
-  private final HttpClientMetricsSupplier httpClientMetricsSupplier;
-  private final NetServerMetricsSupplier netServerMetricsSupplier;
-  private final NetClientMetricsSupplier netClientMetricsSupplier;
-  private final DatagramSocketMetricsSupplier datagramSocketMetricsSupplier;
-  private final EventBusMetricsImpl eventBusMetrics;
+  private final Map<MetricsType, MetricSupplier> metricSuppliers;
 
   private Sender sender;
   private Scheduler scheduler;
@@ -68,42 +68,77 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     this.vertx = vertx;
     this.options = options;
     String prefix = options.getPrefix();
-    httpServerMetricsSupplier = new HttpServerMetricsSupplier(prefix);
-    httpClientMetricsSupplier = new HttpClientMetricsSupplier(prefix);
-    netServerMetricsSupplier = new NetServerMetricsSupplier(prefix);
-    netClientMetricsSupplier = new NetClientMetricsSupplier(prefix);
-    datagramSocketMetricsSupplier = new DatagramSocketMetricsSupplier(prefix);
-    eventBusMetrics = new EventBusMetricsImpl(prefix);
+    Map<MetricsType, MetricSupplier> supplierMap = new EnumMap<>(MetricsType.class);
+    if (!options.isMetricsTypeDisabled(HTTP_SERVER)) {
+      supplierMap.put(HTTP_SERVER, new HttpServerMetricsSupplier(prefix));
+    }
+    if (!options.isMetricsTypeDisabled(HTTP_CLIENT)) {
+      supplierMap.put(HTTP_CLIENT, new HttpClientMetricsSupplier(prefix));
+    }
+    if (!options.isMetricsTypeDisabled(NET_SERVER)) {
+      supplierMap.put(NET_SERVER, new NetServerMetricsSupplier(prefix));
+    }
+    if (!options.isMetricsTypeDisabled(NET_CLIENT)) {
+      supplierMap.put(NET_CLIENT, new NetClientMetricsSupplier(prefix));
+    }
+    if (!options.isMetricsTypeDisabled(DATAGRAM_SOCKET)) {
+      supplierMap.put(DATAGRAM_SOCKET, new DatagramSocketMetricsSupplier(prefix));
+    }
+    if (!options.isMetricsTypeDisabled(EVENT_BUS)) {
+      supplierMap.put(EVENT_BUS, new EventBusMetricsImpl(prefix));
+    }
+    if (!options.isMetricsTypeDisabled(NAMED_POOLS)) {
+      supplierMap.put(NAMED_POOLS, new NamedPoolMetricsSupplier(prefix));
+    }
+    metricSuppliers = Collections.unmodifiableMap(supplierMap);
   }
 
   @Override
   public HttpServerMetrics<Long, Void, Void> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
-    return new HttpServerMetricsImpl(localAddress, httpServerMetricsSupplier);
+    HttpServerMetricsSupplier supplier = (HttpServerMetricsSupplier) metricSuppliers.get(HTTP_SERVER);
+    return supplier != null ? new HttpServerMetricsImpl(localAddress, supplier) : super.createMetrics(server, localAddress, options);
   }
 
   @Override
   public HttpClientMetrics createMetrics(HttpClient client, HttpClientOptions options) {
-    return new HttpClientMetricsImpl(httpClientMetricsSupplier);
+    HttpClientMetricsSupplier supplier = (HttpClientMetricsSupplier) metricSuppliers.get(HTTP_CLIENT);
+    return supplier != null ? new HttpClientMetricsImpl(supplier) : super.createMetrics(client, options);
   }
 
   @Override
   public TCPMetrics createMetrics(NetServer server, SocketAddress localAddress, NetServerOptions options) {
-    return new NetServerMetricsImpl(localAddress, netServerMetricsSupplier);
+    NetServerMetricsSupplier supplier = (NetServerMetricsSupplier) metricSuppliers.get(NET_SERVER);
+    return supplier != null ? new NetServerMetricsImpl(localAddress, supplier) : super.createMetrics(server, localAddress, options);
   }
 
   @Override
   public TCPMetrics createMetrics(NetClient client, NetClientOptions options) {
-    return new NetClientMetricsImpl(netClientMetricsSupplier);
+    NetClientMetricsSupplier supplier = (NetClientMetricsSupplier) metricSuppliers.get(NET_CLIENT);
+    return supplier != null ? new NetClientMetricsImpl(supplier) : super.createMetrics(client, options);
   }
 
   @Override
   public DatagramSocketMetrics createMetrics(DatagramSocket socket, DatagramSocketOptions options) {
-    return new DatagramSocketMetricsImpl(datagramSocketMetricsSupplier);
+    DatagramSocketMetricsSupplier supplier = (DatagramSocketMetricsSupplier) metricSuppliers.get(DATAGRAM_SOCKET);
+    return supplier != null ? new DatagramSocketMetricsImpl(supplier) : super.createMetrics(socket, options);
   }
 
   @Override
   public EventBusMetrics createMetrics(EventBus eventBus) {
-    return eventBusMetrics;
+    EventBusMetrics supplier = (EventBusMetrics) metricSuppliers.get(EVENT_BUS);
+    return supplier != null ? supplier : super.createMetrics(eventBus);
+  }
+
+  @Override
+  public <P> PoolMetrics<?> createMetrics(P pool, String poolType, String poolName, int maxPoolSize) {
+    NamedPoolMetricsSupplier supplier = (NamedPoolMetricsSupplier) metricSuppliers.get(NAMED_POOLS);
+    PoolMetrics<?> poolMetrics;
+    if (supplier != null) {
+      poolMetrics = new PoolMetricsImpl(supplier, poolType, poolName, maxPoolSize);
+    } else {
+      poolMetrics = super.createMetrics(pool, poolType, poolName, maxPoolSize);
+    }
+    return poolMetrics;
   }
 
   @Override
@@ -122,18 +157,7 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     Context context = vertx.getOrCreateContext();
     sender = new Sender(vertx, options, context);
     scheduler = new Scheduler(vertx, options, context, sender);
-    if(!this.options.isMetricsTypeDisabled(MetricsType.HTTP_SERVER))
-      scheduler.register(httpServerMetricsSupplier);
-    if(!this.options.isMetricsTypeDisabled(MetricsType.HTTP_CLIENT))
-      scheduler.register(httpClientMetricsSupplier);
-    if(!this.options.isMetricsTypeDisabled(MetricsType.NET_SERVER))
-      scheduler.register(netServerMetricsSupplier);
-    if(!this.options.isMetricsTypeDisabled(MetricsType.NET_CLIENT))
-      scheduler.register(netClientMetricsSupplier);
-    if(!this.options.isMetricsTypeDisabled(MetricsType.DATAGRAM_SOCKET))
-      scheduler.register(datagramSocketMetricsSupplier);
-    if(!this.options.isMetricsTypeDisabled(MetricsType.EVENT_BUS))
-      scheduler.register(eventBusMetrics);
+    metricSuppliers.values().forEach(scheduler::register);
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
     if (options.isMetricsBridgeEnabled() && options.getMetricsBridgeAddress() != null) {
@@ -162,12 +186,7 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
 
   @Override
   public void close() {
-    scheduler.unregister(httpServerMetricsSupplier);
-    scheduler.unregister(httpClientMetricsSupplier);
-    scheduler.unregister(netServerMetricsSupplier);
-    scheduler.unregister(netClientMetricsSupplier);
-    scheduler.unregister(datagramSocketMetricsSupplier);
-    scheduler.unregister(eventBusMetrics);
+    metricSuppliers.values().forEach(scheduler::unregister);
     scheduler.stop();
     sender.stop();
   }

@@ -36,5 +36,9 @@ Type for datagram socket metrics
 +++
 Type for event bus metrics
 +++
+|[[NAMED_POOLS]]`NAMED_POOLS`|
++++
+Named pools metrics
++++
 |===
 

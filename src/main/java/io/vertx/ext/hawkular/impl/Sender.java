@@ -15,17 +15,6 @@
  */
 package io.vertx.ext.hawkular.impl;
 
-import static java.util.concurrent.TimeUnit.*;
-import static java.util.stream.Collectors.*;
-
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -40,6 +29,17 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.hawkular.AuthenticationOptions;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.concurrent.TimeUnit.*;
+import static java.util.stream.Collectors.*;
 
 /**
  * Sends collected metrics to the Hawkular server.
