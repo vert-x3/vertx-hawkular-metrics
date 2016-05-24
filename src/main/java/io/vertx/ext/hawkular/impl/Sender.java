@@ -86,8 +86,8 @@ public class Sender implements Handler<List<DataPoint>> {
         persona = null;
         break;
       case HAWKULAR:
-        tenant = null;
         HawkularServerOptions hawkularServerOptions = options.getHawkularServerOptions();
+        tenant = hawkularServerOptions.getTenant();
         String authString = hawkularServerOptions.getId() + ":" + hawkularServerOptions.getSecret();
         try {
           auth = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes("UTF-8"));
@@ -153,6 +153,8 @@ public class Sender implements Handler<List<DataPoint>> {
         request.putHeader(HttpHeaders.AUTHORIZATION, auth);
         if (persona != null) {
           request.putHeader(HTTP_HEADER_HAWKULAR_PERSONA, persona);
+        } else {
+          request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
         }
         break;
       default:

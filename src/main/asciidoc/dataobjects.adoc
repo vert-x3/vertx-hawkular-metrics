@@ -18,11 +18,16 @@ Set the identifier used for authentication.
 +++
 |[[persona]]`persona`|`String`|
 +++
-Set the Hawkular Persona identifier. This is used to impersonate an organization with user credentials.
+DEPRECATED. Do not use with Hawkular Alpha13 and up.
+ Set the Hawkular Persona identifier. This is used to impersonate an organization with user credentials.
 +++
 |[[secret]]`secret`|`String`|
 +++
 Set the secret used for authentication.
++++
+|[[tenant]]`tenant`|`String`|
++++
+Set the Hawkular tenant. Defaults to <code>hawkular</code>.
 +++
 |===
 

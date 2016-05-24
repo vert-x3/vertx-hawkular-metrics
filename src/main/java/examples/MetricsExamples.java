@@ -74,6 +74,7 @@ public class MetricsExamples {
           new HawkularServerOptions()
             .setId("username")
             .setSecret("password")
+            .setTenant("sales-department")
         )
     ));
   }

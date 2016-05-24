@@ -102,7 +102,7 @@ def vertx = Vertx.vertx([
 
 ----
 
-==== Authentication with a Hawkular server
+==== Tenant selection and authentication with a Hawkular server
 
 Requests sent to an Hawkular server must be authenticated:
 
@@ -116,12 +116,15 @@ def vertx = Vertx.vertx([
     serverType:ServerType.HAWKULAR,
     hawkularServerOptions:[
       id:"username",
-      secret:"password"
+      secret:"password",
+      tenant:"sales-department"
     ]
   ]
 ])
 
 ----
+
+The tenant option may be omitted, and will default to `hawkular`.
 
 === HTTPS and other HTTP related options
 

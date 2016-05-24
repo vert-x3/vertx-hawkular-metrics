@@ -26,18 +26,26 @@ import io.vertx.core.json.JsonObject;
  */
 @DataObject(generateConverter = true)
 public class HawkularServerOptions {
+  /**
+   * The default Hawkular tenant = hawkular.
+   */
+  public static final String DEFAULT_TENANT = "hawkular";
 
   private String id;
   private String secret;
+  @Deprecated
   private String persona;
+  private String tenant;
 
   public HawkularServerOptions() {
+    this.tenant = DEFAULT_TENANT;
   }
 
   public HawkularServerOptions(HawkularServerOptions other) {
     id = other.id;
     secret = other.secret;
     persona = other.persona;
+    tenant = other.tenant;
   }
 
   public HawkularServerOptions(JsonObject json) {
@@ -76,16 +84,38 @@ public class HawkularServerOptions {
 
   /**
    * @return the Hawkular Persona identifier
+   * @deprecated
+   * @see #setPersona(String)
    */
+  @Deprecated
   public String getPersona() {
     return persona;
   }
 
   /**
+   * DEPRECATED. Do not use with Hawkular Alpha13 and up.
    * Set the Hawkular Persona identifier. This is used to impersonate an organization with user credentials.
+   *
+   * @deprecated do not use with Hawkular Alpha13 and up, use {@link #setTenant(String)} instead
    */
+  @Deprecated
   public HawkularServerOptions setPersona(String persona) {
     this.persona = persona;
+    return this;
+  }
+
+  /**
+   * @return the Hawkular tenant
+   */
+  public String getTenant() {
+    return tenant;
+  }
+
+  /**
+   * Set the Hawkular tenant. Defaults to {@code hawkular}.
+   */
+  public HawkularServerOptions setTenant(String tenant) {
+    this.tenant = tenant;
     return this;
   }
 }
