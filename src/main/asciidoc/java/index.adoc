@@ -57,23 +57,7 @@ Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
 ));
 ----
 
-=== Server type
-
-_vertx-hawkular-metrics_ is able to communicate with a standalone Hawkular Metrics server as well as a full-fledged Hawkular server.
-Set the server type option to select your server flavor:
-
-[source,java]
-----
-Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-  new VertxHawkularOptions()
-    .setEnabled(true)
-    .setServerType(ServerType.HAWKULAR)
-));
-----
-
-Standalone Metrics server is the default.
-
-==== Tenant selection with a standalone Metrics server
+=== Tenant selection
 
 Hawkular Metrics is a multi-tenant solution, and _vertx-hawkular-metrics_ can send metrics for a tenant other than `default`:
 
@@ -82,24 +66,41 @@ Hawkular Metrics is a multi-tenant solution, and _vertx-hawkular-metrics_ can se
 Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
   new VertxHawkularOptions()
     .setEnabled(true)
-    .setStandaloneMetricsOptions(new StandaloneMetricsOptions().setTenant("sales-department"))
+    .setTenant("sales-department")
 ));
 ----
 
-==== Authentication with a Hawkular server
+=== Connecting to a Hawkular server
 
-Requests sent to an Hawkular server must be authenticated:
+Requests sent to a Hawkular server must be authenticated and tenant must be set to `hawkular`:
 
 [source,java]
 ----
 Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
   new VertxHawkularOptions()
     .setEnabled(true)
-    .setServerType(ServerType.HAWKULAR)
-    .setHawkularServerOptions(
-      new HawkularServerOptions()
+    .setTenant("hawkular")
+    .setAuthenticationOptions(
+      new AuthenticationOptions()
+        .setEnabled(true)
         .setId("username")
         .setSecret("password")
+    )
+));
+----
+
+=== Openshift Metrics token authentication
+
+When working with Openshift's internal Metrics server, you can configure token authentication with a custom HTTP header:
+
+[source,java]
+----
+Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+  new VertxHawkularOptions()
+    .setEnabled(true)
+    .setTenant("my-namespace")
+    .setHttpHeaders(new JsonObject()
+      .put("Authorization", "Bearer xkjdksf9890-shjkjhkjlkjlk")
     )
 ));
 ----

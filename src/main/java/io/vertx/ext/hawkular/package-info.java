@@ -67,19 +67,7 @@
  * {@link examples.MetricsExamples#setupRemote()}
  * ----
  *
- * === Server type
- *
- * _${maven.artifactId}_ is able to communicate with a standalone Hawkular Metrics server as well as a full-fledged Hawkular server.
- * Set the server type option to select your server flavor:
- *
- * [source,$lang]
- * ----
- * {@link examples.MetricsExamples#setupServerType()}
- * ----
- *
- * Standalone Metrics server is the default.
- *
- * ==== Tenant selection with a standalone Metrics server
+ * === Tenant selection
  *
  * Hawkular Metrics is a multi-tenant solution, and _${maven.artifactId}_ can send metrics for a tenant other than `default`:
  *
@@ -88,13 +76,22 @@
  * {@link examples.MetricsExamples#setupTenant()}
  * ----
  *
- * ==== Authentication with a Hawkular server
+ * === Connecting to a Hawkular server
  *
- * Requests sent to an Hawkular server must be authenticated:
+ * Requests sent to a Hawkular server must be authenticated and tenant must be set to `hawkular`:
  *
  * [source,$lang]
  * ----
- * {@link examples.MetricsExamples#setupHawkularAuth()}
+ * {@link examples.MetricsExamples#setupHawkularServer()}
+ * ----
+ *
+ * === Openshift Metrics token authentication
+ *
+ * When working with Openshift's internal Metrics server, you can configure token authentication with a custom HTTP header:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupOpenshiftTokenAuthentication()}
  * ----
  *
  * === HTTPS and other HTTP related options

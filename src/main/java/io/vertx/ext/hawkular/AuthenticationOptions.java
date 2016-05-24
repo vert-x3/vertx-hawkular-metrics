@@ -20,28 +20,34 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 /**
- * Options specific to a Hawkular server.
+ * Authentication options.
  *
  * @author Thomas Segismont
  */
 @DataObject(generateConverter = true)
-public class HawkularServerOptions {
+public class AuthenticationOptions {
+  /**
+   * The default value to enable / disable authentication. Disabled by default.
+   */
+  public static final boolean DEFAULT_ENABLED = false;
+
 
   private String id;
   private String secret;
-  private String persona;
+  private boolean enabled;
 
-  public HawkularServerOptions() {
+  public AuthenticationOptions() {
+    this.enabled = DEFAULT_ENABLED;
   }
 
-  public HawkularServerOptions(HawkularServerOptions other) {
+  public AuthenticationOptions(AuthenticationOptions other) {
     id = other.id;
     secret = other.secret;
-    persona = other.persona;
+    enabled = other.enabled;
   }
 
-  public HawkularServerOptions(JsonObject json) {
-    HawkularServerOptionsConverter.fromJson(json, this);
+  public AuthenticationOptions(JsonObject json) {
+    AuthenticationOptionsConverter.fromJson(json, this);
   }
 
   /**
@@ -54,7 +60,7 @@ public class HawkularServerOptions {
   /**
    * Set the identifier used for authentication.
    */
-  public HawkularServerOptions setId(String id) {
+  public AuthenticationOptions setId(String id) {
     this.id = id;
     return this;
   }
@@ -69,23 +75,23 @@ public class HawkularServerOptions {
   /**
    * Set the secret used for authentication.
    */
-  public HawkularServerOptions setSecret(String secret) {
+  public AuthenticationOptions setSecret(String secret) {
     this.secret = secret;
     return this;
   }
 
   /**
-   * @return the Hawkular Persona identifier
+   * @return true if authentication is enabled
    */
-  public String getPersona() {
-    return persona;
+  public boolean isEnabled() {
+    return enabled;
   }
 
   /**
-   * Set the Hawkular Persona identifier. This is used to impersonate an organization with user credentials.
+   * Set whether authentication is enabled. Defaults to {@code false}.
    */
-  public HawkularServerOptions setPersona(String persona) {
-    this.persona = persona;
+  public AuthenticationOptions setEnabled(boolean enabled) {
+    this.enabled = enabled;
     return this;
   }
 }

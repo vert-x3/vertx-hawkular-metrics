@@ -16,6 +16,15 @@
 
 package io.vertx.ext.hawkular.impl
 
+import static java.util.concurrent.TimeUnit.*
+
+import static org.junit.Assert.fail
+
+import org.junit.After
+import org.junit.BeforeClass
+import org.junit.Rule
+import org.junit.runner.RunWith
+
 import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
 import io.vertx.core.AsyncResult
@@ -24,13 +33,6 @@ import io.vertx.ext.unit.junit.Timeout
 import io.vertx.groovy.core.Vertx
 import io.vertx.groovy.ext.unit.TestContext
 import io.vertx.groovy.ext.unit.junit.VertxUnitRunner
-import org.junit.After
-import org.junit.BeforeClass
-import org.junit.Rule
-import org.junit.runner.RunWith
-
-import static java.util.concurrent.TimeUnit.*
-import static org.junit.Assert.fail
 
 @RunWith(VertxUnitRunner.class)
 abstract class BaseITest {
@@ -90,17 +92,15 @@ abstract class BaseITest {
   static def Map createMetricsOptions(String tenantId) {
     def vertxOptions = [
       metricsOptions: [
-        enabled                 : true,
-        host                    : SERVER_URL_PROPS.host,
-        port                    : SERVER_URL_PROPS.port,
-        standaloneMetricsOptions: [
-          tenant: tenantId
-        ],
-        prefix                  : METRIC_PREFIX,
-        schedule                : SECONDS.convert(SCHEDULE, MILLISECONDS),
+        enabled             : true,
+        host                : SERVER_URL_PROPS.host,
+        port                : SERVER_URL_PROPS.port,
+        tenant              : tenantId,
+        prefix              : METRIC_PREFIX,
+        schedule            : SECONDS.convert(SCHEDULE, MILLISECONDS),
         // Event bus bridge configuration
-        metricsBridgeEnabled    : true,
-        metricsBridgeAddress    : "hawkular.metrics"
+        metricsBridgeEnabled: true,
+        metricsBridgeAddress: "hawkular.metrics"
       ]
     ]
     vertxOptions

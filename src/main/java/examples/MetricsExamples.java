@@ -20,9 +20,7 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.docgen.Source;
-import io.vertx.ext.hawkular.HawkularServerOptions;
-import io.vertx.ext.hawkular.ServerType;
-import io.vertx.ext.hawkular.StandaloneMetricsOptions;
+import io.vertx.ext.hawkular.AuthenticationOptions;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 /**
@@ -49,31 +47,35 @@ public class MetricsExamples {
     ));
   }
 
-  public void setupServerType() {
-    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-      new VertxHawkularOptions()
-        .setEnabled(true)
-        .setServerType(ServerType.HAWKULAR)
-    ));
-  }
-
   public void setupTenant() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
       new VertxHawkularOptions()
         .setEnabled(true)
-        .setStandaloneMetricsOptions(new StandaloneMetricsOptions().setTenant("sales-department"))
+        .setTenant("sales-department")
     ));
   }
 
-  public void setupHawkularAuth() {
+  public void setupHawkularServer() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
       new VertxHawkularOptions()
         .setEnabled(true)
-        .setServerType(ServerType.HAWKULAR)
-        .setHawkularServerOptions(
-          new HawkularServerOptions()
+        .setTenant("hawkular")
+        .setAuthenticationOptions(
+          new AuthenticationOptions()
+            .setEnabled(true)
             .setId("username")
             .setSecret("password")
+        )
+    ));
+  }
+
+  public void setupOpenshiftTokenAuthentication() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+      new VertxHawkularOptions()
+        .setEnabled(true)
+        .setTenant("my-namespace")
+        .setHttpHeaders(new JsonObject()
+          .put("Authorization", "Bearer xkjdksf9890-shjkjhkjlkjlk")
         )
     ));
   }
