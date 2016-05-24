@@ -55,12 +55,16 @@ public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientReques
   }
 
   @Override
-  public HttpClientRequestMetrics responsePushed(SocketAddress socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    return null;
+  public HttpClientRequestMetrics responsePushed(SocketAddress key, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+    return requestBegin(key, localAddress, remoteAddress, request);
   }
 
   @Override
   public void requestReset(HttpClientRequestMetrics requestMetric) {
+    HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(requestMetric.getAddress());
+    if (measurements != null) {
+      measurements.requestReset();
+    }
   }
 
   @Override
