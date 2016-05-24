@@ -88,7 +88,7 @@
  * {@link examples.MetricsExamples#setupTenant()}
  * ----
  *
- * ==== Authentication with a Hawkular server
+ * ==== Tenant selection and authentication with a Hawkular server
  *
  * Requests sent to an Hawkular server must be authenticated:
  *
@@ -96,6 +96,8 @@
  * ----
  * {@link examples.MetricsExamples#setupHawkularAuth()}
  * ----
+ *
+ * The tenant option may be omitted, and will default to `hawkular`.
  *
  * === HTTPS and other HTTP related options
  *

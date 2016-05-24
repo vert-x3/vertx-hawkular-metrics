@@ -36,6 +36,9 @@ public class HawkularServerOptionsConverter {
     if (json.getValue("secret") instanceof String) {
       obj.setSecret((String)json.getValue("secret"));
     }
+    if (json.getValue("tenant") instanceof String) {
+      obj.setTenant((String)json.getValue("tenant"));
+    }
   }
 
   public static void toJson(HawkularServerOptions obj, JsonObject json) {
@@ -47,6 +50,9 @@ public class HawkularServerOptionsConverter {
     }
     if (obj.getSecret() != null) {
       json.put("secret", obj.getSecret());
+    }
+    if (obj.getTenant() != null) {
+      json.put("tenant", obj.getTenant());
     }
   }
 }
