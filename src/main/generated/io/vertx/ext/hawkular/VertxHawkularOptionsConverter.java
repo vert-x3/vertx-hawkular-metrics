@@ -27,6 +27,9 @@ import io.vertx.core.json.JsonArray;
 public class VertxHawkularOptionsConverter {
 
   public static void fromJson(JsonObject json, VertxHawkularOptions obj) {
+    if (json.getValue("authenticationOptions") instanceof JsonObject) {
+      obj.setAuthenticationOptions(new io.vertx.ext.hawkular.AuthenticationOptions((JsonObject)json.getValue("authenticationOptions")));
+    }
     if (json.getValue("batchDelay") instanceof Number) {
       obj.setBatchDelay(((Number)json.getValue("batchDelay")).intValue());
     }
@@ -42,11 +45,11 @@ public class VertxHawkularOptionsConverter {
     if (json.getValue("enabled") instanceof Boolean) {
       obj.setEnabled((Boolean)json.getValue("enabled"));
     }
-    if (json.getValue("hawkularServerOptions") instanceof JsonObject) {
-      obj.setHawkularServerOptions(new io.vertx.ext.hawkular.HawkularServerOptions((JsonObject)json.getValue("hawkularServerOptions")));
-    }
     if (json.getValue("host") instanceof String) {
       obj.setHost((String)json.getValue("host"));
+    }
+    if (json.getValue("httpHeaders") instanceof JsonObject) {
+      obj.setHttpHeaders(((JsonObject)json.getValue("httpHeaders")).copy());
     }
     if (json.getValue("httpOptions") instanceof JsonObject) {
       obj.setHttpOptions(new io.vertx.core.http.HttpClientOptions((JsonObject)json.getValue("httpOptions")));
@@ -69,11 +72,11 @@ public class VertxHawkularOptionsConverter {
     if (json.getValue("schedule") instanceof Number) {
       obj.setSchedule(((Number)json.getValue("schedule")).intValue());
     }
-    if (json.getValue("serverType") instanceof String) {
-      obj.setServerType(io.vertx.ext.hawkular.ServerType.valueOf((String)json.getValue("serverType")));
+    if (json.getValue("sendTenantHeader") instanceof Boolean) {
+      obj.setSendTenantHeader((Boolean)json.getValue("sendTenantHeader"));
     }
-    if (json.getValue("standaloneMetricsOptions") instanceof JsonObject) {
-      obj.setStandaloneMetricsOptions(new io.vertx.ext.hawkular.StandaloneMetricsOptions((JsonObject)json.getValue("standaloneMetricsOptions")));
+    if (json.getValue("tenant") instanceof String) {
+      obj.setTenant((String)json.getValue("tenant"));
     }
   }
 
@@ -91,6 +94,9 @@ public class VertxHawkularOptionsConverter {
     if (obj.getHost() != null) {
       json.put("host", obj.getHost());
     }
+    if (obj.getHttpHeaders() != null) {
+      json.put("httpHeaders", obj.getHttpHeaders());
+    }
     if (obj.getMetricsBridgeAddress() != null) {
       json.put("metricsBridgeAddress", obj.getMetricsBridgeAddress());
     }
@@ -103,8 +109,9 @@ public class VertxHawkularOptionsConverter {
       json.put("prefix", obj.getPrefix());
     }
     json.put("schedule", obj.getSchedule());
-    if (obj.getServerType() != null) {
-      json.put("serverType", obj.getServerType().name());
+    json.put("sendTenantHeader", obj.isSendTenantHeader());
+    if (obj.getTenant() != null) {
+      json.put("tenant", obj.getTenant());
     }
   }
 }

@@ -64,27 +64,7 @@ def vertx = Vertx.vertx([
 
 ----
 
-=== Server type
-
-_vertx-hawkular-metrics_ is able to communicate with a standalone Hawkular Metrics server as well as a full-fledged Hawkular server.
-Set the server type option to select your server flavor:
-
-[source,groovy]
-----
-import io.vertx.ext.hawkular.ServerType
-import io.vertx.groovy.core.Vertx
-def vertx = Vertx.vertx([
-  metricsOptions:[
-    enabled:true,
-    serverType:ServerType.HAWKULAR
-  ]
-])
-
-----
-
-Standalone Metrics server is the default.
-
-==== Tenant selection with a standalone Metrics server
+=== Tenant selection
 
 Hawkular Metrics is a multi-tenant solution, and _vertx-hawkular-metrics_ can send metrics for a tenant other than `default`:
 
@@ -94,29 +74,46 @@ import io.vertx.groovy.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
-    standaloneMetricsOptions:[
-      tenant:"sales-department"
+    tenant:"sales-department"
+  ]
+])
+
+----
+
+=== Connecting to a Hawkular server
+
+Requests sent to a Hawkular server must be authenticated and tenant must be set to `hawkular`:
+
+[source,groovy]
+----
+import io.vertx.groovy.core.Vertx
+def vertx = Vertx.vertx([
+  metricsOptions:[
+    enabled:true,
+    tenant:"hawkular",
+    authenticationOptions:[
+      enabled:true,
+      id:"username",
+      secret:"password"
     ]
   ]
 ])
 
 ----
 
-==== Authentication with a Hawkular server
+=== Openshift Metrics token authentication
 
-Requests sent to an Hawkular server must be authenticated:
+When working with Openshift's internal Metrics server, you can configure token authentication with a custom HTTP header:
 
 [source,groovy]
 ----
-import io.vertx.ext.hawkular.ServerType
 import io.vertx.groovy.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
-    serverType:ServerType.HAWKULAR,
-    hawkularServerOptions:[
-      id:"username",
-      secret:"password"
+    tenant:"my-namespace",
+    httpHeaders:[
+      Authorization:"Bearer xkjdksf9890-shjkjhkjlkjlk"
     ]
   ]
 ])

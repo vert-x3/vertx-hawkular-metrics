@@ -15,15 +15,13 @@
  */
 package io.vertx.ext.hawkular;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
-
-import static io.vertx.ext.hawkular.ServerType.*;
-
-import java.util.EnumSet;
-import java.util.Set;
 
 /**
  * Vert.x Hawkular monitoring configuration.
@@ -48,9 +46,9 @@ public class VertxHawkularOptions extends MetricsOptions {
   public static final String DEFAULT_METRICS_URI = "/hawkular/metrics";
 
   /**
-   * The default server type = METRICS.
+   * The default Hawkular tenant = default.
    */
-  public static final ServerType DEFAULT_SERVER_TYPE = METRICS;
+  public static final String DEFAULT_TENANT = "default";
 
   /**
    * Default value for metric collection interval (in seconds) = 1.
@@ -87,9 +85,10 @@ public class VertxHawkularOptions extends MetricsOptions {
   private int port;
   private HttpClientOptions httpOptions;
   private String metricsServiceUri;
-  private ServerType serverType;
-  private StandaloneMetricsOptions standaloneMetricsOptions;
-  private HawkularServerOptions hawkularServerOptions;
+  private String tenant;
+  private boolean sendTenantHeader;
+  private AuthenticationOptions authenticationOptions;
+  private JsonObject httpHeaders;
   private int schedule;
   private String prefix;
   private int batchSize;
@@ -103,9 +102,10 @@ public class VertxHawkularOptions extends MetricsOptions {
     port = DEFAULT_PORT;
     httpOptions = new HttpClientOptions();
     metricsServiceUri = DEFAULT_METRICS_URI;
-    serverType = DEFAULT_SERVER_TYPE;
-    standaloneMetricsOptions = new StandaloneMetricsOptions();
-    hawkularServerOptions = new HawkularServerOptions();
+    tenant = DEFAULT_TENANT;
+    sendTenantHeader = true;
+    authenticationOptions = new AuthenticationOptions();
+    httpHeaders = new JsonObject();
     schedule = DEFAULT_SCHEDULE;
     prefix = DEFAULT_PREFIX;
     batchSize = DEFAULT_BATCH_SIZE;
@@ -121,9 +121,10 @@ public class VertxHawkularOptions extends MetricsOptions {
     port = other.port;
     httpOptions = other.httpOptions != null ? new HttpClientOptions(other.httpOptions) : new HttpClientOptions();
     metricsServiceUri = other.metricsServiceUri;
-    serverType = other.serverType;
-    standaloneMetricsOptions = other.standaloneMetricsOptions;
-    hawkularServerOptions = other.hawkularServerOptions;
+    tenant = other.tenant;
+    sendTenantHeader = other.sendTenantHeader;
+    authenticationOptions = other.authenticationOptions != null ? new AuthenticationOptions(other.authenticationOptions) : new AuthenticationOptions();
+    httpHeaders = other.httpHeaders;
     schedule = other.schedule;
     prefix = other.prefix;
     batchSize = other.batchSize;
@@ -200,48 +201,63 @@ public class VertxHawkularOptions extends MetricsOptions {
   }
 
   /**
-   * @return the server type
+   * @return the Hawkular tenant
    */
-  public ServerType getServerType() {
-    return serverType;
+  public String getTenant() {
+    return tenant;
   }
 
   /**
-   * Set the Hawkular server type (standalone Metrics, Hawkular, ... etc). Defaults to {@code METRICS}.
+   * Set the Hawkular tenant. Defaults to {@code default}.
    */
-  public VertxHawkularOptions setServerType(ServerType serverType) {
-    this.serverType = serverType;
+  public VertxHawkularOptions setTenant(String tenant) {
+    this.tenant = tenant;
     return this;
   }
 
   /**
-   * @return the options specific to a standalone Metrics server
+   * @return true if tenant header should be sent
    */
-  public StandaloneMetricsOptions getStandaloneMetricsOptions() {
-    return standaloneMetricsOptions;
+  public boolean isSendTenantHeader() {
+    return sendTenantHeader;
   }
 
   /**
-   * Set the options specific to a standalone Metrics server.
+   * Set whether Hawkular tenant header should be sent. Defaults to {@code true}.
+   * Must be set to {@code false} when working with pre-Alpha13 Hawkular servers.
    */
-  public VertxHawkularOptions setStandaloneMetricsOptions(StandaloneMetricsOptions standaloneMetricsOptions) {
-    this.standaloneMetricsOptions = standaloneMetricsOptions;
+  public VertxHawkularOptions setSendTenantHeader(boolean sendTenantHeader) {
+    this.sendTenantHeader = sendTenantHeader;
     return this;
   }
 
   /**
-   * @return the options specific to a Hawkular server
+   * @return the authentication options
    */
-  public HawkularServerOptions getHawkularServerOptions() {
-    return hawkularServerOptions;
+  public AuthenticationOptions getAuthenticationOptions() {
+    return authenticationOptions;
   }
 
+  /**
+   * Set the options for authentication.
+   */
+  public VertxHawkularOptions setAuthenticationOptions(AuthenticationOptions authenticationOptions) {
+    this.authenticationOptions = authenticationOptions;
+    return this;
+  }
 
   /**
-   * Set the options specific to a Hawkular server.
+   * @return specific headers to include in HTTP requests
    */
-  public VertxHawkularOptions setHawkularServerOptions(HawkularServerOptions hawkularServerOptions) {
-    this.hawkularServerOptions = hawkularServerOptions;
+  public JsonObject getHttpHeaders() {
+    return httpHeaders;
+  }
+
+  /**
+   * Set specific headers to include in HTTP requests.
+   */
+  public VertxHawkularOptions setHttpHeaders(JsonObject httpHeaders) {
+    this.httpHeaders = httpHeaders;
     return this;
   }
 

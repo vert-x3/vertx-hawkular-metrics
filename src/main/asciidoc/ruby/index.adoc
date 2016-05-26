@@ -64,26 +64,7 @@ vertx = Vertx::Vertx.vertx({
 
 ----
 
-=== Server type
-
-_vertx-hawkular-metrics_ is able to communicate with a standalone Hawkular Metrics server as well as a full-fledged Hawkular server.
-Set the server type option to select your server flavor:
-
-[source,ruby]
-----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'enabled' => true,
-    'serverType' => :HAWKULAR
-  }
-})
-
-----
-
-Standalone Metrics server is the default.
-
-==== Tenant selection with a standalone Metrics server
+=== Tenant selection
 
 Hawkular Metrics is a multi-tenant solution, and _vertx-hawkular-metrics_ can send metrics for a tenant other than `default`:
 
@@ -93,17 +74,15 @@ require 'vertx/vertx'
 vertx = Vertx::Vertx.vertx({
   'metricsOptions' => {
     'enabled' => true,
-    'standaloneMetricsOptions' => {
-      'tenant' => "sales-department"
-    }
+    'tenant' => "sales-department"
   }
 })
 
 ----
 
-==== Authentication with a Hawkular server
+=== Connecting to a Hawkular server
 
-Requests sent to an Hawkular server must be authenticated:
+Requests sent to a Hawkular server must be authenticated and tenant must be set to `hawkular`:
 
 [source,ruby]
 ----
@@ -111,10 +90,30 @@ require 'vertx/vertx'
 vertx = Vertx::Vertx.vertx({
   'metricsOptions' => {
     'enabled' => true,
-    'serverType' => :HAWKULAR,
-    'hawkularServerOptions' => {
+    'tenant' => "hawkular",
+    'authenticationOptions' => {
+      'enabled' => true,
       'id' => "username",
       'secret' => "password"
+    }
+  }
+})
+
+----
+
+=== Openshift Metrics token authentication
+
+When working with Openshift's internal Metrics server, you can configure token authentication with a custom HTTP header:
+
+[source,ruby]
+----
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'tenant' => "my-namespace",
+    'httpHeaders' => {
+      'Authorization' => "Bearer xkjdksf9890-shjkjhkjlkjlk"
     }
   }
 })

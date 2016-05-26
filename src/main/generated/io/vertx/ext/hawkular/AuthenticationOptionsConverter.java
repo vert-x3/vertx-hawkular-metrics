@@ -20,30 +20,28 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 
 /**
- * Converter for {@link io.vertx.ext.hawkular.HawkularServerOptions}.
+ * Converter for {@link io.vertx.ext.hawkular.AuthenticationOptions}.
  *
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.hawkular.HawkularServerOptions} original class using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.hawkular.AuthenticationOptions} original class using Vert.x codegen.
  */
-public class HawkularServerOptionsConverter {
+public class AuthenticationOptionsConverter {
 
-  public static void fromJson(JsonObject json, HawkularServerOptions obj) {
+  public static void fromJson(JsonObject json, AuthenticationOptions obj) {
+    if (json.getValue("enabled") instanceof Boolean) {
+      obj.setEnabled((Boolean)json.getValue("enabled"));
+    }
     if (json.getValue("id") instanceof String) {
       obj.setId((String)json.getValue("id"));
-    }
-    if (json.getValue("persona") instanceof String) {
-      obj.setPersona((String)json.getValue("persona"));
     }
     if (json.getValue("secret") instanceof String) {
       obj.setSecret((String)json.getValue("secret"));
     }
   }
 
-  public static void toJson(HawkularServerOptions obj, JsonObject json) {
+  public static void toJson(AuthenticationOptions obj, JsonObject json) {
+    json.put("enabled", obj.isEnabled());
     if (obj.getId() != null) {
       json.put("id", obj.getId());
-    }
-    if (obj.getPersona() != null) {
-      json.put("persona", obj.getPersona());
     }
     if (obj.getSecret() != null) {
       json.put("secret", obj.getSecret());

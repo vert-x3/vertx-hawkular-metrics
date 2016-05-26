@@ -22,7 +22,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
@@ -36,8 +38,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.hawkular.HawkularServerOptions;
-import io.vertx.ext.hawkular.ServerType;
+import io.vertx.ext.hawkular.AuthenticationOptions;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 /**
@@ -50,15 +51,14 @@ public class Sender implements Handler<List<DataPoint>> {
 
   private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
-  private static final CharSequence HTTP_HEADER_HAWKULAR_PERSONA = HttpHeaders.createOptimized("Hawkular-Persona");
 
   private final Vertx vertx;
   private final String metricsURI;
 
-  private final ServerType serverType;
-  private final String tenant;
-  private final String auth;
-  private final String persona;
+  private final CharSequence tenant;
+  private final CharSequence auth;
+
+  private final Map<CharSequence, Iterable<CharSequence>> httpHeaders;
 
   private final int batchSize;
   private final long batchDelay;
@@ -78,26 +78,35 @@ public class Sender implements Handler<List<DataPoint>> {
     this.vertx = vertx;
     metricsURI = options.getMetricsServiceUri() + "/metrics/data";
 
-    serverType = options.getServerType();
-    switch (serverType) {
-      case METRICS:
-        tenant = options.getStandaloneMetricsOptions().getTenant();
-        auth = null;
-        persona = null;
-        break;
-      case HAWKULAR:
-        tenant = null;
-        HawkularServerOptions hawkularServerOptions = options.getHawkularServerOptions();
-        String authString = hawkularServerOptions.getId() + ":" + hawkularServerOptions.getSecret();
-        try {
-          auth = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-          throw new RuntimeException(e);
+    tenant = options.isSendTenantHeader() ? HttpHeaders.createOptimized(options.getTenant()) : null;
+    AuthenticationOptions authenticationOptions = options.getAuthenticationOptions();
+    if (authenticationOptions.isEnabled()) {
+      String authString = authenticationOptions.getId() + ":" + authenticationOptions.getSecret();
+      try {
+        auth = HttpHeaders.createOptimized("Basic " + Base64.getEncoder().encodeToString(authString.getBytes("UTF-8")));
+      } catch (UnsupportedEncodingException e) {
+        throw new RuntimeException(e);
+      }
+    } else {
+      auth = null;
+    }
+
+    JsonObject httpHeaders = options.getHttpHeaders();
+    if (httpHeaders != null) {
+      this.httpHeaders = new HashMap<>(httpHeaders.size());
+      for (String headerName : httpHeaders.fieldNames()) {
+        CharSequence optimizedName = HttpHeaders.createOptimized(headerName);
+        Object value = httpHeaders.getValue(headerName);
+        List<String> values;
+        if (value instanceof JsonArray) {
+          values = ((JsonArray) value).stream().map(Object::toString).collect(toList());
+        } else {
+          values = Collections.singletonList(value.toString());
         }
-        persona = hawkularServerOptions.getPersona();
-        break;
-      default:
-        throw new UnsupportedServerTypeException(serverType);
+        this.httpHeaders.put(optimizedName, values.stream().map(HttpHeaders::createOptimized).collect(toList()));
+      }
+    } else {
+      this.httpHeaders = Collections.emptyMap();
     }
 
     batchSize = options.getBatchSize();
@@ -142,22 +151,18 @@ public class Sender implements Handler<List<DataPoint>> {
   private void send(List<DataPoint> dataPoints) {
     JsonObject mixedData = toHawkularMixedData(dataPoints);
     HttpClientRequest request = httpClient.post(metricsURI, this::onResponse)
-      .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON)
-      .exceptionHandler(err -> LOG.trace("Could not send metrics", err));
+      .exceptionHandler(err -> LOG.trace("Could not send metrics", err))
+      .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
 
-    switch (serverType) {
-      case METRICS:
-        request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
-        break;
-      case HAWKULAR:
-        request.putHeader(HttpHeaders.AUTHORIZATION, auth);
-        if (persona != null) {
-          request.putHeader(HTTP_HEADER_HAWKULAR_PERSONA, persona);
-        }
-        break;
-      default:
-        throw new UnsupportedServerTypeException(serverType);
+    if (tenant != null) {
+      request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
     }
+    if (auth != null) {
+      request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+    }
+    httpHeaders.entrySet().stream().forEach(httpHeader -> {
+      request.putHeader(httpHeader.getKey(), httpHeader.getValue());
+    });
 
     request.end(mixedData.encode(), "UTF-8");
     sendTime = System.nanoTime();
