@@ -15,13 +15,13 @@
  */
 package io.vertx.ext.hawkular;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Vert.x Hawkular monitoring configuration.

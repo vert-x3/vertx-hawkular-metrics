@@ -16,13 +16,6 @@
 
 package io.vertx.ext.hawkular.impl;
 
-import static java.util.stream.Collectors.*;
-
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.WebSocket;
@@ -30,6 +23,13 @@ import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.ext.hawkular.impl.HttpClientConnectionsMeasurements.Snapshot;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import static java.util.stream.Collectors.*;
 
 /**
  * @author Thomas Segismont

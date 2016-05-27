@@ -15,14 +15,14 @@
  */
 package io.vertx.ext.hawkular.impl;
 
+import io.vertx.core.eventbus.ReplyFailure;
+import io.vertx.core.spi.metrics.EventBusMetrics;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.LongAdder;
-
-import io.vertx.core.eventbus.ReplyFailure;
-import io.vertx.core.spi.metrics.EventBusMetrics;
 
 /**
  * @author Thomas Segismont
