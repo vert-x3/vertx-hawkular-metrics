@@ -34,7 +34,9 @@ import static java.util.stream.Collectors.*;
 /**
  * @author Thomas Segismont
  */
-public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientRequestMetrics, SocketAddress, SocketAddress> {
+public class HttpClientMetricsImpl
+  implements HttpClientMetrics<HttpClientRequestMetrics, SocketAddress, SocketAddress, Void, Void> {
+
   private final ConcurrentMap<SocketAddress, HttpClientConnectionsMeasurements> connectionsMeasurements = new ConcurrentHashMap<>(0);
   private final HttpClientMetricsSupplier httpClientMetricsSupplier;
 
@@ -44,7 +46,47 @@ public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientReques
   }
 
   @Override
-  public HttpClientRequestMetrics requestBegin(SocketAddress key, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+  public Void createEndpoint(String host, int port, int maxPoolSize) {
+    return null;
+  }
+
+  @Override
+  public void closeEndpoint(String host, int port, Void endpointMetric) {
+
+  }
+
+  @Override
+  public Void enqueueRequest(Void endpointMetric) {
+    return null;
+  }
+
+  @Override
+  public void dequeueRequest(Void endpointMetric, Void taskMetric) {
+
+  }
+
+  @Override
+  public void endpointConnected(Void endpointMetric, SocketAddress socketMetric) {
+
+  }
+
+  @Override
+  public void endpointDisconnected(Void endpointMetric, SocketAddress socketMetric) {
+
+  }
+
+  @Override
+  public void requestEnd(HttpClientRequestMetrics requestMetric) {
+
+  }
+
+  @Override
+  public void responseBegin(HttpClientRequestMetrics requestMetric, HttpClientResponse response) {
+
+  }
+
+  @Override
+  public HttpClientRequestMetrics requestBegin(Void endpointMetric, SocketAddress key, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
     HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.requestBegin();
@@ -55,8 +97,8 @@ public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientReques
   }
 
   @Override
-  public HttpClientRequestMetrics responsePushed(SocketAddress key, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    return requestBegin(key, localAddress, remoteAddress, request);
+  public HttpClientRequestMetrics responsePushed(Void endpointMetric, SocketAddress key, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+    return requestBegin(null, key, localAddress, remoteAddress, request);
   }
 
   @Override
@@ -77,7 +119,7 @@ public class HttpClientMetricsImpl implements HttpClientMetrics<HttpClientReques
   }
 
   @Override
-  public SocketAddress connected(SocketAddress key, WebSocket webSocket) {
+  public SocketAddress connected(Void endpointMetric, SocketAddress key, WebSocket webSocket) {
     HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements != null) {
       measurements.incrementWsConnectionCount();

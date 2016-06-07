@@ -414,7 +414,7 @@ There are two types currently supported:
 
 Note that Vert.x creates two worker pools upfront, _vert.x-worker-thread_ and _vert.x-internal-blocking_.
 
-All metrics are prefixed with `<type>.<name>.`. For example, `worker.vert.x-internal-blocking`.
+All metrics are prefixed with `<type>.<name>.`. For example, `worker.vert.x-internal-blocking.`.
 
 [cols="15,50,35", options="header"]
 |===
