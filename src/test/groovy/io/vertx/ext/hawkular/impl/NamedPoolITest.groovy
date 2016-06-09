@@ -64,7 +64,10 @@ class NamedPoolITest extends BaseITest {
 
     async.awaitSuccess()
 
-    assertCounterGreaterThan(maxPoolSize * 3 * sleepMillis, tenantId, "${baseNameWithPoolName}delay")
+    // If all tasks could be submitted *exactly* at the same time, cumulated delay would be maxPoolSize * 3 * sleepMillis
+    // In practice, the value will be close, but not equal
+    // So let's make sure it's at least maxPoolSize * 2 * sleepMillis
+    assertCounterGreaterThan(maxPoolSize * 2 * sleepMillis, tenantId, "${baseNameWithPoolName}delay")
     assertGaugeEquals(0, tenantId, "${baseNameWithPoolName}queued")
     assertCounterEquals(taskCount, tenantId, "${baseNameWithPoolName}queuedCount")
     assertCounterGreaterThan(taskCount * sleepMillis, tenantId, "${baseNameWithPoolName}usage")
