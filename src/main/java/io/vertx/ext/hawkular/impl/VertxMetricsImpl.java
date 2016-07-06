@@ -161,25 +161,27 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
     if (options.isMetricsBridgeEnabled() && options.getMetricsBridgeAddress() != null) {
-      bus.consumer(options.getMetricsBridgeAddress(), message -> {
-        // By spec, it is a json object.
-        JsonObject json = (JsonObject) message.body();
+      context.runOnContext(v -> {
+        bus.consumer(options.getMetricsBridgeAddress(), message -> {
+          // By spec, it is a json object.
+          JsonObject json = (JsonObject) message.body();
 
-        // id (source) and value has to be set.
-        // `id` is used to be homogeneous with Hawkular (using `id` as series identifier).
-        // the timestamp can have been set in the message using the 'timestamp' field. If not use 'now'
-        // the type of metrics can have been set in the message using the 'type' field. It not use 'gauge'. Only
-        // "counter" and "gauge" are supported.
-        String type = json.getString("type", "");
-        String name = json.getString("id");
-        long timestamp = json.getLong("timestamp", System.currentTimeMillis());
-        DataPoint dataPoint;
-        if ("counter".equals(type)) {
-          dataPoint = new CounterPoint(name, timestamp, json.getLong("value"));
-        } else {
-          dataPoint = new GaugePoint(name, timestamp, json.getDouble("value"));
-        }
-        sender.handle(Collections.singletonList(dataPoint));
+          // id (source) and value has to be set.
+          // `id` is used to be homogeneous with Hawkular (using `id` as series identifier).
+          // the timestamp can have been set in the message using the 'timestamp' field. If not use 'now'
+          // the type of metrics can have been set in the message using the 'type' field. It not use 'gauge'. Only
+          // "counter" and "gauge" are supported.
+          String type = json.getString("type", "");
+          String name = json.getString("id");
+          long timestamp = json.getLong("timestamp", System.currentTimeMillis());
+          DataPoint dataPoint;
+          if ("counter".equals(type)) {
+            dataPoint = new CounterPoint(name, timestamp, json.getLong("value"));
+          } else {
+            dataPoint = new GaugePoint(name, timestamp, json.getDouble("value"));
+          }
+          sender.handle(Collections.singletonList(dataPoint));
+        });
       });
     }
   }

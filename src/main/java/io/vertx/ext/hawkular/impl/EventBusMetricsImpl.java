@@ -97,6 +97,10 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
   }
 
   @Override
+  public void scheduleMessage(EventBusHandlerMetrics eventBusHandlerMetrics, boolean b) {
+  }
+
+  @Override
   public void beginHandleMessage(EventBusHandlerMetrics handlerMetrics, boolean local) {
     pending.decrement();
     if (local) {
