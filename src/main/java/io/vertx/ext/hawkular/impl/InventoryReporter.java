@@ -66,6 +66,7 @@ public class InventoryReporter {
   private HttpClient httpClient;
 
   private final String feedId;
+  private final String vertxRootResourceTypeId = "vertx-root";
   private final String vertxRootResourceId;
 
   /**
@@ -129,6 +130,18 @@ public class InventoryReporter {
         fut.fail("Fail to create feed.");
       }
     }).end(new JsonObject().put("id", feedId).encode());
+    return fut;
+  }
+
+  public Future<HttpClientResponse> createVertxRootResourceType() {
+    Future<HttpClientResponse> fut = Future.future();
+    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes", response -> {
+      if (response.statusCode() == 201) {
+        fut.complete(response);
+      } else {
+        fut.fail("Fail to create vertx root resource type.");
+      }
+    }).end(new JsonObject().put("id", vertxRootResourceTypeId).encode());
     return fut;
   }
 
