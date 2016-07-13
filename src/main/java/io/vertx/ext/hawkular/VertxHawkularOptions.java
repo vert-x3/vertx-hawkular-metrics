@@ -96,6 +96,8 @@ public class VertxHawkularOptions extends MetricsOptions {
   private boolean metricsBridgeEnabled;
   private String metricsBridgeAddress;
   private Set<MetricsType> disabledMetricsTypes;
+  private String feedId;
+  private String vertxRootResourceId;
 
   public VertxHawkularOptions() {
     host = DEFAULT_HOST;
@@ -132,6 +134,8 @@ public class VertxHawkularOptions extends MetricsOptions {
     metricsBridgeAddress = other.metricsBridgeAddress;
     metricsBridgeEnabled = other.metricsBridgeEnabled;
     disabledMetricsTypes = other.disabledMetricsTypes != null ? EnumSet.copyOf(other.disabledMetricsTypes) : EnumSet.noneOf(MetricsType.class);
+    feedId = other.feedId;
+    vertxRootResourceId = other.vertxRootResourceId;
   }
 
   public VertxHawkularOptions(JsonObject json) {
@@ -409,5 +413,29 @@ public class VertxHawkularOptions extends MetricsOptions {
 
   public boolean isMetricsTypeDisabled(MetricsType metricsType) {
     return this.disabledMetricsTypes.contains(metricsType);
+  }
+
+  public VertxHawkularOptions setFeedId(String feedId) {
+    this.feedId = feedId;
+    return this;
+  }
+
+  public String getFeedId() {
+    if (feedId == null) {
+      throw new RuntimeException("feed id is null.");
+    }
+    return feedId;
+  }
+
+  public VertxHawkularOptions setVertxRootResourceId(String vertxRootResourceId) {
+    this.vertxRootResourceId = vertxRootResourceId;
+    return this;
+  }
+
+  public String getVertxRootResourceId() {
+    if (vertxRootResourceId == null) {
+      throw new RuntimeException("vertx root resource id is null.");
+    }
+    return vertxRootResourceId;
   }
 }
