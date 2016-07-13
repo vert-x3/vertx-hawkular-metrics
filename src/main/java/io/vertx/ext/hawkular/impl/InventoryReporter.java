@@ -120,6 +120,18 @@ public class InventoryReporter {
     );
   }
 
+  public Future<HttpClientResponse> reportFeed() {
+    Future<HttpClientResponse> fut = Future.future();
+    httpClient.post(inventoryURI+"/feeds", response -> {
+      if (response.statusCode() == 201) {
+        fut.complete(response);
+      } else {
+        fut.fail("Fail to create feed.");
+      }
+    }).end(new JsonObject().put("id", feedId).encode());
+    return fut;
+  }
+
   public void stop() {
     httpClient.close();
   }
