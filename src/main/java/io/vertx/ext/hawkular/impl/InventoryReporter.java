@@ -145,6 +145,21 @@ public class InventoryReporter {
     return fut;
   }
 
+  public Future<HttpClientResponse> createVertxRootResource() {
+    Future<HttpClientResponse> fut = Future.future();
+    JsonObject json = new JsonObject().put("id", vertxRootResourceId)
+            .put("resourceTypePath", "/f;" + feedId + "/rt;" + vertxRootResourceTypeId)
+            .put("properties", new JsonObject().put("type", "standalone"));
+    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources", response -> {
+      if (response.statusCode() == 201) {
+        fut.complete(response);
+      } else {
+        fut.fail("Fail to create root resource.");
+      }
+    }).end(json.encode());
+    return fut;
+  }
+
   public void stop() {
     httpClient.close();
   }
