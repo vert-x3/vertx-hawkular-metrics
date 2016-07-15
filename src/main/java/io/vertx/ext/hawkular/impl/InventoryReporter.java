@@ -17,31 +17,25 @@ package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.hawkular.AuthenticationOptions;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
-import jnr.ffi.annotations.In;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.concurrent.TimeUnit.*;
 import static java.util.stream.Collectors.*;
 
 /**
@@ -56,7 +50,7 @@ public class InventoryReporter {
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
 
   private final Vertx vertx;
-  private final String inventoryURI;
+  private final String inventoryURI = "/inventory/deprecated";
 
   private final CharSequence tenant;
   private final CharSequence auth;
@@ -66,8 +60,16 @@ public class InventoryReporter {
   private HttpClient httpClient;
 
   private final String feedId;
-  private final String vertxRootResourceTypeId = "vertx-root";
+  private final String vertxRootResourceTypeId = "rt.vertx-root";
+  private final String eventbusResourceTypeId = "rt.eventbus";
   private final String vertxRootResourceId;
+  private final String eventbusResourceId;
+
+  private final String counterMetricTypeId = "mt.counter";
+  private final String eventbusMetricId = "m.handlers";
+
+  private final int collectionInterval;
+  private final VertxHawkularOptions options;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -76,10 +78,11 @@ public class InventoryReporter {
    */
   public InventoryReporter(Vertx vertx, VertxHawkularOptions options, Context context) {
     this.vertx = vertx;
-    inventoryURI = options.getMetricsServiceUri() + "/inventory/deprecated";
-
+    this.options = options;
     feedId = options.getFeedId();
     vertxRootResourceId = options.getVertxRootResourceId();
+    eventbusResourceId = vertxRootResourceId + ".eventbus";
+    collectionInterval = options.getSchedule();
 
     tenant = options.isSendTenantHeader() ? HttpHeaders.createOptimized(options.getTenant()) : null;
     AuthenticationOptions authenticationOptions = options.getAuthenticationOptions();
@@ -157,6 +160,18 @@ public class InventoryReporter {
         fut.fail("Fail to create root resource.");
       }
     }).end(json.encode());
+    return fut;
+  }
+
+  public Future<HttpClientResponse> createEventbusResourceType() {
+    Future<HttpClientResponse> fut = Future.future();
+    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes", response -> {
+      if (response.statusCode() == 201) {
+        fut.complete(response);
+      } else {
+        fut.fail("Fail to create event bus resource type.");
+      }
+    }).end(new JsonObject().put("id", eventbusResourceTypeId).encode());
     return fut;
   }
 
