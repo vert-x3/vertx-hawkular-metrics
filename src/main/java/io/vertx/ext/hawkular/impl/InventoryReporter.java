@@ -205,6 +205,20 @@ public class InventoryReporter {
     return fut;
   }
 
+  public Future<HttpClientResponse> associateCounterMetricTypeWithEventbusResourceType() {
+    Future<HttpClientResponse> fut = Future.future();
+    String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, counterMetricTypeId);
+    JsonArray json = new JsonArray().add(metricPath);
+    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes/"+eventbusResourceTypeId+"/metricTypes", response -> {
+      if (response.statusCode() == 204) {
+        fut.complete(response);
+      } else {
+        fut.fail("Fail to associate counter metric type with event bus resource type");
+      }
+    }).end(json.encode());
+    return fut;
+  }
+
   public void stop() {
     httpClient.close();
   }
