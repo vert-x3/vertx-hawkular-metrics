@@ -189,6 +189,22 @@ public class InventoryReporter {
     return fut;
   }
 
+  public Future<HttpClientResponse> createCounterMetricType() {
+    Future<HttpClientResponse> fut = Future.future();
+    JsonObject json = new JsonObject().put("id", counterMetricTypeId)
+            .put("type", "COUNTER")
+            .put("unit", "NONE")
+            .put("collectionInterval", collectionInterval);
+    httpClient.post(inventoryURI+"/feeds/"+feedId+"/metricTypes", response -> {
+      if (response.statusCode() == 201) {
+        fut.complete(response);
+      } else {
+        fut.fail("Fail to create counter metric type.");
+      }
+    }).end(json.encode());
+    return fut;
+  }
+
   public void stop() {
     httpClient.close();
   }
