@@ -219,6 +219,22 @@ public class InventoryReporter {
     return fut;
   }
 
+  public Future<HttpClientResponse> createEventbusHandlerMetric() {
+    Future<HttpClientResponse> fut = Future.future();
+    String baseName = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.eventbus.";
+    JsonObject json = new JsonObject().put("id", eventbusMetricId)
+            .put("metricTypePath", "/mt;" + counterMetricTypeId)
+            .put("properties", new JsonObject().put("metric-id", baseName+"handler"));
+    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources/"+eventbusResourceId+"/metrics", response -> {
+      if (response.statusCode() == 201) {
+        fut.complete(response);
+      } else {
+        fut.fail("Fail to associate counter metric type with event bus resource type");
+      }
+    }).end(json.encode());
+    return fut;
+  }
+
   public void stop() {
     httpClient.close();
   }
