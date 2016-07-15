@@ -175,6 +175,20 @@ public class InventoryReporter {
     return fut;
   }
 
+  public Future<HttpClientResponse> createEventbusResource() {
+    Future<HttpClientResponse> fut = Future.future();
+    JsonObject json = new JsonObject().put("id", eventbusResourceId)
+            .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId);
+    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources/"+vertxRootResourceId, response -> {
+      if (response.statusCode() == 201) {
+        fut.complete(response);
+      } else {
+        fut.fail("Fail to create event bus resource.");
+      }
+    }).end(json.encode());
+    return fut;
+  }
+
   public void stop() {
     httpClient.close();
   }
