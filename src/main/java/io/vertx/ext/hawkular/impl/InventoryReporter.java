@@ -20,6 +20,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
@@ -127,7 +128,7 @@ public class InventoryReporter {
 
   public Future<HttpClientResponse> reportFeed() {
     Future<HttpClientResponse> fut = Future.future();
-    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds", response -> {
+    HttpClientRequest request = httpClient.post(composeEntityUri("", "feed"), response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
@@ -141,7 +142,7 @@ public class InventoryReporter {
 
   public Future<HttpClientResponse> createVertxRootResourceType() {
     Future<HttpClientResponse> fut = Future.future();
-    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes", response -> {
+    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
@@ -158,7 +159,7 @@ public class InventoryReporter {
     JsonObject json = new JsonObject().put("id", vertxRootResourceId)
             .put("resourceTypePath", "/f;" + feedId + "/rt;" + vertxRootResourceTypeId)
             .put("properties", new JsonObject().put("type", "standalone"));
-    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources", response -> {
+    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resource"), response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
@@ -172,7 +173,7 @@ public class InventoryReporter {
 
   public Future<HttpClientResponse> createEventbusResourceType() {
     Future<HttpClientResponse> fut = Future.future();
-    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes", response -> {
+    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
@@ -188,7 +189,7 @@ public class InventoryReporter {
     Future<HttpClientResponse> fut = Future.future();
     JsonObject json = new JsonObject().put("id", eventbusResourceId)
             .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId);
-    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources/"+vertxRootResourceId, response -> {
+    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId+"/r;"+vertxRootResourceId, "resource"), response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
@@ -206,7 +207,7 @@ public class InventoryReporter {
             .put("type", "COUNTER")
             .put("unit", "NONE")
             .put("collectionInterval", collectionInterval);
-    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/metricTypes", response -> {
+    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "metricType"), response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
@@ -222,7 +223,8 @@ public class InventoryReporter {
     Future<HttpClientResponse> fut = Future.future();
     String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, counterMetricTypeId);
     JsonArray json = new JsonArray().add(metricPath);
-    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes/"+eventbusResourceTypeId+"/metricTypes", response -> {
+    // This uses deprecated api because haven't find how to do this in new api.
+    HttpClientRequest request = httpClient.post(inventoryURI+"/deprecated/feeds/"+feedId+"/resourceTypes/"+eventbusResourceTypeId+"/metricTypes", response -> {
       if (response.statusCode() == 204) {
         fut.complete(response);
       } else {
@@ -240,7 +242,8 @@ public class InventoryReporter {
     JsonObject json = new JsonObject().put("id", eventbusMetricId)
             .put("metricTypePath", "/mt;" + counterMetricTypeId)
             .put("properties", new JsonObject().put("metric-id", baseName+"handler"));
-    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources/"+eventbusResourceId+"/metrics", response -> {
+    String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
+    HttpClientRequest request = httpClient.post(composeEntityUri(path, "metric"), response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
@@ -268,5 +271,13 @@ public class InventoryReporter {
 
   public void stop() {
     httpClient.close();
+  }
+
+  private String composeEntityUri(String path,String type) {
+    if (!path.isEmpty()) {
+      return String.format("%s/entity/%s/%s", inventoryURI, path, type);
+    } else {
+      return String.format("%s/entity/%s", inventoryURI, type);
+    }
   }
 }

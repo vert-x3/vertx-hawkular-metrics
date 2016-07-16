@@ -89,7 +89,7 @@ public class VertxHawkularOptions extends MetricsOptions {
   /**
    * The default value of inventory service uri.
    */
-  public static final String DEFAULT_INVENTORY_SERVICE_URI = "/hawkular/deprecated/inventory";
+  public static final String DEFAULT_INVENTORY_SERVICE_URI = "/hawkular/inventory";
 
   private String host;
   private int port;
