@@ -50,7 +50,7 @@ public class InventoryReporter {
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
 
   private final Vertx vertx;
-  private final String inventoryURI = "/inventory/deprecated";
+  private final String inventoryURI = "/hawkular/inventory/deprecated";
 
   private final CharSequence tenant;
   private final CharSequence auth;
@@ -116,35 +116,39 @@ public class InventoryReporter {
     }
 
     context.runOnContext(aVoid -> {
-              HttpClientOptions httpClientOptions = options.getHttpOptions()
-                      .setDefaultHost(options.getHost())
-                      .setDefaultPort(options.getPort());
-              httpClient = vertx.createHttpClient(httpClientOptions);
-            }
+      HttpClientOptions httpClientOptions = options.getHttpOptions()
+              .setDefaultHost(options.getHost())
+              .setDefaultPort(options.getPort());
+      httpClient = vertx.createHttpClient(httpClientOptions);
+      }
     );
   }
 
   public Future<HttpClientResponse> reportFeed() {
     Future<HttpClientResponse> fut = Future.future();
-    httpClient.post(inventoryURI+"/feeds", response -> {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds", response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
         fut.fail("Fail to create feed.");
       }
-    }).end(new JsonObject().put("id", feedId).encode());
+    });
+    addHeaders(request);
+    request.end(new JsonObject().put("id", feedId).encode());
     return fut;
   }
 
   public Future<HttpClientResponse> createVertxRootResourceType() {
     Future<HttpClientResponse> fut = Future.future();
-    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes", response -> {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes", response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
         fut.fail("Fail to create vertx root resource type.");
       }
-    }).end(new JsonObject().put("id", vertxRootResourceTypeId).encode());
+    });
+    addHeaders(request);
+    request.end(new JsonObject().put("id", vertxRootResourceTypeId).encode());
     return fut;
   }
 
@@ -153,25 +157,29 @@ public class InventoryReporter {
     JsonObject json = new JsonObject().put("id", vertxRootResourceId)
             .put("resourceTypePath", "/f;" + feedId + "/rt;" + vertxRootResourceTypeId)
             .put("properties", new JsonObject().put("type", "standalone"));
-    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources", response -> {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources", response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
         fut.fail("Fail to create root resource.");
       }
-    }).end(json.encode());
+    });
+    addHeaders(request);
+    request.end(json.encode());
     return fut;
   }
 
   public Future<HttpClientResponse> createEventbusResourceType() {
     Future<HttpClientResponse> fut = Future.future();
-    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes", response -> {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes", response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
         fut.fail("Fail to create event bus resource type.");
       }
-    }).end(new JsonObject().put("id", eventbusResourceTypeId).encode());
+    });
+    addHeaders(request);
+    request.end(new JsonObject().put("id", eventbusResourceTypeId).encode());
     return fut;
   }
 
@@ -179,13 +187,15 @@ public class InventoryReporter {
     Future<HttpClientResponse> fut = Future.future();
     JsonObject json = new JsonObject().put("id", eventbusResourceId)
             .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId);
-    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources/"+vertxRootResourceId, response -> {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources/"+vertxRootResourceId, response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
         fut.fail("Fail to create event bus resource.");
       }
-    }).end(json.encode());
+    });
+    addHeaders(request);
+    request.end(json.encode());
     return fut;
   }
 
@@ -195,13 +205,15 @@ public class InventoryReporter {
             .put("type", "COUNTER")
             .put("unit", "NONE")
             .put("collectionInterval", collectionInterval);
-    httpClient.post(inventoryURI+"/feeds/"+feedId+"/metricTypes", response -> {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/metricTypes", response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
         fut.fail("Fail to create counter metric type.");
       }
-    }).end(json.encode());
+    });
+    addHeaders(request);
+    request.end(json.encode());
     return fut;
   }
 
@@ -209,13 +221,15 @@ public class InventoryReporter {
     Future<HttpClientResponse> fut = Future.future();
     String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, counterMetricTypeId);
     JsonArray json = new JsonArray().add(metricPath);
-    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes/"+eventbusResourceTypeId+"/metricTypes", response -> {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resourceTypes/"+eventbusResourceTypeId+"/metricTypes", response -> {
       if (response.statusCode() == 204) {
         fut.complete(response);
       } else {
         fut.fail("Fail to associate counter metric type with event bus resource type");
       }
-    }).end(json.encode());
+    });
+    addHeaders(request);
+    request.end(json.encode());
     return fut;
   }
 
@@ -225,14 +239,30 @@ public class InventoryReporter {
     JsonObject json = new JsonObject().put("id", eventbusMetricId)
             .put("metricTypePath", "/mt;" + counterMetricTypeId)
             .put("properties", new JsonObject().put("metric-id", baseName+"handler"));
-    httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources/"+eventbusResourceId+"/metrics", response -> {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/feeds/"+feedId+"/resources/"+eventbusResourceId+"/metrics", response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
         fut.fail("Fail to associate counter metric type with event bus resource type");
       }
-    }).end(json.encode());
+    });
+    addHeaders(request);
+    request.end(json.encode());
     return fut;
+  }
+
+  private void addHeaders(HttpClientRequest request) {
+    request.putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
+
+    if (tenant != null) {
+      request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
+    }
+    if (auth != null) {
+      request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+    }
+    httpHeaders.entrySet().stream().forEach(httpHeader -> {
+      request.putHeader(httpHeader.getKey(), httpHeader.getValue());
+    });
   }
 
   public void stop() {
