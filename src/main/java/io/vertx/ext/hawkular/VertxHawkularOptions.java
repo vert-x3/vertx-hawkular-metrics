@@ -81,6 +81,16 @@ public class VertxHawkularOptions extends MetricsOptions {
    */
   public static final boolean DEFAULT_METRICS_BRIDGE_ENABLED = false;
 
+  /**
+   * The default value to enable / disable the inventory. Disable by default;
+   */
+  public static final boolean DEFAULT_INVENTORY_ENABLED = false;
+
+  /**
+   * The default value of inventory service uri.
+   */
+  public static final String DEFAULT_INVENTORY_SERVICE_URI = "/hawkular/deprecated/inventory";
+
   private String host;
   private int port;
   private HttpClientOptions httpOptions;
@@ -96,6 +106,8 @@ public class VertxHawkularOptions extends MetricsOptions {
   private boolean metricsBridgeEnabled;
   private String metricsBridgeAddress;
   private Set<MetricsType> disabledMetricsTypes;
+  private boolean inventoryEnabled;
+  private String inventoryServiceUri;
   private String feedId;
   private String vertxRootResourceId;
 
@@ -115,6 +127,8 @@ public class VertxHawkularOptions extends MetricsOptions {
     metricsBridgeEnabled = DEFAULT_METRICS_BRIDGE_ENABLED;
     metricsBridgeAddress = DEFAULT_METRICS_BRIDGE_ADDRESS;
     disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
+    inventoryEnabled = DEFAULT_INVENTORY_ENABLED;
+    inventoryServiceUri = DEFAULT_INVENTORY_SERVICE_URI;
   }
 
   public VertxHawkularOptions(VertxHawkularOptions other) {
@@ -136,6 +150,8 @@ public class VertxHawkularOptions extends MetricsOptions {
     disabledMetricsTypes = other.disabledMetricsTypes != null ? EnumSet.copyOf(other.disabledMetricsTypes) : EnumSet.noneOf(MetricsType.class);
     feedId = other.feedId;
     vertxRootResourceId = other.vertxRootResourceId;
+    inventoryEnabled = other.inventoryEnabled;
+    inventoryServiceUri = other.inventoryServiceUri;
   }
 
   public VertxHawkularOptions(JsonObject json) {
@@ -437,5 +453,23 @@ public class VertxHawkularOptions extends MetricsOptions {
       throw new RuntimeException("vertx root resource id is null.");
     }
     return vertxRootResourceId;
+  }
+
+  public VertxHawkularOptions setInventoryEnabled(boolean inventoryEnabled) {
+    this.inventoryEnabled = inventoryEnabled;
+    return this;
+  }
+
+  public boolean isInventoryEnabled() {
+    return inventoryEnabled;
+  }
+
+  public VertxHawkularOptions setInventoryServiceUri(String inventoryServiceUri) {
+    this.inventoryServiceUri = inventoryServiceUri;
+    return this;
+  }
+
+  public String getInventoryServiceUri() {
+    return inventoryServiceUri;
   }
 }

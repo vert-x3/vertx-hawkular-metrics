@@ -50,7 +50,7 @@ public class InventoryReporter {
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
 
   private final Vertx vertx;
-  private final String inventoryURI = "/hawkular/inventory/deprecated";
+  private final String inventoryURI;
 
   private final CharSequence tenant;
   private final CharSequence auth;
@@ -80,6 +80,7 @@ public class InventoryReporter {
     this.vertx = vertx;
     this.options = options;
     feedId = options.getFeedId();
+    inventoryURI = options.getInventoryServiceUri();
     vertxRootResourceId = options.getVertxRootResourceId();
     eventbusResourceId = vertxRootResourceId + ".eventbus";
     collectionInterval = options.getSchedule();
