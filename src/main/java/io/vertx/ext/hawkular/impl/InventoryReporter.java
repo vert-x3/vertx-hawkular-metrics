@@ -120,13 +120,59 @@ public class InventoryReporter {
     this.httpClient = httpClient;
   }
 
+  public void report() {
     context.runOnContext(aVoid -> {
-      HttpClientOptions httpClientOptions = options.getHttpOptions()
-              .setDefaultHost(options.getHost())
-              .setDefaultPort(options.getPort());
-      httpClient = vertx.createHttpClient(httpClientOptions);
-      }
-    );
+      reportFeed().setHandler(ar1 -> {
+        if (ar1.succeeded()) {
+          createVertxRootResourceType().setHandler(ar2 -> {
+            if (ar2.succeeded()) {
+              createVertxRootResource().setHandler(ar3 -> {
+                if (ar3.succeeded()) {
+                  System.out.println("Done with vertx resource");
+                  createEventbusResourceType().setHandler(ar4 -> {
+                    if (ar4.succeeded()) {
+                      createEventbusResource().setHandler(ar5 -> {
+                        if (ar5.succeeded()) {
+                          createGaugeMetricType().setHandler(ar6 -> {
+                            if (ar6.succeeded()) {
+                              createEventbusHandlerMetric().setHandler(ar7 -> {
+                                if (ar7.succeeded()) {
+                                  associateGaugeMetricTypeWithEventbusResourceType().setHandler(ar8 -> {
+                                    if (ar8.succeeded()) {
+                                      System.out.println("Done with event bus handler");
+                                    } else {
+                                      System.err.println(ar8.cause().getLocalizedMessage());
+                                    }
+                                  });
+                                } else {
+                                  System.err.println(ar7.cause().getLocalizedMessage());
+                                }
+                              });
+                            } else {
+                              System.err.println(ar6.cause().getLocalizedMessage());
+                            }
+                          });
+                        } else {
+                          System.err.println(ar5.cause().getLocalizedMessage());
+                        }
+                      });
+                    } else {
+                      System.err.println(ar4.cause().getLocalizedMessage());
+                    }
+                  });
+                } else {
+                  System.err.println(ar3.cause().getLocalizedMessage());
+                }
+              });
+            } else {
+              System.err.println(ar2.cause().getLocalizedMessage());
+            }
+          });
+        } else {
+          System.err.println(ar1.cause().getLocalizedMessage());
+        }
+      });
+    });
   }
 
   public Future<HttpClientResponse> reportFeed() {
