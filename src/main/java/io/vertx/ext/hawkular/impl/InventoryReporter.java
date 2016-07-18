@@ -19,7 +19,6 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
@@ -51,6 +50,7 @@ public class InventoryReporter {
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
 
   private final Vertx vertx;
+  private final Context context;
   private final String inventoryURI;
 
   private final CharSequence tenant;
@@ -77,9 +77,10 @@ public class InventoryReporter {
    * @param options Vertx Hawkular options
    * @param context the metric collection and sending execution context
    */
-  public InventoryReporter(Vertx vertx, VertxHawkularOptions options, Context context) {
+  public InventoryReporter(Vertx vertx, VertxHawkularOptions options, Context context, HttpClient httpClient) {
     this.vertx = vertx;
     this.options = options;
+    this.context = context;
     feedId = options.getFeedId();
     inventoryURI = options.getInventoryServiceUri();
     vertxRootResourceId = options.getVertxRootResourceId();
@@ -116,6 +117,8 @@ public class InventoryReporter {
     } else {
       this.httpHeaders = Collections.emptyMap();
     }
+    this.httpClient = httpClient;
+  }
 
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()

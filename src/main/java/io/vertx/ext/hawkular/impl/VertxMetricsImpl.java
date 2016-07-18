@@ -59,6 +59,8 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
 
   private Sender sender;
   private Scheduler scheduler;
+  private InventoryReporter reporter;
+  private HttpClient httpClient;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -155,8 +157,14 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   public void eventBusInitialized(EventBus bus) {
     // Finish setup
     Context context = vertx.getOrCreateContext();
-    sender = new Sender(vertx, options, context);
+    HttpClientOptions httpClientOptions = options.getHttpOptions()
+            .setDefaultHost(options.getHost())
+            .setDefaultPort(options.getPort());
+    httpClient = context.owner().createHttpClient(httpClientOptions);
+    sender = new Sender(vertx, options, context, httpClient);
     scheduler = new Scheduler(vertx, options, context, sender);
+    reporter = new InventoryReporter(vertx, options, context, httpClient);
+    reporter.report();
     metricSuppliers.values().forEach(scheduler::register);
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
