@@ -135,6 +135,9 @@ public class InventoryReporter {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
         fut.fail("Fail to create feed.");
       }
     });
@@ -149,6 +152,9 @@ public class InventoryReporter {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
         fut.fail("Fail to create vertx root resource type.");
       }
     });
@@ -166,6 +172,9 @@ public class InventoryReporter {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
         fut.fail("Fail to create root resource.");
       }
     });
@@ -180,6 +189,9 @@ public class InventoryReporter {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
         fut.fail("Fail to create event bus resource type.");
       }
     });
@@ -196,6 +208,9 @@ public class InventoryReporter {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
         fut.fail("Fail to create event bus resource.");
       }
     });
@@ -214,6 +229,9 @@ public class InventoryReporter {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
         fut.fail("Fail to create counter metric type.");
       }
     });
@@ -231,6 +249,9 @@ public class InventoryReporter {
       if (response.statusCode() == 204) {
         fut.complete(response);
       } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
         fut.fail("Fail to associate counter metric type with event bus resource type");
       }
     });
@@ -250,7 +271,10 @@ public class InventoryReporter {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
-        fut.fail("Fail to associate counter metric type with event bus resource type");
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
+        fut.fail("Fail to associate gauge metric type with event bus resource type");
       }
     });
     addHeaders(request);
