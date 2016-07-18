@@ -66,7 +66,7 @@ public class InventoryReporter {
   private final String vertxRootResourceId;
   private final String eventbusResourceId;
 
-  private final String counterMetricTypeId = "mt.counter";
+  private final String gaugeMetricTypeId = "mt.gauge";
   private final String eventbusMetricId = "m.handlers";
 
   private final int collectionInterval;
@@ -201,10 +201,10 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> createCounterMetricType() {
+  public Future<HttpClientResponse> createGaugeMetricType() {
     Future<HttpClientResponse> fut = Future.future();
-    JsonObject json = new JsonObject().put("id", counterMetricTypeId)
-            .put("type", "COUNTER")
+    JsonObject json = new JsonObject().put("id", gaugeMetricTypeId)
+            .put("type", "GAUGE")
             .put("unit", "NONE")
             .put("collectionInterval", collectionInterval);
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "metricType"), response -> {
@@ -219,9 +219,9 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> associateCounterMetricTypeWithEventbusResourceType() {
+  public Future<HttpClientResponse> associateGaugeMetricTypeWithEventbusResourceType() {
     Future<HttpClientResponse> fut = Future.future();
-    String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, counterMetricTypeId);
+    String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, gaugeMetricTypeId);
     JsonArray json = new JsonArray().add(metricPath);
     // This uses deprecated api because haven't find how to do this in new api.
     HttpClientRequest request = httpClient.post(inventoryURI+"/deprecated/feeds/"+feedId+"/resourceTypes/"+eventbusResourceTypeId+"/metricTypes", response -> {
@@ -240,8 +240,8 @@ public class InventoryReporter {
     Future<HttpClientResponse> fut = Future.future();
     String baseName = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.eventbus.";
     JsonObject json = new JsonObject().put("id", eventbusMetricId)
-            .put("metricTypePath", "/mt;" + counterMetricTypeId)
-            .put("properties", new JsonObject().put("metric-id", baseName+"handler"));
+            .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
+            .put("properties", new JsonObject().put("metric-id", baseName+"handlers"));
     String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
     HttpClientRequest request = httpClient.post(composeEntityUri(path, "metric"), response -> {
       if (response.statusCode() == 201) {
