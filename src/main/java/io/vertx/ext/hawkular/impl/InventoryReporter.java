@@ -19,6 +19,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
@@ -77,10 +78,10 @@ public class InventoryReporter {
    * @param options Vertx Hawkular options
    * @param context the metric collection and sending execution context
    */
-  public InventoryReporter(Vertx vertx, VertxHawkularOptions options, Context context, HttpClient httpClient) {
+  public InventoryReporter(Vertx vertx, VertxHawkularOptions options, Context context) {
     this.vertx = vertx;
-    this.options = options;
     this.context = context;
+    this.options = options;
     feedId = options.getFeedId();
     inventoryURI = options.getInventoryServiceUri();
     vertxRootResourceId = options.getVertxRootResourceId();
@@ -117,9 +118,14 @@ public class InventoryReporter {
     } else {
       this.httpHeaders = Collections.emptyMap();
     }
-    this.httpClient = httpClient;
+    context.runOnContext(aVoid -> {
+      HttpClientOptions httpClientOptions = options.getHttpOptions()
+              .setDefaultHost(options.getHost())
+              .setDefaultPort(options.getPort());
+      httpClient = vertx.createHttpClient(httpClientOptions);
+      }
+    );
   }
-
   public void report() {
     context.runOnContext(aVoid -> {
       reportFeed().setHandler(ar1 -> {

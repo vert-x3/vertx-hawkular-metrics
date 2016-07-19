@@ -59,8 +59,6 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
 
   private Sender sender;
   private Scheduler scheduler;
-  private InventoryReporter reporter;
-  private HttpClient httpClient;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -157,13 +155,9 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   public void eventBusInitialized(EventBus bus) {
     // Finish setup
     Context context = vertx.getOrCreateContext();
-    HttpClientOptions httpClientOptions = options.getHttpOptions()
-            .setDefaultHost(options.getHost())
-            .setDefaultPort(options.getPort());
-    httpClient = context.owner().createHttpClient(httpClientOptions);
-    sender = new Sender(vertx, options, context, httpClient);
+    sender = new Sender(vertx, options, context);
     scheduler = new Scheduler(vertx, options, context, sender);
-    reporter = new InventoryReporter(vertx, options, context, httpClient);
+    InventoryReporter reporter = new InventoryReporter(vertx, options, context);
     reporter.report();
     metricSuppliers.values().forEach(scheduler::register);
 

@@ -74,7 +74,7 @@ public class Sender implements Handler<List<DataPoint>> {
    * @param options Vertx Hawkular options
    * @param context the metric collection and sending execution context
    */
-  public Sender(Vertx vertx, VertxHawkularOptions options, Context context, HttpClient httpClient) {
+  public Sender(Vertx vertx, VertxHawkularOptions options, Context context) {
     this.vertx = vertx;
     metricsURI = options.getMetricsServiceUri() + "/metrics/data";
 
@@ -113,10 +113,13 @@ public class Sender implements Handler<List<DataPoint>> {
     batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
     queue = new ArrayList<>(batchSize);
     context.runOnContext(aVoid -> {
+      HttpClientOptions httpClientOptions = options.getHttpOptions()
+        .setDefaultHost(options.getHost())
+        .setDefaultPort(options.getPort());
+      httpClient = vertx.createHttpClient(httpClientOptions);
       timerId = vertx.setPeriodic(MILLISECONDS.convert(batchDelay, NANOSECONDS), this::flushIfIdle);
       }
     );
-    this.httpClient = httpClient;
     sendTime = System.nanoTime();
   }
 
