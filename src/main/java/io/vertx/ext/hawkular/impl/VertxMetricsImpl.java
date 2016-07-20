@@ -157,6 +157,8 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     Context context = vertx.getOrCreateContext();
     sender = new Sender(vertx, options, context);
     scheduler = new Scheduler(vertx, options, context, sender);
+    InventoryReporter reporter = new InventoryReporter(vertx, options, context);
+    reporter.report();
     metricSuppliers.values().forEach(scheduler::register);
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
