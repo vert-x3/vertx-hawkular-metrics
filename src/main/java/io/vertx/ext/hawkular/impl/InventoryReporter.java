@@ -130,12 +130,13 @@ public class InventoryReporter {
     context.runOnContext(aVoid -> {
       reportFeed().setHandler(ar1 -> {
         if (ar1.succeeded()) {
-          createVertxRootResourceType().setHandler(ar2 -> {
+
+          createResourceType(new JsonObject().put("id", vertxRootResourceTypeId)).setHandler(ar2 -> {
             if (ar2.succeeded()) {
               createVertxRootResource().setHandler(ar3 -> {
                 if (ar3.succeeded()) {
                   System.out.println("Done with vertx resource");
-                  createEventbusResourceType().setHandler(ar4 -> {
+                  createResourceType(new JsonObject().put("id", eventbusResourceTypeId)).setHandler(ar4 -> {
                     if (ar4.succeeded()) {
                       createEventbusResource().setHandler(ar5 -> {
                         if (ar5.succeeded()) {
@@ -198,7 +199,7 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> createVertxRootResourceType() {
+  public Future<HttpClientResponse> createResourceType(JsonObject json) {
     Future<HttpClientResponse> fut = Future.future();
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
       if (response.statusCode() == 201) {
@@ -207,11 +208,11 @@ public class InventoryReporter {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
         });
-        fut.fail("Fail to create vertx root resource type.");
+        fut.fail("Fail to create resource type with payload : " + json.encode());
       }
     });
     addHeaders(request);
-    request.end(new JsonObject().put("id", vertxRootResourceTypeId).encode());
+    request.end(json.encode());
     return fut;
   }
 
@@ -232,23 +233,6 @@ public class InventoryReporter {
     });
     addHeaders(request);
     request.end(json.encode());
-    return fut;
-  }
-
-  public Future<HttpClientResponse> createEventbusResourceType() {
-    Future<HttpClientResponse> fut = Future.future();
-    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
-      if (response.statusCode() == 201) {
-        fut.complete(response);
-      } else {
-        response.bodyHandler(buffer -> {
-          System.err.println(buffer.getBuffer(0, buffer.length()));
-        });
-        fut.fail("Fail to create event bus resource type.");
-      }
-    });
-    addHeaders(request);
-    request.end(new JsonObject().put("id", eventbusResourceTypeId).encode());
     return fut;
   }
 
