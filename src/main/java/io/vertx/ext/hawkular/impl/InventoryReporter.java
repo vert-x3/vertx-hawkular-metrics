@@ -130,80 +130,27 @@ public class InventoryReporter {
   }
   public void report() {
     context.runOnContext(aVoid -> {
-      reportFeed().setHandler(ar1 -> {
-        if (ar1.succeeded()) {
-
-          createResourceType(new JsonObject().put("id", vertxRootResourceTypeId)).setHandler(ar2 -> {
-            if (ar2.succeeded()) {
-              createResource("f;"+feedId, new JsonObject()
-                .put("id", vertxRootResourceId)
-                .put("resourceTypePath", "/f;" + feedId + "/rt;" + vertxRootResourceTypeId)
-                .put("properties", new JsonObject().put("type", "standalone"))
-              ).setHandler(ar3 -> {
-                if (ar3.succeeded()) {
-                  System.out.println("Done with vertx resource");
-                  createResourceType(new JsonObject().put("id", eventbusResourceTypeId)).setHandler(ar4 -> {
-                    if (ar4.succeeded()) {
-                      createResource("f;"+feedId+"/r;"+vertxRootResourceId, new JsonObject()
-                        .put("id", eventbusResourceId)
-                        .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId)
-                      ).setHandler(ar5 -> {
-                        if (ar5.succeeded()) {
-                          createMetricType(new JsonObject().put("id", gaugeMetricTypeId)
-                            .put("type", "GAUGE")
-                            .put("unit", "NONE")
-                            .put("collectionInterval", collectionInterval)
-                          ).setHandler(ar6 -> {
-                            if (ar6.succeeded()) {
-                              String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
-                              createMetric(path, new JsonObject().put("id", eventbusMetricId)
-                                .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
-                                .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"))
-                              ).setHandler(ar7 -> {
-                                if (ar7.succeeded()) {
-                                  associateMetricTypeWithResourceType(gaugeMetricTypeId, eventbusResourceTypeId).setHandler(ar8 -> {
-                                    if (ar8.succeeded()) {
-                                      System.out.println("Done with event bus handler");
-                                    } else {
-                                      System.err.println(ar8.cause().getLocalizedMessage());
-                                    }
-                                  });
-                                } else {
-                                  System.err.println(ar7.cause().getLocalizedMessage());
-                                }
-                              });
-                            } else {
-                              System.err.println(ar6.cause().getLocalizedMessage());
-                            }
-                          });
-                        } else {
-                          System.err.println(ar5.cause().getLocalizedMessage());
-                        }
-                      });
-                    } else {
-                      System.err.println(ar4.cause().getLocalizedMessage());
-                    }
-                  });
-                } else {
-                  System.err.println(ar3.cause().getLocalizedMessage());
-                }
-              });
+      reportFeed().setHandler(ar -> {
+        if (ar.succeeded()) {
+          reportRootResource().setHandler(ar1 -> {
+            if (ar1.succeeded()) {
+              reportEventbusResource();
             } else {
-              System.err.println(ar2.cause().getLocalizedMessage());
+              System.err.println(ar1.cause().getLocalizedMessage());
             }
           });
         } else {
-          System.err.println(ar1.cause().getLocalizedMessage());
+          System.err.println(ar.cause().getLocalizedMessage());
         }
       });
     });
   }
 
-  private Future<HttpClientResponse> reportFeed() {
-    Future<HttpClientResponse> fut = Future.future();
+  private Future<Void> reportFeed() {
+    Future fut = Future.future();
     HttpClientRequest request = httpClient.post(composeEntityUri("", "feed"), response -> {
       if (response.statusCode() == 201) {
-        fut.complete(response);
+        fut.complete();
       } else {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
@@ -214,6 +161,79 @@ public class InventoryReporter {
     addHeaders(request);
     request.end(new JsonObject().put("id", feedId).encode());
     return fut;
+  }
+
+  private Future<Void> reportRootResource() {
+    Future fut1 = Future.future();
+    Future fut2 = Future.future();
+    createResourceType(new JsonObject().put("id", vertxRootResourceTypeId)).setHandler(ar -> {
+      if (ar.succeeded()) {
+        fut1.complete();
+      } else {
+        fut1.fail(ar.cause());
+      }
+    });
+    fut1.compose(ar -> {
+      createResource("f;"+feedId, new JsonObject()
+        .put("id", vertxRootResourceId)
+        .put("resourceTypePath", "/f;" + feedId + "/rt;" + vertxRootResourceTypeId)
+        .put("properties", new JsonObject().put("type", "standalone"))
+      ).setHandler(ar1 -> {
+        if (ar1.succeeded()) {
+          System.out.println("Done with root resource");
+          fut2.complete();
+        } else {
+          System.err.println(ar1.cause().getLocalizedMessage());
+          fut2.fail(ar1.cause());
+        }
+      });
+    }, fut2);
+    return fut2;
+  }
+
+  private void reportEventbusResource() {
+    createResourceType(new JsonObject().put("id", eventbusResourceTypeId)).setHandler(ar4 -> {
+      if (ar4.succeeded()) {
+        createResource("f;"+feedId+"/r;"+vertxRootResourceId, new JsonObject()
+                .put("id", eventbusResourceId)
+                .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId)
+        ).setHandler(ar5 -> {
+          if (ar5.succeeded()) {
+            createMetricType(new JsonObject().put("id", gaugeMetricTypeId)
+                    .put("type", "GAUGE")
+                    .put("unit", "NONE")
+                    .put("collectionInterval", collectionInterval)
+            ).setHandler(ar6 -> {
+              if (ar6.succeeded()) {
+                String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
+                createMetric(path, new JsonObject().put("id", eventbusMetricId)
+                        .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
+                        .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"))
+                ).setHandler(ar7 -> {
+                  if (ar7.succeeded()) {
+                    associateMetricTypeWithResourceType(gaugeMetricTypeId, eventbusResourceTypeId).setHandler(ar8 -> {
+                      if (ar8.succeeded()) {
+                        System.out.println("Done with event bus handler");
+                      } else {
+                        System.err.println(ar8.cause().getLocalizedMessage());
+                      }
+                    });
+                  } else {
+                    System.err.println(ar7.cause().getLocalizedMessage());
+                  }
+                });
+              } else {
+                System.err.println(ar6.cause().getLocalizedMessage());
+              }
+            });
+          } else {
+            System.err.println(ar5.cause().getLocalizedMessage());
+          }
+        });
+      } else {
+        System.err.println(ar4.cause().getLocalizedMessage());
+      }
+    });
   }
 
   private Future<HttpClientResponse> createResourceType(JsonObject body) {
