@@ -62,6 +62,7 @@ public class InventoryReporter {
   private HttpClient httpClient;
 
   private final String feedId;
+  private final String metricBasename;
   private final String vertxRootResourceTypeId = "rt.vertx-root";
   private final String eventbusResourceTypeId = "rt.eventbus";
   private final String vertxRootResourceId;
@@ -83,6 +84,7 @@ public class InventoryReporter {
     this.context = context;
     this.options = options;
     feedId = options.getFeedId();
+    metricBasename = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.";
     inventoryURI = options.getInventoryServiceUri();
     vertxRootResourceId = options.getVertxRootResourceId();
     eventbusResourceId = vertxRootResourceId + ".eventbus";
@@ -153,7 +155,11 @@ public class InventoryReporter {
                             .put("collectionInterval", collectionInterval)
                           ).setHandler(ar6 -> {
                             if (ar6.succeeded()) {
-                              createEventbusHandlerMetric().setHandler(ar7 -> {
+                              String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
+                              createMetric(path, new JsonObject().put("id", eventbusMetricId)
+                                  .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
+                                  .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"))
+                              ).setHandler(ar7 -> {
                                 if (ar7.succeeded()) {
                                   associateGaugeMetricTypeWithEventbusResourceType().setHandler(ar8 -> {
                                     if (ar8.succeeded()) {
@@ -253,7 +259,24 @@ public class InventoryReporter {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
         });
-        fut.fail("Fail to create counter metric type with payload : " + body.encode());
+        fut.fail("Fail to create metric type with payload : " + body.encode());
+      }
+    });
+    addHeaders(request);
+    request.end(body.encode());
+    return fut;
+  }
+
+  public Future<HttpClientResponse> createMetric(String path, JsonObject body) {
+    Future<HttpClientResponse> fut = Future.future();
+    HttpClientRequest request = httpClient.post(composeEntityUri(path, "metric"), response -> {
+      if (response.statusCode() == 201) {
+        fut.complete(response);
+      } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
+        fut.fail("Fail to create metric with payload : " + body.encode());
       }
     });
     addHeaders(request);
@@ -268,28 +291,6 @@ public class InventoryReporter {
     // This uses deprecated api because haven't find how to do this in new api.
     HttpClientRequest request = httpClient.post(inventoryURI+"/deprecated/feeds/"+feedId+"/resourceTypes/"+eventbusResourceTypeId+"/metricTypes", response -> {
       if (response.statusCode() == 204) {
-        fut.complete(response);
-      } else {
-        response.bodyHandler(buffer -> {
-          System.err.println(buffer.getBuffer(0, buffer.length()));
-        });
-        fut.fail("Fail to associate counter metric type with event bus resource type");
-      }
-    });
-    addHeaders(request);
-    request.end(json.encode());
-    return fut;
-  }
-
-  public Future<HttpClientResponse> createEventbusHandlerMetric() {
-    Future<HttpClientResponse> fut = Future.future();
-    String baseName = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.eventbus.";
-    JsonObject json = new JsonObject().put("id", eventbusMetricId)
-            .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
-            .put("properties", new JsonObject().put("metric-id", baseName+"handlers"));
-    String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
-    HttpClientRequest request = httpClient.post(composeEntityUri(path, "metric"), response -> {
-      if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
         response.bodyHandler(buffer -> {
