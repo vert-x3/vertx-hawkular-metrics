@@ -157,8 +157,8 @@ public class InventoryReporter {
                             if (ar6.succeeded()) {
                               String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
                               createMetric(path, new JsonObject().put("id", eventbusMetricId)
-                                  .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
-                                  .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"))
+                                .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
+                                .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"))
                               ).setHandler(ar7 -> {
                                 if (ar7.succeeded()) {
                                   associateMetricTypeWithResourceType(gaugeMetricTypeId, eventbusResourceTypeId).setHandler(ar8 -> {
@@ -199,7 +199,7 @@ public class InventoryReporter {
     });
   }
 
-  public Future<HttpClientResponse> reportFeed() {
+  private Future<HttpClientResponse> reportFeed() {
     Future<HttpClientResponse> fut = Future.future();
     HttpClientRequest request = httpClient.post(composeEntityUri("", "feed"), response -> {
       if (response.statusCode() == 201) {
@@ -216,7 +216,7 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> createResourceType(JsonObject body) {
+  private Future<HttpClientResponse> createResourceType(JsonObject body) {
     Future<HttpClientResponse> fut = Future.future();
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
       if (response.statusCode() == 201) {
@@ -233,7 +233,7 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> createResource(String path, JsonObject body) {
+  private Future<HttpClientResponse> createResource(String path, JsonObject body) {
     Future<HttpClientResponse> fut = Future.future();
     HttpClientRequest request = httpClient.post(composeEntityUri(path, "resource"), response -> {
       if (response.statusCode() == 201) {
@@ -250,7 +250,7 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> createMetricType(JsonObject body) {
+  private Future<HttpClientResponse> createMetricType(JsonObject body) {
     Future<HttpClientResponse> fut = Future.future();
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "metricType"), response -> {
       if (response.statusCode() == 201) {
@@ -267,7 +267,7 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> createMetric(String path, JsonObject body) {
+  private Future<HttpClientResponse> createMetric(String path, JsonObject body) {
     Future<HttpClientResponse> fut = Future.future();
     HttpClientRequest request = httpClient.post(composeEntityUri(path, "metric"), response -> {
       if (response.statusCode() == 201) {
@@ -284,7 +284,7 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> associateMetricTypeWithResourceType(String metricTypeId, String resourceTypeId) {
+  private Future<HttpClientResponse> associateMetricTypeWithResourceType(String metricTypeId, String resourceTypeId) {
     Future<HttpClientResponse> fut = Future.future();
     String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, metricTypeId);
     JsonArray body = new JsonArray().add(metricPath);
