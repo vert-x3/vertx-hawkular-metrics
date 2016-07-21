@@ -133,14 +133,25 @@ public class InventoryReporter {
 
           createResourceType(new JsonObject().put("id", vertxRootResourceTypeId)).setHandler(ar2 -> {
             if (ar2.succeeded()) {
-              createVertxRootResource().setHandler(ar3 -> {
+              createResource("f;"+feedId, new JsonObject()
+                .put("id", vertxRootResourceId)
+                .put("resourceTypePath", "/f;" + feedId + "/rt;" + vertxRootResourceTypeId)
+                .put("properties", new JsonObject().put("type", "standalone"))
+              ).setHandler(ar3 -> {
                 if (ar3.succeeded()) {
                   System.out.println("Done with vertx resource");
                   createResourceType(new JsonObject().put("id", eventbusResourceTypeId)).setHandler(ar4 -> {
                     if (ar4.succeeded()) {
-                      createEventbusResource().setHandler(ar5 -> {
+                      createResource("f;"+feedId+"/r;"+vertxRootResourceId, new JsonObject()
+                        .put("id", eventbusResourceId)
+                        .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId)
+                      ).setHandler(ar5 -> {
                         if (ar5.succeeded()) {
-                          createGaugeMetricType().setHandler(ar6 -> {
+                          createMetricType(new JsonObject().put("id", gaugeMetricTypeId)
+                            .put("type", "GAUGE")
+                            .put("unit", "NONE")
+                            .put("collectionInterval", collectionInterval)
+                          ).setHandler(ar6 -> {
                             if (ar6.succeeded()) {
                               createEventbusHandlerMetric().setHandler(ar7 -> {
                                 if (ar7.succeeded()) {
@@ -199,7 +210,7 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> createResourceType(JsonObject json) {
+  public Future<HttpClientResponse> createResourceType(JsonObject body) {
     Future<HttpClientResponse> fut = Future.future();
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
       if (response.statusCode() == 201) {
@@ -208,59 +219,33 @@ public class InventoryReporter {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
         });
-        fut.fail("Fail to create resource type with payload : " + json.encode());
+        fut.fail("Fail to create resource type with payload : " + body.encode());
       }
     });
     addHeaders(request);
-    request.end(json.encode());
+    request.end(body.encode());
     return fut;
   }
 
-  public Future<HttpClientResponse> createVertxRootResource() {
+  public Future<HttpClientResponse> createResource(String path, JsonObject body) {
     Future<HttpClientResponse> fut = Future.future();
-    JsonObject json = new JsonObject().put("id", vertxRootResourceId)
-            .put("resourceTypePath", "/f;" + feedId + "/rt;" + vertxRootResourceTypeId)
-            .put("properties", new JsonObject().put("type", "standalone"));
-    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resource"), response -> {
+    HttpClientRequest request = httpClient.post(composeEntityUri(path, "resource"), response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
       } else {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
         });
-        fut.fail("Fail to create root resource.");
+        fut.fail("Fail to create resource with payload : " + body.encode());
       }
     });
     addHeaders(request);
-    request.end(json.encode());
+    request.end(body.encode());
     return fut;
   }
 
-  public Future<HttpClientResponse> createEventbusResource() {
+  public Future<HttpClientResponse> createMetricType(JsonObject body) {
     Future<HttpClientResponse> fut = Future.future();
-    JsonObject json = new JsonObject().put("id", eventbusResourceId)
-            .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId);
-    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId+"/r;"+vertxRootResourceId, "resource"), response -> {
-      if (response.statusCode() == 201) {
-        fut.complete(response);
-      } else {
-        response.bodyHandler(buffer -> {
-          System.err.println(buffer.getBuffer(0, buffer.length()));
-        });
-        fut.fail("Fail to create event bus resource.");
-      }
-    });
-    addHeaders(request);
-    request.end(json.encode());
-    return fut;
-  }
-
-  public Future<HttpClientResponse> createGaugeMetricType() {
-    Future<HttpClientResponse> fut = Future.future();
-    JsonObject json = new JsonObject().put("id", gaugeMetricTypeId)
-            .put("type", "GAUGE")
-            .put("unit", "NONE")
-            .put("collectionInterval", collectionInterval);
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "metricType"), response -> {
       if (response.statusCode() == 201) {
         fut.complete(response);
@@ -268,11 +253,11 @@ public class InventoryReporter {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
         });
-        fut.fail("Fail to create counter metric type.");
+        fut.fail("Fail to create counter metric type with payload : " + body.encode());
       }
     });
     addHeaders(request);
-    request.end(json.encode());
+    request.end(body.encode());
     return fut;
   }
 
