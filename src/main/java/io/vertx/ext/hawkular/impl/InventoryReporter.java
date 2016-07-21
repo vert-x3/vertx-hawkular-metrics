@@ -161,7 +161,7 @@ public class InventoryReporter {
                                   .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"))
                               ).setHandler(ar7 -> {
                                 if (ar7.succeeded()) {
-                                  associateGaugeMetricTypeWithEventbusResourceType().setHandler(ar8 -> {
+                                  associateMetricTypeWithResourceType(gaugeMetricTypeId, eventbusResourceTypeId).setHandler(ar8 -> {
                                     if (ar8.succeeded()) {
                                       System.out.println("Done with event bus handler");
                                     } else {
@@ -284,23 +284,23 @@ public class InventoryReporter {
     return fut;
   }
 
-  public Future<HttpClientResponse> associateGaugeMetricTypeWithEventbusResourceType() {
+  public Future<HttpClientResponse> associateMetricTypeWithResourceType(String metricTypeId, String resourceTypeId) {
     Future<HttpClientResponse> fut = Future.future();
-    String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, gaugeMetricTypeId);
-    JsonArray json = new JsonArray().add(metricPath);
+    String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, metricTypeId);
+    JsonArray body = new JsonArray().add(metricPath);
     // This uses deprecated api because haven't find how to do this in new api.
-    HttpClientRequest request = httpClient.post(inventoryURI+"/deprecated/feeds/"+feedId+"/resourceTypes/"+eventbusResourceTypeId+"/metricTypes", response -> {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/deprecated/feeds/"+feedId+"/resourceTypes/"+resourceTypeId+"/metricTypes", response -> {
       if (response.statusCode() == 204) {
         fut.complete(response);
       } else {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
         });
-        fut.fail("Fail to associate gauge metric type with event bus resource type");
+        fut.fail("Fail to associate metric type with resource type with payload : " + body.encode());
       }
     });
     addHeaders(request);
-    request.end(json.encode());
+    request.end(body.encode());
     return fut;
   }
 
