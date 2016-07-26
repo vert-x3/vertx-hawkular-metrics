@@ -137,25 +137,20 @@ public class InventoryReporter {
   }
   public void report() {
     context.runOnContext(aVoid -> {
-      reportFeed().setHandler(ar -> {
-        if (ar.succeeded()) {
-          reportRootResource().setHandler(ar1 -> {
-            if (ar1.succeeded()) {
-              reportEventbusResource();
-              reportHttpServerResource(new SocketAddressImpl(8080, "0.0.0.0"));
-            } else {
-              System.err.println(ar1.cause().getLocalizedMessage());
-            }
-          });
-        } else {
-          System.err.println(ar.cause().getLocalizedMessage());
-        }
+      Future<Void> fut1 = Future.future();
+      Future<Void> fut2 = Future.future();
+      reportFeed(fut1);
+      fut1.compose(aVoid1 -> {
+        reportRootResource(fut2);
+      }, fut2);
+      fut2.setHandler(ar -> {
+        reportEventbusResource();
+        reportHttpServerResource(new SocketAddressImpl(8080, "0.0.0.0"));
       });
     });
   }
 
-  private Future<Void> reportFeed() {
-    Future fut = Future.future();
+  private void reportFeed(Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri("", "feed"), response -> {
       if (response.statusCode() == 201) {
         fut.complete();
@@ -168,10 +163,9 @@ public class InventoryReporter {
     });
     addHeaders(request);
     request.end(new JsonObject().put("id", feedId).encode());
-    return fut;
   }
 
-  private Future<Void> reportRootResource() {
+  private void reportRootResource(Future<Void> fut) {
     Future<Void> fut1 = Future.future();
     Future<Void> fut2 = Future.future();
     createResourceType(new JsonObject().put("id", vertxRootResourceTypeId), fut1);
@@ -182,7 +176,10 @@ public class InventoryReporter {
               .put("properties", new JsonObject().put("type", "standalone"));
       createResource("f;"+feedId, body, fut2);
     }, fut2);
-    return fut2;
+    fut2.compose(aVoid -> {
+      System.out.println("Done root resource reporting");
+      fut.complete();
+    }, fut);
   }
 
   private void reportEventbusResource() {
