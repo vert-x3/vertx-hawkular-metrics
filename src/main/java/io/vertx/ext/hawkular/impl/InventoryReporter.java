@@ -15,6 +15,7 @@
  */
 package io.vertx.ext.hawkular.impl;
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -146,8 +147,17 @@ public class InventoryReporter {
         reportRootResource(fut2);
       }, fut2);
       fut2.compose(aVoid1 -> {
-        reportEventbusResource();
-        reportHttpServerResource(new SocketAddressImpl(8080, "0.0.0.0"));
+        Future<Void> rfut1 = Future.future();
+        Future<Void> rfut2 = Future.future();
+        reportEventbusResource(rfut1);
+        reportHttpServerResource(new SocketAddressImpl(8080, "0.0.0.0"), rfut2);
+        CompositeFuture.all(rfut1, rfut2).setHandler(ar -> {
+          if (ar.succeeded()) {
+            fut3.complete();
+          } else {
+            fut3.fail(ar.cause());
+          }
+        });
       }, fut3);
       fut3.setHandler(ar -> {
         if (ar.succeeded()) {
@@ -191,7 +201,7 @@ public class InventoryReporter {
     }, fut);
   }
 
-  private void reportEventbusResource() {
+  private void reportEventbusResource(Future<Void> fut) {
     Future<Void> fut1 = Future.future();
     Future<Void> fut2 = Future.future();
     Future<Void> fut3 = Future.future();
@@ -218,14 +228,15 @@ public class InventoryReporter {
     }, fut5);
     fut5.setHandler(ar -> {
       if (ar.succeeded()){
+        fut.complete();
         System.out.println("Done event bus reporting");
       } else {
-        System.err.println(ar.cause().getLocalizedMessage());
+        fut.fail(ar.cause());
       }
     });
   }
 
-  private void reportHttpServerResource(SocketAddress localAddress) {
+  private void reportHttpServerResource(SocketAddress localAddress, Future<Void> fut) {
     Future<Void> fut1 = Future.future();
     Future<Void> fut2 = Future.future();
     Future<Void> fut3 = Future.future();
@@ -252,9 +263,10 @@ public class InventoryReporter {
     }, fut5);
     fut5.setHandler(ar -> {
       if (ar.succeeded()) {
+        fut.complete();
         System.out.println("Done http server reporting");
       } else {
-        System.err.println(ar.cause().getLocalizedMessage());
+        fut.fail(ar.cause());
       }
     });
   }
