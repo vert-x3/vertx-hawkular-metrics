@@ -21,6 +21,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -139,13 +140,21 @@ public class InventoryReporter {
     context.runOnContext(aVoid -> {
       Future<Void> fut1 = Future.future();
       Future<Void> fut2 = Future.future();
+      Future<Void> fut3 = Future.future();
       reportFeed(fut1);
       fut1.compose(aVoid1 -> {
         reportRootResource(fut2);
       }, fut2);
-      fut2.setHandler(ar -> {
+      fut2.compose(aVoid1 -> {
         reportEventbusResource();
         reportHttpServerResource(new SocketAddressImpl(8080, "0.0.0.0"));
+      }, fut3);
+      fut3.setHandler(ar -> {
+        if (ar.succeeded()) {
+          System.err.println("Done all reporting.");
+        } else {
+          System.err.println(ar.cause().getLocalizedMessage());
+        }
       });
     });
   }
@@ -207,9 +216,11 @@ public class InventoryReporter {
     fut4.compose(aVoid -> {
       associateMetricTypeWithResourceType(gaugeMetricTypeId, eventbusResourceTypeId, fut5);
     }, fut5);
-    fut5.setHandler(voidAsyncResult -> {
-      if (voidAsyncResult.succeeded()){
+    fut5.setHandler(ar -> {
+      if (ar.succeeded()){
         System.out.println("Done event bus reporting");
+      } else {
+        System.err.println(ar.cause().getLocalizedMessage());
       }
     });
   }
@@ -239,9 +250,11 @@ public class InventoryReporter {
     fut4.compose(aVoid -> {
       associateMetricTypeWithResourceType(counterMetricTypeId, httpServerResourceTypeId, fut5);
     }, fut5);
-    fut5.setHandler(voidAsyncResult -> {
-      if (voidAsyncResult.succeeded()) {
+    fut5.setHandler(ar -> {
+      if (ar.succeeded()) {
         System.out.println("Done http server reporting");
+      } else {
+        System.err.println(ar.cause().getLocalizedMessage());
       }
     });
   }
