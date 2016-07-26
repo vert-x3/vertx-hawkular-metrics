@@ -27,6 +27,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.net.SocketAddress;
+import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.ext.hawkular.AuthenticationOptions;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
@@ -65,11 +67,15 @@ public class InventoryReporter {
   private final String metricBasename;
   private final String vertxRootResourceTypeId = "rt.vertx-root";
   private final String eventbusResourceTypeId = "rt.eventbus";
+  private final String httpServerResourceTypeId = "rt.http.server";
   private final String vertxRootResourceId;
   private final String eventbusResourceId;
+  private final String httpServerResourceId;
 
   private final String gaugeMetricTypeId = "mt.gauge";
-  private final String eventbusMetricId = "m.handlers";
+  private final String counterMetricTypeId = "mt.counter";
+  private final String eventbusHandlerMetricId = "m.eventbus.handlers";
+  private final String httpServerRequestCountMetricId = "m.http.server.requestCount";
 
   private final int collectionInterval;
   private final VertxHawkularOptions options;
@@ -86,10 +92,12 @@ public class InventoryReporter {
     feedId = options.getFeedId();
     metricBasename = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.";
     inventoryURI = options.getInventoryServiceUri();
+
     vertxRootResourceId = options.getVertxRootResourceId();
     eventbusResourceId = vertxRootResourceId + ".eventbus";
-    collectionInterval = options.getSchedule();
+    httpServerResourceId = vertxRootResourceId + ".http.server";
 
+    collectionInterval = options.getSchedule();
     tenant = options.isSendTenantHeader() ? HttpHeaders.createOptimized(options.getTenant()) : null;
     AuthenticationOptions authenticationOptions = options.getAuthenticationOptions();
     if (authenticationOptions.isEnabled()) {
@@ -122,8 +130,8 @@ public class InventoryReporter {
     }
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()
-              .setDefaultHost(options.getHost())
-              .setDefaultPort(options.getPort());
+        .setDefaultHost(options.getHost())
+        .setDefaultPort(options.getPort());
       httpClient = vertx.createHttpClient(httpClientOptions);
       }
     );
@@ -135,6 +143,7 @@ public class InventoryReporter {
           reportRootResource().setHandler(ar1 -> {
             if (ar1.succeeded()) {
               reportEventbusResource();
+              reportHttpServerResource();
             } else {
               System.err.println(ar1.cause().getLocalizedMessage());
             }
@@ -192,30 +201,51 @@ public class InventoryReporter {
   }
 
   private void reportEventbusResource() {
-    createResourceType(new JsonObject().put("id", eventbusResourceTypeId)).setHandler(ar4 -> {
-      if (ar4.succeeded()) {
+    createResourceType(new JsonObject().put("id", eventbusResourceTypeId)).setHandler(ar -> {
+      if (ar.succeeded()) {
         createResource("f;"+feedId+"/r;"+vertxRootResourceId, new JsonObject()
-                .put("id", eventbusResourceId)
-                .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId)
-        ).setHandler(ar5 -> {
-          if (ar5.succeeded()) {
+          .put("id", eventbusResourceId)
+          .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId)
+        ).setHandler(ar1 -> {
+          if (ar1.succeeded()) {
             createMetricType(new JsonObject().put("id", gaugeMetricTypeId)
-                    .put("type", "GAUGE")
-                    .put("unit", "NONE")
-                    .put("collectionInterval", collectionInterval)
-            ).setHandler(ar6 -> {
-              if (ar6.succeeded()) {
+              .put("type", "GAUGE")
+              .put("unit", "NONE")
+              .put("collectionInterval", collectionInterval)
+            ).setHandler(ar2 -> {
+              if (ar2.succeeded()) {
                 String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
-                createMetric(path, new JsonObject().put("id", eventbusMetricId)
-                        .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
-                        .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"))
-                ).setHandler(ar7 -> {
-                  if (ar7.succeeded()) {
-                    associateMetricTypeWithResourceType(gaugeMetricTypeId, eventbusResourceTypeId).setHandler(ar8 -> {
-                      if (ar8.succeeded()) {
+                createMetric(path, new JsonObject()
+                  .put("id", eventbusHandlerMetricId)
+                  .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
+                  .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"))
+                ).setHandler(ar3 -> {
+                  if (ar3.succeeded()) {
+                    associateMetricTypeWithResourceType(gaugeMetricTypeId, eventbusResourceTypeId).setHandler(ar4 -> {
+                      if (ar4.succeeded()) {
                         System.out.println("Done with event bus handler");
                       } else {
-                        System.err.println(ar8.cause().getLocalizedMessage());
+                        System.err.println(ar4.cause().getLocalizedMessage());
+                      }
+                    });
+                  } else {
+                    System.err.println(ar3.cause().getLocalizedMessage());
+                  }
+                });
+              } else {
+                System.err.println(ar2.cause().getLocalizedMessage());
+              }
+            });
+          } else {
+            System.err.println(ar1.cause().getLocalizedMessage());
+          }
+        });
+      } else {
+        System.err.println(ar.cause().getLocalizedMessage());
+      }
+    });
+  }
+
                       }
                     });
                   } else {
