@@ -143,7 +143,7 @@ public class InventoryReporter {
           reportRootResource().setHandler(ar1 -> {
             if (ar1.succeeded()) {
               reportEventbusResource();
-              reportHttpServerResource();
+              reportHttpServerResource(new SocketAddressImpl(8080, "0.0.0.0"));
             } else {
               System.err.println(ar1.cause().getLocalizedMessage());
             }
@@ -246,22 +246,48 @@ public class InventoryReporter {
     });
   }
 
+  private void reportHttpServerResource(SocketAddress localAddress) {
+    createResourceType(new JsonObject().put("id", httpServerResourceTypeId)).setHandler(ar -> {
+      if(ar.succeeded()) {
+        createResource("f;"+feedId+"/r;"+vertxRootResourceId, new JsonObject()
+          .put("id", httpServerResourceId)
+          .put("resourceTypePath", "/f;" + feedId + "/rt;" + httpServerResourceTypeId)
+        ).setHandler(ar1 -> {
+          if (ar1.succeeded()) {
+            createMetricType(new JsonObject().put("id", counterMetricTypeId)
+              .put("type", "COUNTER")
+              .put("unit", "NONE")
+              .put("collectionInterval", collectionInterval)
+            ).setHandler(ar2 -> {
+              if (ar2.succeeded()) {
+                String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, httpServerResourceId);
+                createMetric(path, new JsonObject()
+                  .put("id", httpServerRequestCountMetricId)
+                  .put("metricTypePath", "/f;" + feedId + "/mt;" + counterMetricTypeId)
+                  .put("properties", new JsonObject().put("metric-id", metricBasename+"http.server."+localAddress.host()+":"+localAddress.port()+".requestCount"))
+                ).setHandler(ar3 -> {
+                  if (ar3.succeeded()) {
+                    associateMetricTypeWithResourceType(counterMetricTypeId, httpServerResourceTypeId).setHandler(ar4 -> {
+                      if (ar4.succeeded()) {
+                        System.out.println("Done with http server requestCount");
+                      } else {
+                        System.err.println(ar4.cause().getLocalizedMessage());
                       }
                     });
                   } else {
-                    System.err.println(ar7.cause().getLocalizedMessage());
+                    System.err.println(ar3.cause().getLocalizedMessage());
                   }
                 });
               } else {
-                System.err.println(ar6.cause().getLocalizedMessage());
+                System.err.println(ar2.cause().getLocalizedMessage());
               }
             });
           } else {
-            System.err.println(ar5.cause().getLocalizedMessage());
+            System.err.println(ar1.cause().getLocalizedMessage());
           }
         });
       } else {
-        System.err.println(ar4.cause().getLocalizedMessage());
+        System.err.println(ar.cause().getLocalizedMessage());
       }
     });
   }
