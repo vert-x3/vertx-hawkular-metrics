@@ -21,7 +21,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -173,130 +172,87 @@ public class InventoryReporter {
   }
 
   private Future<Void> reportRootResource() {
-    Future fut1 = Future.future();
-    Future fut2 = Future.future();
-    createResourceType(new JsonObject().put("id", vertxRootResourceTypeId)).setHandler(ar -> {
-      if (ar.succeeded()) {
-        fut1.complete();
-      } else {
-        fut1.fail(ar.cause());
-      }
-    });
-    fut1.compose(ar -> {
-      createResource("f;"+feedId, new JsonObject()
-        .put("id", vertxRootResourceId)
-        .put("resourceTypePath", "/f;" + feedId + "/rt;" + vertxRootResourceTypeId)
-        .put("properties", new JsonObject().put("type", "standalone"))
-      ).setHandler(ar1 -> {
-        if (ar1.succeeded()) {
-          System.out.println("Done with root resource");
-          fut2.complete();
-        } else {
-          System.err.println(ar1.cause().getLocalizedMessage());
-          fut2.fail(ar1.cause());
-        }
-      });
+    Future<Void> fut1 = Future.future();
+    Future<Void> fut2 = Future.future();
+    createResourceType(new JsonObject().put("id", vertxRootResourceTypeId), fut1);
+    fut1.compose(aVoid -> {
+      JsonObject body = new JsonObject()
+              .put("id", vertxRootResourceId)
+              .put("resourceTypePath", "/f;" + feedId + "/rt;" + vertxRootResourceTypeId)
+              .put("properties", new JsonObject().put("type", "standalone"));
+      createResource("f;"+feedId, body, fut2);
     }, fut2);
     return fut2;
   }
 
   private void reportEventbusResource() {
-    createResourceType(new JsonObject().put("id", eventbusResourceTypeId)).setHandler(ar -> {
-      if (ar.succeeded()) {
-        createResource("f;"+feedId+"/r;"+vertxRootResourceId, new JsonObject()
-          .put("id", eventbusResourceId)
-          .put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId)
-        ).setHandler(ar1 -> {
-          if (ar1.succeeded()) {
-            createMetricType(new JsonObject().put("id", gaugeMetricTypeId)
-              .put("type", "GAUGE")
-              .put("unit", "NONE")
-              .put("collectionInterval", collectionInterval)
-            ).setHandler(ar2 -> {
-              if (ar2.succeeded()) {
-                String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
-                createMetric(path, new JsonObject()
-                  .put("id", eventbusHandlerMetricId)
-                  .put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
-                  .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"))
-                ).setHandler(ar3 -> {
-                  if (ar3.succeeded()) {
-                    associateMetricTypeWithResourceType(gaugeMetricTypeId, eventbusResourceTypeId).setHandler(ar4 -> {
-                      if (ar4.succeeded()) {
-                        System.out.println("Done with event bus handler");
-                      } else {
-                        System.err.println(ar4.cause().getLocalizedMessage());
-                      }
-                    });
-                  } else {
-                    System.err.println(ar3.cause().getLocalizedMessage());
-                  }
-                });
-              } else {
-                System.err.println(ar2.cause().getLocalizedMessage());
-              }
-            });
-          } else {
-            System.err.println(ar1.cause().getLocalizedMessage());
-          }
-        });
-      } else {
-        System.err.println(ar.cause().getLocalizedMessage());
+    Future<Void> fut1 = Future.future();
+    Future<Void> fut2 = Future.future();
+    Future<Void> fut3 = Future.future();
+    Future<Void> fut4 = Future.future();
+    Future<Void> fut5 = Future.future();
+
+    createResourceType(new JsonObject().put("id", eventbusResourceTypeId), fut1);
+    fut1.compose(aVoid -> {
+      JsonObject body = new JsonObject().put("id", eventbusResourceId).put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId);
+      createResource("f;" + feedId + "/r;" + vertxRootResourceId, body, fut2);
+    }, fut2);
+    fut2.compose(aVoid -> {
+      JsonObject body = new JsonObject().put("id", gaugeMetricTypeId).put("type", "GAUGE").put("unit", "NONE").put("collectionInterval", collectionInterval);
+      createMetricType( body, fut3);
+    }, fut3);
+    fut3.compose(aVoid -> {
+      String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, eventbusResourceId);
+      JsonObject body = new JsonObject().put("id", eventbusHandlerMetricId).put("metricTypePath", "/f;" + feedId + "/mt;" + gaugeMetricTypeId)
+              .put("properties", new JsonObject().put("metric-id", metricBasename+"eventbus.handlers"));
+      createMetric(path, body, fut4);
+    }, fut4);
+    fut4.compose(aVoid -> {
+      associateMetricTypeWithResourceType(gaugeMetricTypeId, eventbusResourceTypeId, fut5);
+    }, fut5);
+    fut5.setHandler(voidAsyncResult -> {
+      if (voidAsyncResult.succeeded()){
+        System.out.println("Done event bus reporting");
       }
     });
   }
 
   private void reportHttpServerResource(SocketAddress localAddress) {
-    createResourceType(new JsonObject().put("id", httpServerResourceTypeId)).setHandler(ar -> {
-      if(ar.succeeded()) {
-        createResource("f;"+feedId+"/r;"+vertxRootResourceId, new JsonObject()
-          .put("id", httpServerResourceId)
-          .put("resourceTypePath", "/f;" + feedId + "/rt;" + httpServerResourceTypeId)
-        ).setHandler(ar1 -> {
-          if (ar1.succeeded()) {
-            createMetricType(new JsonObject().put("id", counterMetricTypeId)
-              .put("type", "COUNTER")
-              .put("unit", "NONE")
-              .put("collectionInterval", collectionInterval)
-            ).setHandler(ar2 -> {
-              if (ar2.succeeded()) {
-                String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, httpServerResourceId);
-                createMetric(path, new JsonObject()
-                  .put("id", httpServerRequestCountMetricId)
-                  .put("metricTypePath", "/f;" + feedId + "/mt;" + counterMetricTypeId)
-                  .put("properties", new JsonObject().put("metric-id", metricBasename+"http.server."+localAddress.host()+":"+localAddress.port()+".requestCount"))
-                ).setHandler(ar3 -> {
-                  if (ar3.succeeded()) {
-                    associateMetricTypeWithResourceType(counterMetricTypeId, httpServerResourceTypeId).setHandler(ar4 -> {
-                      if (ar4.succeeded()) {
-                        System.out.println("Done with http server requestCount");
-                      } else {
-                        System.err.println(ar4.cause().getLocalizedMessage());
-                      }
-                    });
-                  } else {
-                    System.err.println(ar3.cause().getLocalizedMessage());
-                  }
-                });
-              } else {
-                System.err.println(ar2.cause().getLocalizedMessage());
-              }
-            });
-          } else {
-            System.err.println(ar1.cause().getLocalizedMessage());
-          }
-        });
-      } else {
-        System.err.println(ar.cause().getLocalizedMessage());
+    Future<Void> fut1 = Future.future();
+    Future<Void> fut2 = Future.future();
+    Future<Void> fut3 = Future.future();
+    Future<Void> fut4 = Future.future();
+    Future<Void> fut5 = Future.future();
+
+    createResourceType(new JsonObject().put("id", httpServerResourceTypeId), fut1);
+    fut1.compose(aVoid -> {
+      JsonObject body = new JsonObject().put("id", httpServerResourceId).put("resourceTypePath", "/f;" + feedId + "/rt;" + httpServerResourceTypeId);
+      createResource("f;" + feedId + "/r;" + vertxRootResourceId, body, fut2);
+    }, fut2);
+    fut2.compose(aVoid -> {
+      JsonObject body = new JsonObject().put("id", counterMetricTypeId).put("type", "COUNTER").put("unit", "NONE").put("collectionInterval", collectionInterval);
+      createMetricType(body, fut3);
+    }, fut3);
+    fut3.compose(aVoid -> {
+      JsonObject body = new JsonObject().put("id", httpServerRequestCountMetricId).put("metricTypePath", "/f;" + feedId + "/mt;" + counterMetricTypeId)
+              .put("properties", new JsonObject().put("metric-id", metricBasename+"http.server."+localAddress.host()+":"+localAddress.port()+".requestCount"));
+      String path = String.format("f;%s/r;%s/r;%s", feedId, vertxRootResourceId, httpServerResourceId);
+      createMetric(path, body,fut4);
+    }, fut4);
+    fut4.compose(aVoid -> {
+      associateMetricTypeWithResourceType(counterMetricTypeId, httpServerResourceTypeId, fut5);
+    }, fut5);
+    fut5.setHandler(voidAsyncResult -> {
+      if (voidAsyncResult.succeeded()) {
+        System.out.println("Done http server reporting");
       }
     });
   }
 
-  private Future<HttpClientResponse> createResourceType(JsonObject body) {
-    Future<HttpClientResponse> fut = Future.future();
+  private void createResourceType(JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
       if (response.statusCode() == 201) {
-        fut.complete(response);
+        fut.complete();
       } else {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
@@ -306,14 +262,12 @@ public class InventoryReporter {
     });
     addHeaders(request);
     request.end(body.encode());
-    return fut;
   }
 
-  private Future<HttpClientResponse> createResource(String path, JsonObject body) {
-    Future<HttpClientResponse> fut = Future.future();
+  private void createResource(String path, JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri(path, "resource"), response -> {
       if (response.statusCode() == 201) {
-        fut.complete(response);
+        fut.complete();
       } else {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
@@ -323,14 +277,12 @@ public class InventoryReporter {
     });
     addHeaders(request);
     request.end(body.encode());
-    return fut;
   }
 
-  private Future<HttpClientResponse> createMetricType(JsonObject body) {
-    Future<HttpClientResponse> fut = Future.future();
+  private void createMetricType(JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "metricType"), response -> {
       if (response.statusCode() == 201) {
-        fut.complete(response);
+        fut.complete();
       } else {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
@@ -340,14 +292,12 @@ public class InventoryReporter {
     });
     addHeaders(request);
     request.end(body.encode());
-    return fut;
   }
 
-  private Future<HttpClientResponse> createMetric(String path, JsonObject body) {
-    Future<HttpClientResponse> fut = Future.future();
+  private void createMetric(String path, JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri(path, "metric"), response -> {
       if (response.statusCode() == 201) {
-        fut.complete(response);
+        fut.complete();
       } else {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
@@ -357,17 +307,15 @@ public class InventoryReporter {
     });
     addHeaders(request);
     request.end(body.encode());
-    return fut;
   }
 
-  private Future<HttpClientResponse> associateMetricTypeWithResourceType(String metricTypeId, String resourceTypeId) {
-    Future<HttpClientResponse> fut = Future.future();
+  private void associateMetricTypeWithResourceType(String metricTypeId, String resourceTypeId, Future<Void> fut) {
     String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, metricTypeId);
     JsonArray body = new JsonArray().add(metricPath);
     // This uses deprecated api because haven't find how to do this in new api.
     HttpClientRequest request = httpClient.post(inventoryURI+"/deprecated/feeds/"+feedId+"/resourceTypes/"+resourceTypeId+"/metricTypes", response -> {
       if (response.statusCode() == 204) {
-        fut.complete(response);
+        fut.complete();
       } else {
         response.bodyHandler(buffer -> {
           System.err.println(buffer.getBuffer(0, buffer.length()));
@@ -377,7 +325,6 @@ public class InventoryReporter {
     });
     addHeaders(request);
     request.end(body.encode());
-    return fut;
   }
 
   private void addHeaders(HttpClientRequest request) {
