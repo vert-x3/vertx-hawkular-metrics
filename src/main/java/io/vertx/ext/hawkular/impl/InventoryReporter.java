@@ -22,7 +22,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -141,30 +140,23 @@ public class InventoryReporter {
     context.runOnContext(aVoid -> {
       Future<Void> fut1 = Future.future();
       Future<Void> fut2 = Future.future();
-      Future<Void> fut3 = Future.future();
+
       reportFeed(fut1);
       fut1.compose(aVoid1 -> {
         reportRootResource(fut2);
       }, fut2);
-      fut2.compose(aVoid1 -> {
+      fut2.setHandler(aVoid1 -> {
         Future<Void> rfut1 = Future.future();
         Future<Void> rfut2 = Future.future();
         reportEventbusResource(rfut1);
         reportHttpServerResource(new SocketAddressImpl(8080, "0.0.0.0"), rfut2);
         CompositeFuture.all(rfut1, rfut2).setHandler(ar -> {
           if (ar.succeeded()) {
-            fut3.complete();
+            System.out.println("Done all reporting.");
           } else {
-            fut3.fail(ar.cause());
+            System.err.println(ar.cause().getLocalizedMessage());
           }
         });
-      }, fut3);
-      fut3.setHandler(ar -> {
-        if (ar.succeeded()) {
-          System.err.println("Done all reporting.");
-        } else {
-          System.err.println(ar.cause().getLocalizedMessage());
-        }
       });
     });
   }
@@ -196,7 +188,6 @@ public class InventoryReporter {
       createResource("f;"+feedId, body, fut2);
     }, fut2);
     fut2.compose(aVoid -> {
-      System.out.println("Done root resource reporting");
       fut.complete();
     }, fut);
   }
@@ -229,7 +220,6 @@ public class InventoryReporter {
     fut5.setHandler(ar -> {
       if (ar.succeeded()){
         fut.complete();
-        System.out.println("Done event bus reporting");
       } else {
         fut.fail(ar.cause());
       }
@@ -264,7 +254,6 @@ public class InventoryReporter {
     fut5.setHandler(ar -> {
       if (ar.succeeded()) {
         fut.complete();
-        System.out.println("Done http server reporting");
       } else {
         fut.fail(ar.cause());
       }
