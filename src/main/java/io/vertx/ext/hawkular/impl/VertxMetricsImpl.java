@@ -40,6 +40,7 @@ import io.vertx.core.spi.metrics.PoolMetrics;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.hawkular.MetricsType;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
+import io.vertx.ext.hawkular.impl.inventory.InventoryReporter;
 
 import java.util.Collections;
 import java.util.EnumMap;

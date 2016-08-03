@@ -19,15 +19,19 @@ import java.util.Map;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Report a single resource to the Hawkular server.
+ * Report a single entity to the Hawkular server.
  *
  * @author Austin Kuo
  */
-public abstract class ResourceReporter {
+public abstract class EntityReporter {
 
-  private final String feedId;
-  private final String metricBasename;
-  private final String inventoryURI;
+  protected final String feedId;
+  protected final String metricBasename;
+  protected final String inventoryURI;
+  protected final String rootResourceTypeId = "rt.vertx-root";
+  protected final String rootResourceId;
+  protected final int collectionInterval;
+
   private HttpClient httpClient;
   private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
@@ -36,7 +40,7 @@ public abstract class ResourceReporter {
   private final CharSequence tenant;
   private final CharSequence auth;
 
-  ResourceReporter(VertxHawkularOptions options, HttpClient httpClient) {
+  EntityReporter(VertxHawkularOptions options, HttpClient httpClient) {
     feedId = options.getFeedId();
     metricBasename = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.";
     inventoryURI = options.getInventoryServiceUri();
@@ -70,6 +74,23 @@ public abstract class ResourceReporter {
     } else {
       this.httpHeaders = Collections.emptyMap();
     }
+    rootResourceId = options.getVertxRootResourceId();
+    collectionInterval = options.getSchedule();
+  }
+
+  protected void createFeed(Future<Void> fut) {
+    HttpClientRequest request = httpClient.post(composeEntityUri("", "feed"), response -> {
+      if (response.statusCode() == 201) {
+        fut.complete();
+      } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
+        fut.fail("Fail to create feed.");
+      }
+    });
+    addHeaders(request);
+    request.end(new JsonObject().put("id", feedId).encode());
   }
 
   protected void createResourceType(JsonObject body, Future<Void> fut) {
