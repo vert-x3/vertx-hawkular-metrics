@@ -58,6 +58,7 @@ import static io.vertx.ext.hawkular.MetricsType.*;
 public class VertxMetricsImpl extends DummyVertxMetrics {
   private final Vertx vertx;
   private final VertxHawkularOptions options;
+  private Context context;
   private final Map<MetricsType, MetricSupplier> metricSuppliers;
 
   private Sender sender;
@@ -102,6 +103,9 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   @Override
   public HttpServerMetrics<Long, Void, Void> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
     HttpServerMetricsSupplier supplier = (HttpServerMetricsSupplier) metricSuppliers.get(HTTP_SERVER);
+    context.runOnContext(aVoid -> {
+      httpSocketAddresses.add(localAddress);
+    });
     return supplier != null ? new HttpServerMetricsImpl(localAddress, supplier) : super.createMetrics(server, localAddress, options);
   }
 
@@ -160,7 +164,7 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   @Override
   public void eventBusInitialized(EventBus bus) {
     // Finish setup
-    Context context = vertx.getOrCreateContext();
+    context = vertx.getOrCreateContext();
     sender = new Sender(vertx, options, context);
     scheduler = new Scheduler(vertx, options, context, sender);
     inventoryReporter = new InventoryReporter(vertx, options, context).setHttpSocketAddresses(httpSocketAddresses);

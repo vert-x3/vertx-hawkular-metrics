@@ -108,9 +108,11 @@ public class InventoryReporter {
 
   public InventoryReporter setHttpSocketAddresses(Set<SocketAddress> httpSocketAddresses) {
     this.httpSocketAddresses = httpSocketAddresses;
-    for (SocketAddress addr : httpSocketAddresses) {
-      subResourceReporters.add(new HttpServerResourceReporter(options, httpClient, addr));
-    }
+    context.runOnContext(aVoid -> {
+      for (SocketAddress addr : httpSocketAddresses) {
+        subResourceReporters.add(new HttpServerResourceReporter(options, httpClient, addr));
+      }
+    });
     return this;
   }
 }
