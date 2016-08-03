@@ -21,26 +21,16 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.SocketAddress;
-import io.vertx.core.net.impl.SocketAddressImpl;
-import io.vertx.ext.hawkular.AuthenticationOptions;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import static java.util.stream.Collectors.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * Report inventory to the Hawkular server.
@@ -48,16 +38,15 @@ import static java.util.stream.Collectors.*;
  * @author Austin Kuo
  */
 public class InventoryReporter {
+
   private static final Logger LOG = LoggerFactory.getLogger(InventoryReporter.class);
-
-
-  private final Vertx vertx;
   private final Context context;
-  private HttpClient httpClient;
   private final VertxHawkularOptions options;
+  private HttpClient httpClient;
   private EntityReporter feedReporter;
   private EntityReporter rootResourceReporter;
   private List<EntityReporter> subResourceReporters;
+  private Set<SocketAddress> httpSocketAddresses;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -65,7 +54,6 @@ public class InventoryReporter {
    * @param context the metric collection and sending execution context
    */
   public InventoryReporter(Vertx vertx, VertxHawkularOptions options, Context context) {
-    this.vertx = vertx;
     this.context = context;
     this.options = options;
     context.runOnContext(aVoid -> {
@@ -77,7 +65,6 @@ public class InventoryReporter {
       rootResourceReporter = new RootResourceReporter(options, httpClient);
       subResourceReporters = new ArrayList<>();
       subResourceReporters.add(new EventbusResourceReporter(options, httpClient));
-      subResourceReporters.add(new HttpServerResourceReporter(options, httpClient, new SocketAddressImpl(8080, "0.0.0.0")));
     });
   }
   public void report() {
@@ -91,11 +78,11 @@ public class InventoryReporter {
       }, rootResourceCreated);
       rootResourceCreated.compose(aVoid1 -> {
         List<Future> futureList = new ArrayList<>(subResourceReporters.size());
-        futureList.add(Future.future());
-        futureList.add(Future.future());
         for (int i = 0; i < subResourceReporters.size(); i++) {
           EntityReporter r = subResourceReporters.get(i);
-          r.report(futureList.get(i));
+          Future<Void> future = Future.future();
+          r.report(future);
+          futureList.add(future);
         }
         CompositeFuture.all(futureList).setHandler(ar -> {
           if (ar.succeeded()) {
@@ -114,7 +101,16 @@ public class InventoryReporter {
       });
     });
   }
+
   public void stop() {
     httpClient.close();
+  }
+
+  public InventoryReporter setHttpSocketAddresses(Set<SocketAddress> httpSocketAddresses) {
+    this.httpSocketAddresses = httpSocketAddresses;
+    for (SocketAddress addr : httpSocketAddresses) {
+      subResourceReporters.add(new HttpServerResourceReporter(options, httpClient, addr));
+    }
+    return this;
   }
 }

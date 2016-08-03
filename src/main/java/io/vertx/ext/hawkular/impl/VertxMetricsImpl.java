@@ -44,7 +44,9 @@ import io.vertx.ext.hawkular.impl.inventory.InventoryReporter;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static io.vertx.ext.hawkular.MetricsType.*;
 
@@ -60,6 +62,8 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
 
   private Sender sender;
   private Scheduler scheduler;
+  private InventoryReporter inventoryReporter;
+  private Set<SocketAddress> httpSocketAddresses;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -92,6 +96,7 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
       supplierMap.put(NAMED_POOLS, new NamedPoolMetricsSupplier(prefix));
     }
     metricSuppliers = Collections.unmodifiableMap(supplierMap);
+    httpSocketAddresses = new HashSet<>();
   }
 
   @Override
@@ -158,8 +163,8 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     Context context = vertx.getOrCreateContext();
     sender = new Sender(vertx, options, context);
     scheduler = new Scheduler(vertx, options, context, sender);
-    InventoryReporter reporter = new InventoryReporter(vertx, options, context);
-    reporter.report();
+    inventoryReporter = new InventoryReporter(vertx, options, context).setHttpSocketAddresses(httpSocketAddresses);
+    inventoryReporter.report();
     metricSuppliers.values().forEach(scheduler::register);
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
@@ -194,7 +199,6 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     metricSuppliers.values().forEach(scheduler::unregister);
     scheduler.stop();
     sender.stop();
+    inventoryReporter.stop();
   }
-
-
 }
