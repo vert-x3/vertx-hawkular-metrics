@@ -25,20 +25,20 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class EntityReporter {
 
-  protected final String feedId;
-  protected final String metricBasename;
-  protected final String inventoryURI;
-  protected final String rootResourceTypeId = "rt.vertx-root";
-  protected final String rootResourceId;
-  protected final int collectionInterval;
+  protected static String feedId;
+  protected static String metricBasename;
+  protected static String inventoryURI;
+  protected static String rootResourceTypeId = "rt.vertx-root";
+  protected static String rootResourceId;
+  protected static int collectionInterval;
 
-  private HttpClient httpClient;
+  private static HttpClient httpClient;
   private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
 
-  private final Map<CharSequence, Iterable<CharSequence>> httpHeaders;
-  private final CharSequence tenant;
-  private final CharSequence auth;
+  private static Map<CharSequence, Iterable<CharSequence>> httpHeaders;
+  private static CharSequence tenant;
+  private static CharSequence auth;
 
   EntityReporter(VertxHawkularOptions options, HttpClient httpClient) {
     feedId = options.getFeedId();
@@ -78,7 +78,7 @@ public abstract class EntityReporter {
     collectionInterval = options.getSchedule();
   }
 
-  protected void createFeed(Future<Void> fut) {
+  protected static void createFeed(Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri("", "feed"), response -> {
       if (response.statusCode() == 201) {
         fut.complete();
@@ -93,7 +93,7 @@ public abstract class EntityReporter {
     request.end(new JsonObject().put("id", feedId).encode());
   }
 
-  protected void createResourceType(JsonObject body, Future<Void> fut) {
+  protected static void createResourceType(JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
       if (response.statusCode() == 201) {
         fut.complete();
@@ -108,7 +108,7 @@ public abstract class EntityReporter {
     request.end(body.encode());
   }
 
-  protected void createResource(String path, JsonObject body, Future<Void> fut) {
+  protected static void createResource(String path, JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri(path, "resource"), response -> {
       if (response.statusCode() == 201) {
         fut.complete();
@@ -123,7 +123,7 @@ public abstract class EntityReporter {
     request.end(body.encode());
   }
 
-  protected void createMetricType(JsonObject body, Future<Void> fut) {
+  protected static void createMetricType(JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "metricType"), response -> {
       if (response.statusCode() == 201) {
         fut.complete();
@@ -138,7 +138,7 @@ public abstract class EntityReporter {
     request.end(body.encode());
   }
 
-  protected void createMetric(String path, JsonObject body, Future<Void> fut) {
+  protected static void createMetric(String path, JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri(path, "metric"), response -> {
       if (response.statusCode() == 201) {
         fut.complete();
@@ -153,7 +153,7 @@ public abstract class EntityReporter {
     request.end(body.encode());
   }
 
-  protected void associateMetricTypeWithResourceType(String metricTypeId, String resourceTypeId, Future<Void> fut) {
+  protected static void associateMetricTypeWithResourceType(String metricTypeId, String resourceTypeId, Future<Void> fut) {
     String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, metricTypeId);
     JsonArray body = new JsonArray().add(metricPath);
     // This uses deprecated api because haven't find how to do this in new api.
@@ -171,7 +171,7 @@ public abstract class EntityReporter {
     request.end(body.encode());
   }
 
-  private void addHeaders(HttpClientRequest request) {
+  private static void addHeaders(HttpClientRequest request) {
     request.putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
 
     if (tenant != null) {
@@ -185,7 +185,7 @@ public abstract class EntityReporter {
     });
   }
 
-  private String composeEntityUri(String path,String type) {
+  private static String composeEntityUri(String path,String type) {
     if (!path.isEmpty()) {
       return String.format("%s/entity/%s/%s", inventoryURI, path, type);
     } else {
