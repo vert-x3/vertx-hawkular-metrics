@@ -72,7 +72,7 @@ public class DatagramSocketResourceReporter extends EntityReporter {
     String metricId;
     if (address != null) {
       String addressId = address.host() + ":" + address.port();
-      metricId = metricBasename + "datagram" + addressId + postFix;
+      metricId = metricBasename + "datagram." + addressId + postFix;
     } else {
       metricId = metricBasename + "datagram" + postFix;
     }
