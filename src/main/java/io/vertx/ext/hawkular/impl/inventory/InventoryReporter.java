@@ -104,6 +104,7 @@ public class InventoryReporter {
       subResourceReporters.forEach(this::handle);
       subResourceReporters.clear();
     }
+    sendTime = System.nanoTime();
   }
 
   private void handle(EntityReporter reporter) {
@@ -111,9 +112,9 @@ public class InventoryReporter {
     reporter.report(fut);
     fut.setHandler(ar -> {
       if (ar.succeeded()) {
-        System.out.println("DONE : " + reporter.toString());
+        System.out.println(sendTime + " DONE : " + reporter.toString());
       } else {
-        System.err.println("FAIL : " + reporter.toString());
+        System.err.println(sendTime + " FAIL : " + reporter.toString());
       }
     });
   }
