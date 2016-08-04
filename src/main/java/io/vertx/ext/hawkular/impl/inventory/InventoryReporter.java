@@ -72,6 +72,7 @@ public class InventoryReporter {
       rootResourceReporter = new RootResourceReporter(options, httpClient);
       subResourceReporters = new ArrayList<>();
       subResourceReporters.add(new EventbusResourceReporter(options, httpClient));
+      subResourceReporters.add(new HttpClientResourceReporter(options, httpClient));
     });
     sendTime = System.nanoTime();
     batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
@@ -115,6 +116,8 @@ public class InventoryReporter {
         System.out.println(sendTime + " DONE : " + reporter.toString());
       } else {
         System.err.println(sendTime + " FAIL : " + reporter.toString());
+        // retry when any error occurs.
+        handle(reporter);
       }
     });
   }
