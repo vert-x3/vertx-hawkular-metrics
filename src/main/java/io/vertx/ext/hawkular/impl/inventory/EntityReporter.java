@@ -95,7 +95,7 @@ public abstract class EntityReporter {
 
   protected static void createResourceType(JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
-      if (response.statusCode() == 201) {
+      if (response.statusCode() == 201 || response.statusCode() == 409) {
         fut.complete();
       } else {
         response.bodyHandler(buffer -> {
@@ -110,7 +110,7 @@ public abstract class EntityReporter {
 
   protected static void createResource(String path, JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri(path, "resource"), response -> {
-      if (response.statusCode() == 201) {
+      if (response.statusCode() == 201 || response.statusCode() == 409) {
         fut.complete();
       } else {
         response.bodyHandler(buffer -> {
@@ -125,7 +125,7 @@ public abstract class EntityReporter {
 
   protected static void createMetricType(JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "metricType"), response -> {
-      if (response.statusCode() == 201) {
+      if (response.statusCode() == 201 || response.statusCode() == 409) {
         fut.complete();
       } else {
         response.bodyHandler(buffer -> {
@@ -158,7 +158,7 @@ public abstract class EntityReporter {
     JsonArray body = new JsonArray().add(metricPath);
     // This uses deprecated api because haven't find how to do this in new api.
     HttpClientRequest request = httpClient.post(inventoryURI+"/deprecated/feeds/"+feedId+"/resourceTypes/"+resourceTypeId+"/metricTypes", response -> {
-      if (response.statusCode() == 204) {
+      if (response.statusCode() == 204 || response.statusCode() == 409) {
         fut.complete();
       } else {
         response.bodyHandler(buffer -> {

@@ -20,8 +20,8 @@ public class HttpServerResourceReporter extends EntityReporter {
   private final String httpServerResourceId;
   HttpServerResourceReporter(VertxHawkularOptions options, HttpClient httpClient, SocketAddress localAddress) {
     super(options, httpClient);
-    httpServerResourceId = rootResourceId + ".http.server";
     this.localAddress = localAddress;
+    httpServerResourceId = rootResourceId + ".http.server."+localAddress.host()+":"+localAddress.port();
   }
 
   @Override

@@ -15,7 +15,6 @@
  */
 package io.vertx.ext.hawkular.impl.inventory;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -29,7 +28,10 @@ import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 
 /**
@@ -41,12 +43,16 @@ public class InventoryReporter {
 
   private static final Logger LOG = LoggerFactory.getLogger(InventoryReporter.class);
   private final Context context;
+  private final Vertx vertx;
   private final VertxHawkularOptions options;
   private HttpClient httpClient;
   private EntityReporter feedReporter;
   private EntityReporter rootResourceReporter;
   private List<EntityReporter> subResourceReporters;
-  private Set<SocketAddress> httpSocketAddresses;
+  private long sendTime;
+  private final long batchDelay;
+  private long timerId;
+
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -56,6 +62,7 @@ public class InventoryReporter {
   public InventoryReporter(Vertx vertx, VertxHawkularOptions options, Context context) {
     this.context = context;
     this.options = options;
+    this.vertx = vertx;
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()
         .setDefaultHost(options.getHost())
@@ -66,53 +73,48 @@ public class InventoryReporter {
       subResourceReporters = new ArrayList<>();
       subResourceReporters.add(new EventbusResourceReporter(options, httpClient));
     });
+    sendTime = System.nanoTime();
+    batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
   }
   public void report() {
     context.runOnContext(aVoid -> {
       Future<Void> feedCreated = Future.future();
       Future<Void> rootResourceCreated = Future.future();
-      Future<Void> subResourcesCreated = Future.future();
       feedReporter.createFeed(feedCreated);
       feedCreated.compose(aVoid1 -> {
         rootResourceReporter.report(rootResourceCreated);
       }, rootResourceCreated);
-      rootResourceCreated.compose(aVoid1 -> {
-        List<Future> futureList = new ArrayList<>(subResourceReporters.size());
-        for (int i = 0; i < subResourceReporters.size(); i++) {
-          EntityReporter r = subResourceReporters.get(i);
-          Future<Void> future = Future.future();
-          r.report(future);
-          futureList.add(future);
-        }
-        CompositeFuture.all(futureList).setHandler(ar -> {
-          if (ar.succeeded()) {
-            subResourcesCreated.complete();
-          } else {
-            subResourcesCreated.fail(ar.cause());
-          }
-        });
-      }, subResourcesCreated);
-      subResourcesCreated.setHandler(ar -> {
-        if (ar.succeeded()) {
-          System.out.println("DONE");
-        } else {
-          System.err.println(ar.cause().getLocalizedMessage());
-        }
+      rootResourceCreated.setHandler(ar -> {
+        timerId = vertx.setPeriodic(MILLISECONDS.convert(batchDelay, NANOSECONDS), this::reportSubResources);
       });
     });
   }
 
   public void stop() {
     httpClient.close();
+    vertx.cancelTimer(timerId);
   }
 
-  public InventoryReporter setHttpSocketAddresses(Set<SocketAddress> httpSocketAddresses) {
-    this.httpSocketAddresses = httpSocketAddresses;
-    context.runOnContext(aVoid -> {
-      for (SocketAddress addr : httpSocketAddresses) {
-        subResourceReporters.add(new HttpServerResourceReporter(options, httpClient, addr));
+  public void registerHttpServer(SocketAddress address) {
+    subResourceReporters.add(new HttpServerResourceReporter(options, httpClient, address));
+  }
+
+  private void reportSubResources(Long timerId) {
+    if (System.nanoTime() - sendTime > batchDelay && !subResourceReporters.isEmpty()) {
+      subResourceReporters.forEach(this::handle);
+      subResourceReporters.clear();
+    }
+  }
+
+  private void handle(EntityReporter reporter) {
+    Future<Void> fut = Future.future();
+    reporter.report(fut);
+    fut.setHandler(ar -> {
+      if (ar.succeeded()) {
+        System.out.println("DONE : " + reporter.toString());
+      } else {
+        System.err.println("FAIL : " + reporter.toString());
       }
     });
-    return this;
   }
 }
