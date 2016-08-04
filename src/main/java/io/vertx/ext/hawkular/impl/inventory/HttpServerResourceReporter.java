@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Report http server resource to the Hawkular server.
+ * Report the http server resource to the Hawkular server.
  *
  * @author Austin Kuo
  */

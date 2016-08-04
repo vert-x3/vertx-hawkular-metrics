@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 /**
- * Report eventbus Resource to the Hawkular server.
+ * Report the eventbus Resource to the Hawkular server.
  *
  * @author Austin Kuo
  */

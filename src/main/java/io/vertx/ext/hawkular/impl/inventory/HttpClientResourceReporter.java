@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Report a http client resource to the Hawkular server.
+ * Report the http client resource to the Hawkular server.
  *
  * @author Austin Kuo
  */
