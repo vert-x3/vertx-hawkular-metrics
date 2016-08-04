@@ -57,19 +57,19 @@ public class HttpServerResourceReporter extends EntityReporter {
       JsonObject body = new JsonObject().put("id", httpServerResourceId).put("resourceTypePath", "/f;" + feedId + "/rt;" + httpServerResourceTypeId);
       createResource("f;" + feedId + "/r;" + rootResourceId, body, fut2);
     }, fut2);
-    fut2.setHandler(aVoid -> {
+    fut2.compose(aVoid1 -> {
       List<Future> futureList = new ArrayList(numMetrics);
       for (int i = 0; i < numMetrics; i++) {
         futureList.add(Future.future());
       }
-      reportMetric(futureList.get(0), requestCountMetricTypeId, requestCountMetricId, ".requestCount", "NONE", "COUNTER");
-      reportMetric(futureList.get(1), processingTimeMetricTypeId, processingTimeMetricId, ".processingTime", "MILLISECONDS", "COUNTER");
-      reportMetric(futureList.get(2), bytesReceivedMetricTypeId, bytesReceivedMetricId, ".bytesReceived", "BYTES", "COUNTER");
-      reportMetric(futureList.get(3), bytesSentMetricTypeId, bytesSentMetricId, ".bytesSent", "BYTES", "COUNTER");
-      reportMetric(futureList.get(4), errorCountMetricTypeId, errorCountMetricId, ".errorCount", "BYTES", "COUNTER");
-      reportMetric(futureList.get(5), requestsMetricTypeId, requestsMetricId, ".requests", "NONE", "GAUGE");
-      reportMetric(futureList.get(6), httpConnectionsMetricTypeId, httpConnectionsMetricId, ".httpConnections", "NONE", "GAUGE");
-      reportMetric(futureList.get(7), wsConnectionsMetricTypeId, wsConnectionsMetricId, ".wsConnections", "NONE", "GAUGE");
+      reportMetric(futureList.get(0), requestCountMetricTypeId, ".requestCount", "NONE", "COUNTER");
+      reportMetric(futureList.get(1), processingTimeMetricTypeId, ".processingTime", "MILLISECONDS", "COUNTER");
+      reportMetric(futureList.get(2), bytesReceivedMetricTypeId, ".bytesReceived", "BYTES", "COUNTER");
+      reportMetric(futureList.get(3), bytesSentMetricTypeId, ".bytesSent", "BYTES", "COUNTER");
+      reportMetric(futureList.get(4), errorCountMetricTypeId, ".errorCount", "BYTES", "COUNTER");
+      reportMetric(futureList.get(5), requestsMetricTypeId, ".requests", "NONE", "GAUGE");
+      reportMetric(futureList.get(6), httpConnectionsMetricTypeId, ".httpConnections", "NONE", "GAUGE");
+      reportMetric(futureList.get(7), wsConnectionsMetricTypeId, ".wsConnections", "NONE", "GAUGE");
       CompositeFuture.all(futureList).setHandler(ar -> {
         if (ar.succeeded()) {
           future.complete();
@@ -77,17 +77,18 @@ public class HttpServerResourceReporter extends EntityReporter {
           future.fail(ar.cause());
         }
       });
-    });
+    }, future);
   }
 
-  private void reportMetric(Future<Void> future, String metricTypeId, String metricId, String postFix, String unit, String type) {
+  private void reportMetric(Future<Void> future, String metricTypeId, String postFix, String unit, String type) {
     Future<Void> fut1 = Future.future();
     Future<Void> fut2 = Future.future();
+    String metricId = metricBasename+"http.server."+localAddress.host()+":"+localAddress.port()+postFix;
     JsonObject body = new JsonObject().put("id", metricTypeId).put("type", type).put("unit", unit).put("collectionInterval", collectionInterval);
     createMetricType(body, fut1);
     fut1.compose(aVoid -> {
       JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", "/f;" + feedId + "/mt;" + metricTypeId)
-              .put("properties", new JsonObject().put("metric-id", metricBasename+"http.server."+localAddress.host()+":"+localAddress.port()+postFix));
+              .put("properties", new JsonObject().put("metric-id", metricId));
       String path = String.format("f;%s/r;%s/r;%s", feedId, rootResourceId, httpServerResourceId);
       createMetric(path, body1,fut2);
     }, fut2);
