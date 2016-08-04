@@ -103,16 +103,13 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   @Override
   public HttpServerMetrics<Long, Void, Void> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
     HttpServerMetricsSupplier supplier = (HttpServerMetricsSupplier) metricSuppliers.get(HTTP_SERVER);
-    context.runOnContext(aVoid -> {
-      httpSocketAddresses.add(localAddress);
-    });
-    return supplier != null ? new HttpServerMetricsImpl(localAddress, supplier) : super.createMetrics(server, localAddress, options);
+    return supplier != null ? new HttpServerMetricsImpl(localAddress, supplier, inventoryReporter) : super.createMetrics(server, localAddress, options);
   }
 
   @Override
   public HttpClientMetrics createMetrics(HttpClient client, HttpClientOptions options) {
     HttpClientMetricsSupplier supplier = (HttpClientMetricsSupplier) metricSuppliers.get(HTTP_CLIENT);
-    return supplier != null ? new HttpClientMetricsImpl(supplier) : super.createMetrics(client, options);
+    return supplier != null ? new HttpClientMetricsImpl(supplier, inventoryReporter) : super.createMetrics(client, options);
   }
 
   @Override
@@ -167,8 +164,10 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     context = vertx.getOrCreateContext();
     sender = new Sender(vertx, options, context);
     scheduler = new Scheduler(vertx, options, context, sender);
-    inventoryReporter = new InventoryReporter(vertx, options, context).setHttpSocketAddresses(httpSocketAddresses);
-    inventoryReporter.report();
+    if (options.isInventoryEnabled()) {
+      inventoryReporter = new InventoryReporter(vertx, options, context);
+      inventoryReporter.report();
+    }
     metricSuppliers.values().forEach(scheduler::register);
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.

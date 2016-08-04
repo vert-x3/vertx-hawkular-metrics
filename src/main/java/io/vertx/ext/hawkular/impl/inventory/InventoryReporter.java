@@ -48,6 +48,7 @@ public class InventoryReporter {
   private HttpClient httpClient;
   private EntityReporter feedReporter;
   private EntityReporter rootResourceReporter;
+  private HttpClientResourceReporter httpClientResourceReporter;
   private List<EntityReporter> subResourceReporters;
   private long sendTime;
   private final long batchDelay;
@@ -63,6 +64,7 @@ public class InventoryReporter {
     this.context = context;
     this.options = options;
     this.vertx = vertx;
+    subResourceReporters = new ArrayList<>();
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()
         .setDefaultHost(options.getHost())
@@ -70,9 +72,9 @@ public class InventoryReporter {
       httpClient = vertx.createHttpClient(httpClientOptions);
       feedReporter = new FeedReporter(options, httpClient);
       rootResourceReporter = new RootResourceReporter(options, httpClient);
-      subResourceReporters = new ArrayList<>();
       subResourceReporters.add(new EventbusResourceReporter(options, httpClient));
-      subResourceReporters.add(new HttpClientResourceReporter(options, httpClient));
+      httpClientResourceReporter = new HttpClientResourceReporter(options, httpClient);
+      subResourceReporters.add(httpClientResourceReporter);
     });
     sendTime = System.nanoTime();
     batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
@@ -86,7 +88,11 @@ public class InventoryReporter {
         rootResourceReporter.report(rootResourceCreated);
       }, rootResourceCreated);
       rootResourceCreated.setHandler(ar -> {
-        timerId = vertx.setPeriodic(MILLISECONDS.convert(batchDelay, NANOSECONDS), this::reportSubResources);
+        if (ar.succeeded()) {
+          timerId = vertx.setPeriodic(MILLISECONDS.convert(batchDelay, NANOSECONDS), this::reportSubResources);
+        } else {
+          LOG.error(ar.cause().getLocalizedMessage());
+        }
       });
     });
   }
@@ -120,5 +126,9 @@ public class InventoryReporter {
         handle(reporter);
       }
     });
+  }
+
+  public void reportAddressMetric(SocketAddress remoteAddress) {
+    httpClientResourceReporter.addAddress(remoteAddress);
   }
 }
