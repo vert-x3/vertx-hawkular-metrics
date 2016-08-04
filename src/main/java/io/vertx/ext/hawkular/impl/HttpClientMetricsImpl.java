@@ -145,7 +145,7 @@ public class HttpClientMetricsImpl
     HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements == null) {
       measurements = connectionsMeasurements.computeIfAbsent(key, address -> new HttpClientConnectionsMeasurements());
-      inventoryReporter.reportAddressMetric(key);
+      inventoryReporter.addHttpClientAddress(key);
     }
     measurements.incrementConnections();
     return key;

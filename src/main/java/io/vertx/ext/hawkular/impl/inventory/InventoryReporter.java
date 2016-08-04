@@ -49,6 +49,7 @@ public class InventoryReporter {
   private EntityReporter feedReporter;
   private EntityReporter rootResourceReporter;
   private HttpClientResourceReporter httpClientResourceReporter;
+  private DatagramSocketResourceReporter datagramSocketResourceReporter;
   private List<EntityReporter> subResourceReporters;
   private long sendTime;
   private final long batchDelay;
@@ -70,11 +71,15 @@ public class InventoryReporter {
         .setDefaultHost(options.getHost())
         .setDefaultPort(options.getPort());
       httpClient = vertx.createHttpClient(httpClientOptions);
+      datagramSocketResourceReporter = new DatagramSocketResourceReporter(options, httpClient);
       feedReporter = new FeedReporter(options, httpClient);
       rootResourceReporter = new RootResourceReporter(options, httpClient);
       subResourceReporters.add(new EventbusResourceReporter(options, httpClient));
       httpClientResourceReporter = new HttpClientResourceReporter(options, httpClient);
       subResourceReporters.add(httpClientResourceReporter);
+      datagramSocketResourceReporter = new DatagramSocketResourceReporter(options, httpClient);
+      subResourceReporters.add(datagramSocketResourceReporter);
+      LOG.info("Inventory Reporter inited");
     });
     sendTime = System.nanoTime();
     batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
@@ -128,7 +133,22 @@ public class InventoryReporter {
     });
   }
 
-  public void reportAddressMetric(SocketAddress remoteAddress) {
-    httpClientResourceReporter.addAddress(remoteAddress);
+  public void addHttpClientAddress(SocketAddress address) {
+    context.runOnContext(aVoid -> {
+      httpClientResourceReporter.addAddress(address);
+    });
+  }
+
+  public void addDatagramSentAddress(SocketAddress address) {
+    context.runOnContext(aVoid -> {
+      datagramSocketResourceReporter.addSentAddress(address);
+    });
+
+  }
+
+  public void addDatagramReceivedAddress(SocketAddress address) {
+    context.runOnContext(aVoid -> {
+      datagramSocketResourceReporter.addReceivedAddress(address);
+    });
   }
 }
