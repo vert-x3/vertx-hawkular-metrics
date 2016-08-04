@@ -140,7 +140,7 @@ public abstract class EntityReporter {
 
   protected static void createMetric(String path, JsonObject body, Future<Void> fut) {
     HttpClientRequest request = httpClient.post(composeEntityUri(path, "metric"), response -> {
-      if (response.statusCode() == 201) {
+      if (response.statusCode() == 201 || response.statusCode() == 409) {
         fut.complete();
       } else {
         response.bodyHandler(buffer -> {

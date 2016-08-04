@@ -113,9 +113,9 @@ public class InventoryReporter {
     reporter.report(fut);
     fut.setHandler(ar -> {
       if (ar.succeeded()) {
-        System.out.println(sendTime + " DONE : " + reporter.toString());
+        LOG.info("DONE : " + reporter.toString());
       } else {
-        System.err.println(sendTime + " FAIL : " + reporter.toString());
+        LOG.error("FAIL : " + reporter.toString());
         // retry when any error occurs.
         handle(reporter);
       }
