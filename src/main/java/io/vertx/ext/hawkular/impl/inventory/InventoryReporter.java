@@ -42,6 +42,7 @@ public class InventoryReporter {
   private HttpClient httpClient;
   private EntityReporter feedReporter;
   private EntityReporter rootResourceReporter;
+  private EventbusResourceReporter eventbusResourceReporter;
   private HttpClientResourceReporter httpClientResourceReporter;
   private DatagramSocketResourceReporter datagramSocketResourceReporter;
   private NetClientResourceReporter netClientResourceReporter;
@@ -67,7 +68,8 @@ public class InventoryReporter {
       feedReporter = new FeedReporter(options, httpClient);
       String type = vertx.isClustered()? "cluster" : "standalone";
       rootResourceReporter = new RootResourceReporter(options, httpClient, type);
-      subResourceReporters.add(new EventbusResourceReporter(options, httpClient));
+      eventbusResourceReporter = new EventbusResourceReporter(options, httpClient);
+      subResourceReporters.add(eventbusResourceReporter);
       httpClientResourceReporter = new HttpClientResourceReporter(options, httpClient);
       subResourceReporters.add(httpClientResourceReporter);
       datagramSocketResourceReporter = new DatagramSocketResourceReporter(options, httpClient);
@@ -144,6 +146,12 @@ public class InventoryReporter {
   public void addNetClientRemoteAddress(SocketAddress address) {
     context.runOnContext(aVoid -> {
       netClientResourceReporter.addRemoteAddress(address);
+    });
+  }
+
+  public void addEventbusRemoteAddress(String address) {
+    context.runOnContext(aVoid -> {
+      eventbusResourceReporter.addRemoteAddress(address);
     });
   }
 }
