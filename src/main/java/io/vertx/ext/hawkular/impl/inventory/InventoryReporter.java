@@ -142,7 +142,7 @@ public class InventoryReporter {
 
   public void addHttpClientAddress(SocketAddress address) {
     context.runOnContext(aVoid -> {
-      httpClientResourceReporter.addAddress(address);
+      httpClientResourceReporter.addRemoteAddress(address);
     });
   }
 

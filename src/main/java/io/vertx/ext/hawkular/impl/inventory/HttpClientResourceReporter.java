@@ -10,7 +10,9 @@ import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Report the http client resource to the Hawkular server.
@@ -19,7 +21,7 @@ import java.util.List;
  */
 public class HttpClientResourceReporter extends EntityReporter {
   private static final Logger LOG = LoggerFactory.getLogger(HttpClientResourceReporter.class);
-  private final List<SocketAddress> addresses = new ArrayList<>();
+  private final Set<SocketAddress> remoteAddresses = new HashSet<>();
   private static final String httpClientResourceTypeId = "rt.http.client";
   private final String httpClientResourceId;
   private static final String connectionsMetricTypeId = "mt.gauge.connections";
@@ -46,11 +48,11 @@ public class HttpClientResourceReporter extends EntityReporter {
     }, fut2);
     fut2.compose(aVoid -> {
       List<Future> futureList = new ArrayList<>();
-      for (int i = 0; i < addresses.size(); i++) {
+      remoteAddresses.forEach(addr -> {
         Future fut = Future.future();
         futureList.add(fut);
-        reportAddressMetric(addresses.get(i), fut);
-      }
+        reportAddressMetric(addr, fut);
+      });
       CompositeFuture.all(futureList).setHandler(ar -> {
         if (ar.succeeded()) {
           future.complete();
@@ -61,7 +63,7 @@ public class HttpClientResourceReporter extends EntityReporter {
     }, future);
   }
 
-  public void reportAddressMetric(SocketAddress address, Future<Void> future) {
+  private void reportAddressMetric(SocketAddress address, Future<Void> future) {
 
     List<Future> futureList = new ArrayList<>(8);
     for (int i = 0; i < 8; i++) {
@@ -108,7 +110,7 @@ public class HttpClientResourceReporter extends EntityReporter {
     }, future);
   }
 
-  public void addAddress(SocketAddress address) {
-    addresses.add(address);
+  protected void addRemoteAddress(SocketAddress address) {
+    remoteAddresses.add(address);
   }
 }

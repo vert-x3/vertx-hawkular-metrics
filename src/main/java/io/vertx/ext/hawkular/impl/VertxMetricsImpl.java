@@ -115,19 +115,19 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   @Override
   public TCPMetrics createMetrics(NetServer server, SocketAddress localAddress, NetServerOptions options) {
     NetServerMetricsSupplier supplier = (NetServerMetricsSupplier) metricSuppliers.get(NET_SERVER);
-    return supplier != null ? new NetServerMetricsImpl(localAddress, supplier) : super.createMetrics(server, localAddress, options);
+    return supplier != null ? new NetServerMetricsImpl(localAddress, supplier, inventoryReporter) : super.createMetrics(server, localAddress, options);
   }
 
   @Override
   public TCPMetrics createMetrics(NetClient client, NetClientOptions options) {
     NetClientMetricsSupplier supplier = (NetClientMetricsSupplier) metricSuppliers.get(NET_CLIENT);
-    return supplier != null ? new NetClientMetricsImpl(supplier) : super.createMetrics(client, options);
+    return supplier != null ? new NetClientMetricsImpl(supplier, inventoryReporter) : super.createMetrics(client, options);
   }
 
   @Override
   public DatagramSocketMetrics createMetrics(DatagramSocket socket, DatagramSocketOptions options) {
     DatagramSocketMetricsSupplier supplier = (DatagramSocketMetricsSupplier) metricSuppliers.get(DATAGRAM_SOCKET);
-    return supplier != null ? new DatagramSocketMetricsImpl(supplier) : super.createMetrics(socket, options);
+    return supplier != null ? new DatagramSocketMetricsImpl(supplier, inventoryReporter) : super.createMetrics(socket, options);
   }
 
   @Override
