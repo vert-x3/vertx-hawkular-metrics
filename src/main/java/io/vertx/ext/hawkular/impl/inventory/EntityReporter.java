@@ -23,29 +23,41 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Austin Kuo
  */
-public abstract class EntityReporter {
+public class EntityReporter {
 
   protected static String feedId;
+  protected static String tenant;
   protected static String metricBasename;
   protected static String inventoryURI;
   protected static String rootResourceTypeId = "rt.vertx-root";
   protected static String rootResourceId;
   protected static int collectionInterval;
+  protected static String tenantPath;
+  protected static String feedPath;
+  protected static String rootResourcePath;
+
+  protected static final String FEED = "feed";
+  protected static final String RESOURCE = "resource";
+  protected static final String RESOURCE_TYPE = "resourceType";
+  protected static final String METRIC = "metric";
+  protected static final String METRIC_TYPE = "metricType";
+
+
 
   private static HttpClient httpClient;
   private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
 
   private static Map<CharSequence, Iterable<CharSequence>> httpHeaders;
-  private static CharSequence tenant;
   private static CharSequence auth;
+  private static JsonObject bulkJson;
 
   EntityReporter(VertxHawkularOptions options, HttpClient httpClient) {
     feedId = options.getFeedId();
     metricBasename = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.";
     inventoryURI = options.getInventoryServiceUri();
     this.httpClient = httpClient;
-    tenant = options.isSendTenantHeader() ? HttpHeaders.createOptimized(options.getTenant()) : null;
+    tenant = options.isSendTenantHeader() ? options.getTenant() : null;
     AuthenticationOptions authenticationOptions = options.getAuthenticationOptions();
     if (authenticationOptions.isEnabled()) {
       String authString = authenticationOptions.getId() + ":" + authenticationOptions.getSecret();
@@ -76,84 +88,27 @@ public abstract class EntityReporter {
     }
     rootResourceId = options.getVertxRootResourceId();
     collectionInterval = options.getSchedule();
+    tenantPath = String.format("/t;%s", tenant);
+    feedPath = String.format("/t;%s/f;%s", tenant, feedId);
+    rootResourcePath = String.format("/t;%s/f;%s/r;%s", tenant, feedId, rootResourceId);
+    bulkJson =  new JsonObject().put(tenantPath, new JsonObject().put("feed", new JsonArray()))
+            .put(feedPath, new JsonObject()
+                    .put("resource", new JsonArray())
+                    .put("resourceType", new JsonArray())
+                    .put("metricType", new JsonArray())
+                    .put("relationship", new JsonArray()));
   }
 
-  protected static void createFeed(Future<Void> fut) {
-    HttpClientRequest request = httpClient.post(composeEntityUri("", "feed"), response -> {
-      if (response.statusCode() == 201) {
-        fut.complete();
-      } else {
-        response.bodyHandler(buffer -> {
-          System.err.println(buffer.getBuffer(0, buffer.length()));
-        });
-        fut.fail("Fail to create feed.");
-      }
-    });
-    addHeaders(request);
-    request.end(new JsonObject().put("id", feedId).encode());
+  protected static void addEntity(String path, String type, JsonObject entity) {
+    if (!bulkJson.containsKey(path)) {
+      bulkJson.put(path, new JsonObject());
+    }
+    if (!bulkJson.getJsonObject(path).containsKey(type)) {
+      bulkJson.getJsonObject(path).put(type, new JsonArray());
+    }
+    bulkJson.getJsonObject(path).getJsonArray(type).add(entity);
   }
-
-  protected static void createResourceType(JsonObject body, Future<Void> fut) {
-    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "resourceType"), response -> {
-      if (response.statusCode() == 201 || response.statusCode() == 409) {
-        fut.complete();
-      } else {
-        response.bodyHandler(buffer -> {
-          System.err.println(buffer.getBuffer(0, buffer.length()));
-        });
-        fut.fail("Fail to create resource type with payload : " + body.encode());
-      }
-    });
-    addHeaders(request);
-    request.end(body.encode());
-  }
-
-  protected static void createResource(String path, JsonObject body, Future<Void> fut) {
-    HttpClientRequest request = httpClient.post(composeEntityUri(path, "resource"), response -> {
-      if (response.statusCode() == 201 || response.statusCode() == 409) {
-        fut.complete();
-      } else {
-        response.bodyHandler(buffer -> {
-          System.err.println(buffer.getBuffer(0, buffer.length()));
-        });
-        fut.fail("Fail to create resource with payload : " + body.encode());
-      }
-    });
-    addHeaders(request);
-    request.end(body.encode());
-  }
-
-  protected static void createMetricType(JsonObject body, Future<Void> fut) {
-    HttpClientRequest request = httpClient.post(composeEntityUri("f;"+feedId, "metricType"), response -> {
-      if (response.statusCode() == 201 || response.statusCode() == 409) {
-        fut.complete();
-      } else {
-        response.bodyHandler(buffer -> {
-          System.err.println(buffer.getBuffer(0, buffer.length()));
-        });
-        fut.fail("Fail to create metric type with payload : " + body.encode());
-      }
-    });
-    addHeaders(request);
-    request.end(body.encode());
-  }
-
-  protected static void createMetric(String path, JsonObject body, Future<Void> fut) {
-    HttpClientRequest request = httpClient.post(composeEntityUri(path, "metric"), response -> {
-      if (response.statusCode() == 201 || response.statusCode() == 409) {
-        fut.complete();
-      } else {
-        response.bodyHandler(buffer -> {
-          System.err.println(buffer.getBuffer(0, buffer.length()));
-        });
-        fut.fail("Fail to create metric with payload : " + body.encode());
-      }
-    });
-    addHeaders(request);
-    request.end(body.encode());
-  }
-
-  protected static void associateMetricTypeWithResourceType(String metricTypeId, String resourceTypeId, Future<Void> fut) {
+  /*protected static void associateMetricTypeWithResourceType(String metricTypeId, String resourceTypeId, Future<Void> fut) {
     String metricPath = String.format("/t;%s/f;%s/mt;%s", tenant, feedId, metricTypeId);
     JsonArray body = new JsonArray().add(metricPath);
     // This uses deprecated api because haven't find how to do this in new api.
@@ -170,6 +125,7 @@ public abstract class EntityReporter {
     addHeaders(request);
     request.end(body.encode());
   }
+  */
 
   private static void addHeaders(HttpClientRequest request) {
     request.putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
@@ -185,13 +141,23 @@ public abstract class EntityReporter {
     });
   }
 
-  private static String composeEntityUri(String path,String type) {
-    if (!path.isEmpty()) {
-      return String.format("%s/entity/%s/%s", inventoryURI, path, type);
-    } else {
-      return String.format("%s/entity/%s", inventoryURI, type);
-    }
-  }
+  protected void register() {
 
-  abstract void report(Future<Void> future);
+  };
+
+  protected static void report(Future<Void> future) {
+    HttpClientRequest request = httpClient.post(inventoryURI+"/bulk", response -> {
+      response.bodyHandler(buffer -> {
+        System.out.println(buffer.getBuffer(0, buffer.length()));
+      });
+      if (response.statusCode() == 201) {
+        future.complete();
+      } else {
+        future.fail("Fail to report " + bulkJson.encode());
+      }
+    });
+    addHeaders(request);
+    System.out.println(bulkJson.encodePrettily());
+    request.end(bulkJson.encode());
+  };
 }

@@ -40,13 +40,13 @@ public class InventoryReporter {
   private final Vertx vertx;
   private final VertxHawkularOptions options;
   private HttpClient httpClient;
-  private EntityReporter feedReporter;
-  private EntityReporter rootResourceReporter;
+  private FeedReporter feedReporter;
+  private RootResourceReporter rootResourceReporter;
   private EventbusResourceReporter eventbusResourceReporter;
   private HttpClientResourceReporter httpClientResourceReporter;
   private DatagramSocketResourceReporter datagramSocketResourceReporter;
   private NetClientResourceReporter netClientResourceReporter;
-  private Set<EntityReporter> subResourceReporters;
+  private Set<EntityReporter> entityReporters;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -57,7 +57,7 @@ public class InventoryReporter {
     this.context = context;
     this.options = options;
     this.vertx = vertx;
-    subResourceReporters = new HashSet<>();
+    entityReporters = new HashSet<>();
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()
         .setDefaultHost(options.getHost())
@@ -66,33 +66,33 @@ public class InventoryReporter {
       httpClient = vertx.createHttpClient(httpClientOptions);
       datagramSocketResourceReporter = new DatagramSocketResourceReporter(options, httpClient);
       feedReporter = new FeedReporter(options, httpClient);
+      entityReporters.add(feedReporter);
       String type = vertx.isClustered()? "cluster" : "standalone";
       rootResourceReporter = new RootResourceReporter(options, httpClient, type);
+      entityReporters.add(rootResourceReporter);
       eventbusResourceReporter = new EventbusResourceReporter(options, httpClient);
-      subResourceReporters.add(eventbusResourceReporter);
       httpClientResourceReporter = new HttpClientResourceReporter(options, httpClient);
-      subResourceReporters.add(httpClientResourceReporter);
       datagramSocketResourceReporter = new DatagramSocketResourceReporter(options, httpClient);
-      subResourceReporters.add(datagramSocketResourceReporter);
       netClientResourceReporter = new NetClientResourceReporter(options, httpClient);
-      subResourceReporters.add(netClientResourceReporter);
+      entityReporters.add(eventbusResourceReporter);
+      entityReporters.add(httpClientResourceReporter);
+      entityReporters.add(datagramSocketResourceReporter);
+      entityReporters.add(netClientResourceReporter);
       LOG.info("Inventory Reporter inited");
     });
   }
   public void report() {
     context.runOnContext(aVoid -> {
-      Future<Void> feedCreated = Future.future();
-      Future<Void> rootResourceCreated = Future.future();
-      feedReporter.createFeed(feedCreated);
-      feedCreated.compose(aVoid1 -> {
-        rootResourceReporter.report(rootResourceCreated);
-      }, rootResourceCreated);
-      rootResourceCreated.setHandler(ar -> {
+      entityReporters.forEach(e -> {
+        e.register();
+      });
+      Future<Void> reported = Future.future();
+      EntityReporter.report(reported);
+      reported.setHandler(ar -> {
         if (ar.succeeded()) {
-          subResourceReporters.forEach(this::handle);
-          subResourceReporters.clear();
+          LOG.info("report successfully.");
         } else {
-          LOG.error(ar.cause().getLocalizedMessage());
+          LOG.error("report failed.");
         }
       });
     });
@@ -103,25 +103,11 @@ public class InventoryReporter {
   }
 
   public void registerHttpServer(SocketAddress address) {
-    subResourceReporters.add(new HttpServerResourceReporter(options, httpClient, address));
+    new HttpServerResourceReporter(options, httpClient, address).register();
   }
 
   public void registerNetServer(SocketAddress address) {
-    subResourceReporters.add(new NetServerResourceReporter(options, httpClient, address));
-  }
-
-  private void handle(EntityReporter reporter) {
-    Future<Void> fut = Future.future();
-    reporter.report(fut);
-    fut.setHandler(ar -> {
-      if (ar.succeeded()) {
-        LOG.info("DONE : " + reporter.toString());
-      } else {
-        // retry when any error occurs.
-        LOG.error(ar.cause().getLocalizedMessage());
-        handle(reporter);
-      }
-    });
+    entityReporters.add(new NetServerResourceReporter(options, httpClient, address));
   }
 
   public void addHttpClientAddress(SocketAddress address) {

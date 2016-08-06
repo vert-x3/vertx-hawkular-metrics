@@ -7,9 +7,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Report the http server resource to the Hawkular server.
  *
@@ -30,7 +27,6 @@ public class HttpServerResourceReporter extends EntityReporter {
   private static final String wsConnectionsMetricTypeId = "mt.counter.wsConnections";
 
   private final String httpServerResourceId;
-  private static final int numMetrics = 8;
   
   HttpServerResourceReporter(VertxHawkularOptions options, HttpClient httpClient, SocketAddress localAddress) {
     super(options, httpClient);
@@ -39,52 +35,30 @@ public class HttpServerResourceReporter extends EntityReporter {
   }
 
   @Override
-  void report(Future<Void> future) {
-    Future<Void> fut1 = Future.future();
-    Future<Void> fut2 = Future.future();
+  protected void register() {
+    addEntity(feedPath, RESOURCE_TYPE, new JsonObject().put("id", httpServerResourceTypeId));
+    JsonObject body = new JsonObject().put("id", httpServerResourceId).put("resourceTypePath", "/f;" + feedId + "/rt;" + httpServerResourceTypeId);
+    addEntity(rootResourcePath, RESOURCE, body);
 
-    createResourceType(new JsonObject().put("id", httpServerResourceTypeId), fut1);
-    fut1.compose(aVoid -> {
-      JsonObject body = new JsonObject().put("id", httpServerResourceId).put("resourceTypePath", "/f;" + feedId + "/rt;" + httpServerResourceTypeId);
-      createResource("f;" + feedId + "/r;" + rootResourceId, body, fut2);
-    }, fut2);
-    fut2.compose(aVoid1 -> {
-      List<Future> futureList = new ArrayList(numMetrics);
-      for (int i = 0; i < numMetrics; i++) {
-        futureList.add(Future.future());
-      }
-      reportMetric(futureList.get(0), requestCountMetricTypeId, ".requestCount", "NONE", "COUNTER");
-      reportMetric(futureList.get(1), processingTimeMetricTypeId, ".processingTime", "MILLISECONDS", "COUNTER");
-      reportMetric(futureList.get(2), bytesReceivedMetricTypeId, ".bytesReceived", "BYTES", "COUNTER");
-      reportMetric(futureList.get(3), bytesSentMetricTypeId, ".bytesSent", "BYTES", "COUNTER");
-      reportMetric(futureList.get(4), errorCountMetricTypeId, ".errorCount", "BYTES", "COUNTER");
-      reportMetric(futureList.get(5), requestsMetricTypeId, ".requests", "NONE", "GAUGE");
-      reportMetric(futureList.get(6), httpConnectionsMetricTypeId, ".httpConnections", "NONE", "GAUGE");
-      reportMetric(futureList.get(7), wsConnectionsMetricTypeId, ".wsConnections", "NONE", "GAUGE");
-      CompositeFuture.all(futureList).setHandler(ar -> {
-        if (ar.succeeded()) {
-          future.complete();
-        } else {
-          future.fail(ar.cause());
-        }
-      });
-    }, future);
+    reportMetric(requestCountMetricTypeId, ".requestCount", "NONE", "COUNTER");
+    reportMetric(processingTimeMetricTypeId, ".processingTime", "MILLISECONDS", "COUNTER");
+    reportMetric(bytesReceivedMetricTypeId, ".bytesReceived", "BYTES", "COUNTER");
+    reportMetric(bytesSentMetricTypeId, ".bytesSent", "BYTES", "COUNTER");
+    reportMetric(errorCountMetricTypeId, ".errorCount", "BYTES", "COUNTER");
+    reportMetric(requestsMetricTypeId, ".requests", "NONE", "GAUGE");
+    reportMetric(httpConnectionsMetricTypeId, ".httpConnections", "NONE", "GAUGE");
+    reportMetric(wsConnectionsMetricTypeId, ".wsConnections", "NONE", "GAUGE");
   }
 
-  private void reportMetric(Future<Void> future, String metricTypeId, String postFix, String unit, String type) {
-    Future<Void> fut1 = Future.future();
-    Future<Void> fut2 = Future.future();
+  private void reportMetric(String metricTypeId, String postFix, String unit, String type) {
     String metricId = metricBasename+"http.server."+localAddress.host()+":"+localAddress.port()+postFix;
     JsonObject body = new JsonObject().put("id", metricTypeId).put("type", type).put("unit", unit).put("collectionInterval", collectionInterval);
-    createMetricType(body, fut1);
-    fut1.compose(aVoid -> {
-      JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", "/f;" + feedId + "/mt;" + metricTypeId)
-              .put("properties", new JsonObject().put("metric-id", metricId));
-      String path = String.format("f;%s/r;%s/r;%s", feedId, rootResourceId, httpServerResourceId);
-      createMetric(path, body1,fut2);
-    }, fut2);
-    fut2.compose(aVoid -> {
-      associateMetricTypeWithResourceType(metricTypeId, httpServerResourceTypeId, future);
-    }, future);
+    addEntity(feedPath, METRIC_TYPE, body);
+    JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", "/f;" + feedId + "/mt;" + metricTypeId)
+            .put("properties", new JsonObject().put("metric-id", metricId));
+    String path = String.format(feedId, rootResourcePath, httpServerResourceId);
+    addEntity(path, METRIC, body1);
+   //   associateMetricTypeWithResourceType(metricTypeId, httpServerResourceTypeId, future);
+
   }
 }

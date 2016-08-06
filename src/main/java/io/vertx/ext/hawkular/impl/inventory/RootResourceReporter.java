@@ -18,19 +18,12 @@ public class RootResourceReporter extends EntityReporter {
     this.type = type;
   }
   @Override
-  void report(Future<Void> future) {
-    Future<Void> fut1 = Future.future();
-    Future<Void> fut2 = Future.future();
-    createResourceType(new JsonObject().put("id", rootResourceTypeId), fut1);
-    fut1.compose(aVoid -> {
-      JsonObject body = new JsonObject()
-              .put("id", rootResourceId)
-              .put("resourceTypePath", "/f;" + feedId + "/rt;" + rootResourceTypeId)
-              .put("properties", new JsonObject().put("type", type));
-      createResource("f;"+feedId, body, fut2);
-    }, fut2);
-    fut2.compose(aVoid -> {
-      future.complete();
-    }, future);
+  protected void register() {
+    addEntity(feedPath, RESOURCE_TYPE, new JsonObject().put("id", rootResourceTypeId));
+    JsonObject body = new JsonObject()
+            .put("id", rootResourceId)
+            .put("resourceTypePath", feedPath + "/rt;" + rootResourceTypeId)
+            .put("properties", new JsonObject().put("type", type));
+    addEntity(feedPath, RESOURCE,body);
   }
 }

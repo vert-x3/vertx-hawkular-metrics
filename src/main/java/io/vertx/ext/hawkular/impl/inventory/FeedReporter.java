@@ -2,6 +2,7 @@ package io.vertx.ext.hawkular.impl.inventory;
 
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 /**
@@ -15,7 +16,7 @@ public class FeedReporter extends EntityReporter {
     super(options, httpClient);
   }
   @Override
-  void report(Future<Void> future) {
-    createFeed(future);
+  protected void register() {
+    addEntity(tenantPath, FEED, new JsonObject().put("id", feedId));
   }
 }
