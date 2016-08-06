@@ -25,14 +25,10 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
-
+import java.util.Map;
 
 /**
  * Report inventory to the Hawkular server.
@@ -52,9 +48,6 @@ public class InventoryReporter {
   private DatagramSocketResourceReporter datagramSocketResourceReporter;
   private NetClientResourceReporter netClientResourceReporter;
   private List<EntityReporter> subResourceReporters;
-  private long sendTime;
-  private final long batchDelay;
-  private long timerId;
   private Map<EntityReporter, Integer> retryCount = new HashMap<>();
 
   /**
@@ -84,8 +77,6 @@ public class InventoryReporter {
       subResourceReporters.add(netClientResourceReporter);
       LOG.info("Inventory Reporter inited");
     });
-    sendTime = System.nanoTime();
-    batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
   }
   public void report() {
     context.runOnContext(aVoid -> {
@@ -97,7 +88,8 @@ public class InventoryReporter {
       }, rootResourceCreated);
       rootResourceCreated.setHandler(ar -> {
         if (ar.succeeded()) {
-          timerId = vertx.setPeriodic(MILLISECONDS.convert(batchDelay, NANOSECONDS), this::reportSubResources);
+          subResourceReporters.forEach(this::handle);
+          subResourceReporters.clear();
         } else {
           LOG.error(ar.cause().getLocalizedMessage());
         }
@@ -107,7 +99,6 @@ public class InventoryReporter {
 
   public void stop() {
     httpClient.close();
-    vertx.cancelTimer(timerId);
   }
 
   public void registerHttpServer(SocketAddress address) {
@@ -118,14 +109,6 @@ public class InventoryReporter {
     subResourceReporters.add(new NetServerResourceReporter(options, httpClient, address));
   }
 
-  private void reportSubResources(Long timerId) {
-    if (System.nanoTime() - sendTime > batchDelay && !subResourceReporters.isEmpty()) {
-      subResourceReporters.forEach(this::handle);
-      subResourceReporters.clear();
-    }
-    sendTime = System.nanoTime();
-  }
-
   private void handle(EntityReporter reporter) {
     Future<Void> fut = Future.future();
     reporter.report(fut);
@@ -133,9 +116,17 @@ public class InventoryReporter {
       if (ar.succeeded()) {
         LOG.info("DONE : " + reporter.toString());
       } else {
-        LOG.error("FAIL : " + reporter.toString());
         // retry when any error occurs.
-        handle(reporter);
+        if (!retryCount.containsKey(reporter)) {
+          retryCount.put(reporter, 1);
+        } else {
+          retryCount.put(reporter, retryCount.get(reporter)+1);
+        }
+        LOG.error("FAIL : {0} {1} {2}", retryCount.get(reporter), reporter.getClass().getName(), ar.cause().getLocalizedMessage());
+        //LOG.error("FAIL : " + retryCount.get(reporter) + reporter.toString() + ar.cause().getLocalizedMessage());
+        if (retryCount.get(reporter) < 3) {
+          handle(reporter);
+        }
       }
     });
   }
