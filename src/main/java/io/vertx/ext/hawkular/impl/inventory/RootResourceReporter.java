@@ -12,8 +12,10 @@ import io.vertx.ext.hawkular.VertxHawkularOptions;
  */
 public class RootResourceReporter extends EntityReporter {
 
-  RootResourceReporter(VertxHawkularOptions options, HttpClient httpClient) {
+  private final String type;
+  RootResourceReporter(VertxHawkularOptions options, HttpClient httpClient, String type) {
     super(options, httpClient);
+    this.type = type;
   }
   @Override
   void report(Future<Void> future) {
@@ -24,7 +26,7 @@ public class RootResourceReporter extends EntityReporter {
       JsonObject body = new JsonObject()
               .put("id", rootResourceId)
               .put("resourceTypePath", "/f;" + feedId + "/rt;" + rootResourceTypeId)
-              .put("properties", new JsonObject().put("type", "standalone"));
+              .put("properties", new JsonObject().put("type", type));
       createResource("f;"+feedId, body, fut2);
     }, fut2);
     fut2.compose(aVoid -> {

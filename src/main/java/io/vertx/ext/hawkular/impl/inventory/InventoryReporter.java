@@ -25,10 +25,8 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Report inventory to the Hawkular server.
@@ -47,8 +45,7 @@ public class InventoryReporter {
   private HttpClientResourceReporter httpClientResourceReporter;
   private DatagramSocketResourceReporter datagramSocketResourceReporter;
   private NetClientResourceReporter netClientResourceReporter;
-  private List<EntityReporter> subResourceReporters;
-  private Map<EntityReporter, Integer> retryCount = new HashMap<>();
+  private Set<EntityReporter> subResourceReporters;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -59,15 +56,17 @@ public class InventoryReporter {
     this.context = context;
     this.options = options;
     this.vertx = vertx;
-    subResourceReporters = new ArrayList<>();
+    subResourceReporters = new HashSet<>();
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()
         .setDefaultHost(options.getHost())
         .setDefaultPort(options.getPort());
+
       httpClient = vertx.createHttpClient(httpClientOptions);
       datagramSocketResourceReporter = new DatagramSocketResourceReporter(options, httpClient);
       feedReporter = new FeedReporter(options, httpClient);
-      rootResourceReporter = new RootResourceReporter(options, httpClient);
+      String type = vertx.isClustered()? "cluster" : "standalone";
+      rootResourceReporter = new RootResourceReporter(options, httpClient, type);
       subResourceReporters.add(new EventbusResourceReporter(options, httpClient));
       httpClientResourceReporter = new HttpClientResourceReporter(options, httpClient);
       subResourceReporters.add(httpClientResourceReporter);
@@ -117,16 +116,8 @@ public class InventoryReporter {
         LOG.info("DONE : " + reporter.toString());
       } else {
         // retry when any error occurs.
-        if (!retryCount.containsKey(reporter)) {
-          retryCount.put(reporter, 1);
-        } else {
-          retryCount.put(reporter, retryCount.get(reporter)+1);
-        }
-        LOG.error("FAIL : {0} {1} {2}", retryCount.get(reporter), reporter.getClass().getName(), ar.cause().getLocalizedMessage());
-        //LOG.error("FAIL : " + retryCount.get(reporter) + reporter.toString() + ar.cause().getLocalizedMessage());
-        if (retryCount.get(reporter) < 3) {
-          handle(reporter);
-        }
+        LOG.error(ar.cause().getLocalizedMessage());
+        handle(reporter);
       }
     });
   }
