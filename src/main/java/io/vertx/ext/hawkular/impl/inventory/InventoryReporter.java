@@ -50,11 +50,12 @@ public class InventoryReporter {
   private EntityReporter rootResourceReporter;
   private HttpClientResourceReporter httpClientResourceReporter;
   private DatagramSocketResourceReporter datagramSocketResourceReporter;
+  private NetClientResourceReporter netClientResourceReporter;
   private List<EntityReporter> subResourceReporters;
   private long sendTime;
   private final long batchDelay;
   private long timerId;
-
+  private Map<EntityReporter, Integer> retryCount = new HashMap<>();
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -79,6 +80,8 @@ public class InventoryReporter {
       subResourceReporters.add(httpClientResourceReporter);
       datagramSocketResourceReporter = new DatagramSocketResourceReporter(options, httpClient);
       subResourceReporters.add(datagramSocketResourceReporter);
+      netClientResourceReporter = new NetClientResourceReporter(options, httpClient);
+      subResourceReporters.add(netClientResourceReporter);
       LOG.info("Inventory Reporter inited");
     });
     sendTime = System.nanoTime();
@@ -153,6 +156,12 @@ public class InventoryReporter {
   public void addDatagramReceivedAddress(SocketAddress address) {
     context.runOnContext(aVoid -> {
       datagramSocketResourceReporter.addReceivedAddress(address);
+    });
+  }
+
+  public void addNetClientRemoteAddress(SocketAddress address) {
+    context.runOnContext(aVoid -> {
+      netClientResourceReporter.addRemoteAddress(address);
     });
   }
 }
