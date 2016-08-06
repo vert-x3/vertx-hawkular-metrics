@@ -111,6 +111,10 @@ public class InventoryReporter {
     subResourceReporters.add(new HttpServerResourceReporter(options, httpClient, address));
   }
 
+  public void registerNetServer(SocketAddress address) {
+    subResourceReporters.add(new NetServerResourceReporter(options, httpClient, address));
+  }
+
   private void reportSubResources(Long timerId) {
     if (System.nanoTime() - sendTime > batchDelay && !subResourceReporters.isEmpty()) {
       subResourceReporters.forEach(this::handle);
