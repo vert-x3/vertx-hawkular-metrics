@@ -29,15 +29,6 @@ public class HttpServerResourceReporter extends EntityReporter {
   private static final String httpConnectionsMetricTypeId = "mt.counter.httpConnections";
   private static final String wsConnectionsMetricTypeId = "mt.counter.wsConnections";
 
-  private static final String requestCountMetricId = "m.http.server.requestCount";
-  private static final String processingTimeMetricId = "m.http.server.processingTime";
-  private static final String bytesReceivedMetricId = "m.http.server.bytesReceived";
-  private static final String bytesSentMetricId = "m.http.server.bytesSent";
-  private static final String errorCountMetricId = "m.http.server.errorCount";
-  private static final String requestsMetricId = "m.http.server.requests";
-  private static final String httpConnectionsMetricId = "m.http.server.httpConnections";
-  private static final String wsConnectionsMetricId = "m.http.server.wsConnections";
-
   private final String httpServerResourceId;
   private static final int numMetrics = 8;
   
