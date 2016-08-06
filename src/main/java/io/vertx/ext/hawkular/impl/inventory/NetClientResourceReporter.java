@@ -26,6 +26,7 @@ public class NetClientResourceReporter extends EntityReporter {
   private static final String bytesReceivedMetricTypeId = "mt.counter.bytesReceived";
   private static final String bytesSentMetricTypeId = "mt.counter.bytesSent";
   private static final String errorCountMetricTypeId = "mt.counter.errorCount";
+  private static final int numMetrics = 4;
 
   NetClientResourceReporter(VertxHawkularOptions options, HttpClient httpClient) {
     super(options, httpClient);
@@ -64,8 +65,8 @@ public class NetClientResourceReporter extends EntityReporter {
 
   private void reportAddressMetric(SocketAddress address, Future<Void> future) {
 
-    List<Future> futureList = new ArrayList<>(8);
-    for (int i = 0; i < 8; i++) {
+    List<Future> futureList = new ArrayList<>(numMetrics);
+    for (int i = 0; i < numMetrics; i++) {
       futureList.add(Future.future());
     }
     reportMetric(futureList.get(0), connectionsMetricTypeId, ".connections", "NONE", "GAUGE", address);

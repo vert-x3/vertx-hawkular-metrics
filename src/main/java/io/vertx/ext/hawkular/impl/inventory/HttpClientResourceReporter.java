@@ -32,6 +32,7 @@ public class HttpClientResourceReporter extends EntityReporter {
   private static final String errorCountMetricTypeId = "mt.counter.errorCount";
   private static final String requestCountMetricTypeId = "mt.counter.requestCount";
   private static final String responseTimeMetricTypeId = "mt.counter.responseTime";
+  private static final int numMetrics = 8;
 
   HttpClientResourceReporter(VertxHawkularOptions options, HttpClient httpClient) {
     super(options, httpClient);
@@ -65,8 +66,8 @@ public class HttpClientResourceReporter extends EntityReporter {
 
   private void reportAddressMetric(SocketAddress address, Future<Void> future) {
 
-    List<Future> futureList = new ArrayList<>(8);
-    for (int i = 0; i < 8; i++) {
+    List<Future> futureList = new ArrayList<>(numMetrics);
+    for (int i = 0; i < numMetrics; i++) {
         futureList.add(Future.future());
     }
     // TCP metrics
@@ -84,10 +85,8 @@ public class HttpClientResourceReporter extends EntityReporter {
     CompositeFuture.all(futureList).setHandler(ar -> {
       if (ar.succeeded()) {
         future.complete();
-        LOG.info("Reported all metrics " + address.toString());
       } else {
         future.fail(ar.cause());
-        LOG.error("Failed to reported all metrics " + address.toString());
       }
     });
   }
