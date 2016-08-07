@@ -138,29 +138,24 @@ public class InventoryReporter {
         handle(rootCreated, rootResourceReporter.buildPayload());
       }, rootCreated);
       rootCreated.setHandler(aVoid1 -> {
-        Future<Void> fut1 = Future.future();
-        Future<Void> fut2 = Future.future();
-        Future<Void> fut3 = Future.future();
-        Future<Void> fut4 = Future.future();
-        fut1.compose(aVoid2 -> {
-          handle(fut2, httpClientResourceReporter.buildPayload());
-        }, fut2);
-        fut2.compose(aVoid2 -> {
-          handle(fut3, datagramSocketResourceReporter.buildPayload());
-        }, fut3);
-        fut3.compose(aVoid2 -> {
-          handle(fut4, netClientResourceReporter.buildPayload());
-        }, fut4);
-        handle(fut1, eventbusResourceReporter.buildPayload());
-        fut4.setHandler(ar -> {
-          if (ar.succeeded()) {
-            LOG.info("report successfully.");
-          } else {
-            report();
-            LOG.error("report failed. " + ar.cause().getLocalizedMessage());
-          }
+        subEntityReporters.forEach(r -> {
+          handleWrapper(r);
         });
       });
+    });
+  }
+
+  private void handleWrapper(EntityReporter reporter) {
+    Future<Void> fut = Future.future();
+    handle(fut, reporter.buildPayload());
+    fut.setHandler(ar -> {
+      if (ar.succeeded()) {
+        LOG.info("DONE {0}", reporter.toString());
+      } else {
+        // retry when error occurs
+        LOG.error("FAIL {0} {1}", reporter.toString(), ar.cause().getLocalizedMessage());
+        handleWrapper(reporter);
+      }
     });
   }
 
@@ -197,27 +192,13 @@ public class InventoryReporter {
 
   public void registerHttpServer(SocketAddress address) {
     context.runOnContext(aVoid -> {
-      Future<Void> fut = Future.future();
-      handle(fut, new HttpServerResourceReporter(options, address).buildPayload());
-      fut.setHandler(ar -> {
-        if (ar.failed()) {
-          registerHttpServer(address);
-        }
-      });
+      subEntityReporters.add(new HttpServerResourceReporter(options, address));
     });
   }
 
   public void registerNetServer(SocketAddress address) {
     context.runOnContext(aVoid -> {
-      Future<Void> fut = Future.future();
-      handle(fut, new NetServerResourceReporter(options, address).buildPayload());
-      fut.setHandler(ar -> {
-        if (ar.succeeded()) {
-          LOG.info("reported {0}", "netServer" + address.toString());
-        } else {
-          registerNetServer(address);
-        }
-      });
+      subEntityReporters.add(new NetServerResourceReporter(options, address));
     });
   }
 
