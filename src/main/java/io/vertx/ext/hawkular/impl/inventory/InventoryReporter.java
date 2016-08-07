@@ -18,15 +18,29 @@ package io.vertx.ext.hawkular.impl.inventory;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.impl.codecs.JsonObjectMessageCodec;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.SocketAddress;
+import io.vertx.ext.hawkular.AuthenticationOptions;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Report inventory to the Hawkular server.
@@ -46,8 +60,14 @@ public class InventoryReporter {
   private HttpClientResourceReporter httpClientResourceReporter;
   private DatagramSocketResourceReporter datagramSocketResourceReporter;
   private NetClientResourceReporter netClientResourceReporter;
-  private Set<EntityReporter> entityReporters;
+  private List<EntityReporter> subEntityReporters;
 
+  private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
+  private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
+
+  private static Map<CharSequence, Iterable<CharSequence>> httpHeaders;
+  private static CharSequence auth;
+  protected static String tenant;
   /**
    * @param vertx   the {@link Vertx} managed instance
    * @param options Vertx Hawkular options
@@ -57,44 +77,117 @@ public class InventoryReporter {
     this.context = context;
     this.options = options;
     this.vertx = vertx;
-    entityReporters = new HashSet<>();
+
+    tenant = options.isSendTenantHeader() ? options.getTenant() : null;
+    AuthenticationOptions authenticationOptions = options.getAuthenticationOptions();
+    if (authenticationOptions.isEnabled()) {
+      String authString = authenticationOptions.getId() + ":" + authenticationOptions.getSecret();
+      try {
+        auth = HttpHeaders.createOptimized("Basic " + Base64.getEncoder().encodeToString(authString.getBytes("UTF-8")));
+      } catch (UnsupportedEncodingException e) {
+        throw new RuntimeException(e);
+      }
+    } else {
+      auth = null;
+    }
+    JsonObject httpHeaders = options.getHttpHeaders();
+    if (httpHeaders != null) {
+      this.httpHeaders = new HashMap<>(httpHeaders.size());
+      for (String headerName : httpHeaders.fieldNames()) {
+        CharSequence optimizedName = HttpHeaders.createOptimized(headerName);
+        Object value = httpHeaders.getValue(headerName);
+        List<String> values;
+        if (value instanceof JsonArray) {
+          values = ((JsonArray) value).stream().map(Object::toString).collect(toList());
+        } else {
+          values = Collections.singletonList(value.toString());
+        }
+        this.httpHeaders.put(optimizedName, values.stream().map(HttpHeaders::createOptimized).collect(toList()));
+      }
+    } else {
+      this.httpHeaders = Collections.emptyMap();
+    }
+
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()
         .setDefaultHost(options.getHost())
         .setDefaultPort(options.getPort());
-
       httpClient = vertx.createHttpClient(httpClientOptions);
-      datagramSocketResourceReporter = new DatagramSocketResourceReporter(options, httpClient);
-      feedReporter = new FeedReporter(options, httpClient);
-      entityReporters.add(feedReporter);
+      feedReporter = new FeedReporter(options);
       String type = vertx.isClustered()? "cluster" : "standalone";
       rootResourceReporter = new RootResourceReporter(options, httpClient, type);
-      entityReporters.add(rootResourceReporter);
-      eventbusResourceReporter = new EventbusResourceReporter(options, httpClient);
-      httpClientResourceReporter = new HttpClientResourceReporter(options, httpClient);
-      datagramSocketResourceReporter = new DatagramSocketResourceReporter(options, httpClient);
-      netClientResourceReporter = new NetClientResourceReporter(options, httpClient);
-      entityReporters.add(eventbusResourceReporter);
-      entityReporters.add(httpClientResourceReporter);
-      entityReporters.add(datagramSocketResourceReporter);
-      entityReporters.add(netClientResourceReporter);
+      datagramSocketResourceReporter = new DatagramSocketResourceReporter(options);
+      eventbusResourceReporter = new EventbusResourceReporter(options);
+      httpClientResourceReporter = new HttpClientResourceReporter(options);
+      datagramSocketResourceReporter = new DatagramSocketResourceReporter(options);
+      netClientResourceReporter = new NetClientResourceReporter(options) ;
+      subEntityReporters = new ArrayList<>();
+      subEntityReporters.add(eventbusResourceReporter);
+      subEntityReporters.add(httpClientResourceReporter);
+      subEntityReporters.add(datagramSocketResourceReporter);
+      subEntityReporters.add(netClientResourceReporter);
       LOG.info("Inventory Reporter inited");
     });
   }
   public void report() {
     context.runOnContext(aVoid -> {
-      entityReporters.forEach(e -> {
-        e.register();
+      Future<Void> feedCreated = Future.future();
+      Future<Void> rootCreated = Future.future();
+      handle(feedCreated, feedReporter.buildPayload());
+      feedCreated.compose(aVoid1 -> {
+        handle(rootCreated, rootResourceReporter.buildPayload());
+      }, rootCreated);
+      rootCreated.setHandler(aVoid1 -> {
+        Future<Void> fut1 = Future.future();
+        Future<Void> fut2 = Future.future();
+        Future<Void> fut3 = Future.future();
+        Future<Void> fut4 = Future.future();
+        fut1.compose(aVoid2 -> {
+          handle(fut2, httpClientResourceReporter.buildPayload());
+        }, fut2);
+        fut2.compose(aVoid2 -> {
+          handle(fut3, datagramSocketResourceReporter.buildPayload());
+        }, fut3);
+        fut3.compose(aVoid2 -> {
+          handle(fut4, netClientResourceReporter.buildPayload());
+        }, fut4);
+        handle(fut1, eventbusResourceReporter.buildPayload());
+        fut4.setHandler(ar -> {
+          if (ar.succeeded()) {
+            LOG.info("report successfully.");
+          } else {
+            report();
+            LOG.error("report failed. " + ar.cause().getLocalizedMessage());
+          }
+        });
       });
-      Future<Void> reported = Future.future();
-      EntityReporter.report(reported);
-      reported.setHandler(ar -> {
-        if (ar.succeeded()) {
-          LOG.info("report successfully.");
-        } else {
-          LOG.error("report failed.");
-        }
-      });
+    });
+  }
+
+  private void handle(Future<Void> reported, JsonObject payload) {
+    LOG.debug("handling {0}", payload.encode());
+    HttpClientRequest request = httpClient.post(options.getInventoryServiceUri() + "/bulk", response -> {
+      if (response.statusCode() == 201) {
+        reported.complete();
+      } else {
+        reported.fail(response.statusCode() + " " + response.statusMessage());
+      }
+    });
+    addHeaders(request);
+    request.end(payload.encode());
+  }
+
+  private void addHeaders(HttpClientRequest request) {
+    request.putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
+
+    if (tenant != null) {
+      request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
+    }
+    if (auth != null) {
+      request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+    }
+    httpHeaders.entrySet().stream().forEach(httpHeader -> {
+      request.putHeader(httpHeader.getKey(), httpHeader.getValue());
     });
   }
 
@@ -103,11 +196,29 @@ public class InventoryReporter {
   }
 
   public void registerHttpServer(SocketAddress address) {
-    new HttpServerResourceReporter(options, httpClient, address).register();
+    context.runOnContext(aVoid -> {
+      Future<Void> fut = Future.future();
+      handle(fut, new HttpServerResourceReporter(options, address).buildPayload());
+      fut.setHandler(ar -> {
+        if (ar.failed()) {
+          registerHttpServer(address);
+        }
+      });
+    });
   }
 
   public void registerNetServer(SocketAddress address) {
-    entityReporters.add(new NetServerResourceReporter(options, httpClient, address));
+    context.runOnContext(aVoid -> {
+      Future<Void> fut = Future.future();
+      handle(fut, new NetServerResourceReporter(options, address).buildPayload());
+      fut.setHandler(ar -> {
+        if (ar.succeeded()) {
+          LOG.info("reported {0}", "netServer" + address.toString());
+        } else {
+          registerNetServer(address);
+        }
+      });
+    });
   }
 
   public void addHttpClientAddress(SocketAddress address) {

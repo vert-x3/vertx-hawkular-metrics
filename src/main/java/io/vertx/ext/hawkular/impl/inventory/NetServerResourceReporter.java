@@ -1,6 +1,5 @@
 package io.vertx.ext.hawkular.impl.inventory;
 
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
@@ -21,14 +20,13 @@ public class NetServerResourceReporter extends EntityReporter {
   private final String netServerResourceId;
   private final SocketAddress localAddress;
 
-  NetServerResourceReporter(VertxHawkularOptions options, HttpClient httpClient, SocketAddress localAddress) {
-    super(options, httpClient);
+  NetServerResourceReporter(VertxHawkularOptions options, SocketAddress localAddress) {
+    super(options);
     this.localAddress = localAddress;
     netServerResourceId = rootResourceId + ".net.server."+localAddress.host()+":"+localAddress.port();
   }
 
-  @Override
-  protected void register() {
+  protected JsonObject buildPayload() {
     addEntity(feedPath, RESOURCE_TYPE, new JsonObject().put("id", netServerResourceTypeId));
     JsonObject body = new JsonObject().put("id", netServerResourceId).put("resourceTypePath", "/f;" + feedId + "/rt;" + netServerResourceTypeId);
     addEntity(rootResourcePath, RESOURCE, body);
@@ -36,6 +34,7 @@ public class NetServerResourceReporter extends EntityReporter {
     reportMetric(errorCountMetricTypeId, ".errorCount", "NONE", "COUNTER");
     reportMetric(bytesReceivedMetricTypeId, ".bytesReceived", "BYTES", "COUNTER");
     reportMetric(bytesSentMetricTypeId, ".bytesSent", "BYTES", "COUNTER");
+    return bulkJson;
   }
 
   private void reportMetric(String metricTypeId, String postFix, String unit, String type) {
@@ -43,10 +42,10 @@ public class NetServerResourceReporter extends EntityReporter {
     JsonObject body = new JsonObject().put("id", metricTypeId).put("type", type).put("unit", unit).put("collectionInterval", collectionInterval);
     addEntity(feedPath, METRIC_TYPE, body);
 
-    JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", "/f;" + feedId + "/mt;" + metricTypeId)
+    JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", feedPath + "/mt;" + metricTypeId)
             .put("properties", new JsonObject().put("metric-id", metricId));
-    String path = String.format("f;%s/r;%s/r;%s", feedId, rootResourceId, netServerResourceId);
-    addEntity(path, METRIC, body1);
-    //  associateMetricTypeWithResourceType(metricTypeId, netServerResourceTypeId, future);
+    String path = String.format("%s/r;%s", rootResourcePath, netServerResourceId);
+    addEntity(feedPath, METRIC, body1);
+    addEntity(path, RELATIONSHIP, new JsonObject().put("name", "incorporates").put("otherEnd", feedPath + "/m;" + metricId).put("direction", "outgoing"));
   }
 }

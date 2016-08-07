@@ -1,8 +1,5 @@
 package io.vertx.ext.hawkular.impl.inventory;
 
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
@@ -41,16 +38,16 @@ public class EventbusResourceReporter extends EntityReporter {
   private final String eventbusResourceId;
   private final Set<String> remoteAddresses;
 
-  EventbusResourceReporter(VertxHawkularOptions options, HttpClient httpClient) {
-    super(options, httpClient);
+  EventbusResourceReporter(VertxHawkularOptions options) {
+    super(options);
     eventbusResourceId = rootResourceId + ".eventbus";
     remoteAddresses = new HashSet<>();
   }
 
-  protected void register() {
-    addEntity(feedPath, "resourceType", new JsonObject().put("id", eventbusResourceTypeId));
+  protected JsonObject buildPayload() {
+    addEntity(feedPath, RESOURCE_TYPE, new JsonObject().put("id", eventbusResourceTypeId));
     JsonObject body = new JsonObject().put("id", eventbusResourceId).put("resourceTypePath", "/f;" + feedId + "/rt;" + eventbusResourceTypeId);
-    addEntity(rootResourcePath, "resource", body);
+    addEntity(rootResourcePath, RESOURCE, body);
     reportMetric(handlerMetricTypeId, ".handlers", "NONE", "GAUGE", null);
     reportMetric(eventbusResourceTypeId, ".errorCount", "NONE", "COUNTER", null);
     reportMetric(bytesWrittenMetricTypeId, ".bytesWritten", "BYTES", "COUNTER", null);
@@ -74,6 +71,7 @@ public class EventbusResourceReporter extends EntityReporter {
     remoteAddresses.forEach(addr -> {
       reportMetric(processingTimeMetricTypeId, ".processingTime", "MILLISECONDS", "COUNTER", addr);
     });
+    return bulkJson;
   }
 
   private void reportMetric(String metricTypeId, String postFix, String unit, String type, String address) {
@@ -84,11 +82,12 @@ public class EventbusResourceReporter extends EntityReporter {
       metricId = metricBasename + "eventbus" + postFix;
     }
     JsonObject body = new JsonObject().put("id", metricTypeId).put("type", type).put("unit", unit).put("collectionInterval", collectionInterval);
-    addEntity(feedPath, "metricType", body);
-    JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", "/f;" + feedId + "/mt;" + metricTypeId)
+    addEntity(feedPath, METRIC_TYPE, body);
+    JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", feedPath + "/mt;" + metricTypeId)
             .put("properties", new JsonObject().put("metric-id", metricId));
-    String path = String.format("/t;%s/f;%s/r;%s/r;%s", tenant, feedId, rootResourceId, eventbusResourceId);
-    addEntity(path, "metric", body1);
+    String path = String.format("%s/r;%s", rootResourcePath, eventbusResourceId);
+    addEntity(feedPath, METRIC, body1);
+    addEntity(path, RELATIONSHIP, new JsonObject().put("name", "incorporates").put("otherEnd", feedPath + "/m;" + metricId).put("direction", "outgoing"));
   }
 
   protected void addRemoteAddress(String address) {

@@ -1,7 +1,5 @@
 package io.vertx.ext.hawkular.impl.inventory;
 
-import io.vertx.core.Future;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -31,46 +29,41 @@ public class HttpClientResourceReporter extends EntityReporter {
   private static final String responseTimeMetricTypeId = "mt.counter.responseTime";
   private static final int numMetrics = 8;
 
-  HttpClientResourceReporter(VertxHawkularOptions options, HttpClient httpClient) {
-    super(options, httpClient);
+  HttpClientResourceReporter(VertxHawkularOptions options) {
+    super(options);
     httpClientResourceId = rootResourceId + ".http.client";
   }
-  @Override
-  protected void register() {
-    addEntity(feedPath, "resourceType", new JsonObject().put("id", httpClientResourceTypeId));
+
+  protected JsonObject buildPayload() {
+    addEntity(feedPath, RESOURCE_TYPE, new JsonObject().put("id", httpClientResourceTypeId));
     JsonObject body = new JsonObject().put("id", httpClientResourceId).put("resourceTypePath", "/f;" + feedId + "/rt;" + httpClientResourceTypeId);
-    addEntity(rootResourcePath, "resource", body);
+    addEntity(rootResourcePath, RESOURCE, body);
     remoteAddresses.forEach(addr -> {
-      reportAddressMetric(addr);
+      // TCP metrics
+      reportMetric(connectionsMetricTypeId, ".connections", "NONE", "GAUGE", addr);
+      reportMetric(bytesReceivedMetricTypeId, ".bytesReceived", "BYTES", "COUNTER", addr);
+      reportMetric(bytesSentMetricTypeId, ".bytesSent", "BYTES", "COUNTER", addr);
+      reportMetric(errorCountMetricTypeId, ".errorCount", "NONE", "COUNTER", addr);
+
+      // HTTP metrics
+      reportMetric(requestsMetricTypeId, ".requests", "NONE", "GAUGE", addr);
+      reportMetric(requestCountMetricTypeId, ".requestCount", "NONE", "COUNTER", addr);
+      reportMetric(responseTimeMetricTypeId, ".responseTime", "MILLISECONDS", "COUNTER", addr);
+      reportMetric(wsConnectionsMetricTypeId, ".wsConnections", "NONE", "GAUGE", addr);
     });
-  }
-
-  private void reportAddressMetric(SocketAddress address) {
-    // TCP metrics
-    reportMetric(connectionsMetricTypeId, ".connections", "NONE", "GAUGE", address);
-    reportMetric(bytesReceivedMetricTypeId, ".bytesReceived", "BYTES", "COUNTER", address);
-    reportMetric(bytesSentMetricTypeId, ".bytesSent", "BYTES", "COUNTER", address);
-    reportMetric(errorCountMetricTypeId, ".errorCount", "NONE", "COUNTER", address);
-
-    // HTTP metrics
-    reportMetric(requestsMetricTypeId, ".requests", "NONE", "GAUGE", address);
-    reportMetric(requestCountMetricTypeId, ".requestCount", "NONE", "COUNTER", address);
-    reportMetric(responseTimeMetricTypeId, ".responseTime", "MILLISECONDS", "COUNTER", address);
-    reportMetric(wsConnectionsMetricTypeId, ".wsConnections", "NONE", "GAUGE", address);
+    return bulkJson;
   }
 
   private void reportMetric(String metricTypeId, String postFix, String unit, String type, SocketAddress address) {
-    Future<Void> fut1 = Future.future();
-    Future<Void> fut2 = Future.future();
     String addressId = address.host() + ":" + address.port();
     String metricId = metricBasename + "http.client." + addressId +postFix;
     JsonObject body = new JsonObject().put("id", metricTypeId).put("type", type).put("unit", unit).put("collectionInterval", collectionInterval);
-    addEntity(feedPath, "metricType", body);
-    JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", "/f;" + feedId + "/mt;" + metricTypeId)
+    addEntity(feedPath, METRIC_TYPE, body);
+    JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", feedPath + "/mt;" + metricTypeId)
             .put("properties", new JsonObject().put("metric-id", metricId));
     String path = String.format("%s/r;%s", rootResourcePath, httpClientResourceId);
-    addEntity(path, "metric", body1);
-    //  associateMetricTypeWithResourceType(metricTypeId, httpClientResourceTypeId, future);
+    addEntity(feedPath, METRIC, body1);
+    addEntity(path, RELATIONSHIP, new JsonObject().put("name", "incorporates").put("otherEnd", feedPath + "/m;" + metricId).put("direction", "outgoing"));
   }
 
   protected void addRemoteAddress(SocketAddress address) {

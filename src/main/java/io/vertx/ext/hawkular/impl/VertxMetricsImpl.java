@@ -166,6 +166,7 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     scheduler = new Scheduler(vertx, options, context, sender);
     if (options.isInventoryEnabled()) {
       inventoryReporter = new InventoryReporter(vertx, options, context);
+      ((EventBusMetricsImpl)metricSuppliers.get(EVENT_BUS)).setInventoryReporter(inventoryReporter);
       inventoryReporter.report();
     }
     metricSuppliers.values().forEach(scheduler::register);

@@ -1,8 +1,5 @@
 package io.vertx.ext.hawkular.impl.inventory;
 
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
@@ -28,14 +25,13 @@ public class HttpServerResourceReporter extends EntityReporter {
 
   private final String httpServerResourceId;
   
-  HttpServerResourceReporter(VertxHawkularOptions options, HttpClient httpClient, SocketAddress localAddress) {
-    super(options, httpClient);
+  HttpServerResourceReporter(VertxHawkularOptions options, SocketAddress localAddress) {
+    super(options);
     this.localAddress = localAddress;
     httpServerResourceId = rootResourceId + ".http.server."+localAddress.host()+":"+localAddress.port();
   }
 
-  @Override
-  protected void register() {
+  protected JsonObject buildPayload() {
     addEntity(feedPath, RESOURCE_TYPE, new JsonObject().put("id", httpServerResourceTypeId));
     JsonObject body = new JsonObject().put("id", httpServerResourceId).put("resourceTypePath", "/f;" + feedId + "/rt;" + httpServerResourceTypeId);
     addEntity(rootResourcePath, RESOURCE, body);
@@ -48,17 +44,18 @@ public class HttpServerResourceReporter extends EntityReporter {
     reportMetric(requestsMetricTypeId, ".requests", "NONE", "GAUGE");
     reportMetric(httpConnectionsMetricTypeId, ".httpConnections", "NONE", "GAUGE");
     reportMetric(wsConnectionsMetricTypeId, ".wsConnections", "NONE", "GAUGE");
+    return bulkJson;
   }
 
   private void reportMetric(String metricTypeId, String postFix, String unit, String type) {
     String metricId = metricBasename+"http.server."+localAddress.host()+":"+localAddress.port()+postFix;
     JsonObject body = new JsonObject().put("id", metricTypeId).put("type", type).put("unit", unit).put("collectionInterval", collectionInterval);
     addEntity(feedPath, METRIC_TYPE, body);
-    JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", "/f;" + feedId + "/mt;" + metricTypeId)
+    JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", feedPath + "/mt;" + metricTypeId)
             .put("properties", new JsonObject().put("metric-id", metricId));
-    String path = String.format(feedId, rootResourcePath, httpServerResourceId);
-    addEntity(path, METRIC, body1);
-   //   associateMetricTypeWithResourceType(metricTypeId, httpServerResourceTypeId, future);
-
+    String path = String.format("%s/r;%s", rootResourcePath, httpServerResourceId);
+    addEntity(feedPath, METRIC, body1);
+    addEntity(feedPath, METRIC, body1);
+    addEntity(path, RELATIONSHIP, new JsonObject().put("name", "incorporates").put("otherEnd", feedPath + "/m;" + metricId).put("direction", "outgoing"));
   }
 }
