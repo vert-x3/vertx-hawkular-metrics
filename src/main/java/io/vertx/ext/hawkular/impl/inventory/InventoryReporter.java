@@ -18,12 +18,10 @@ package io.vertx.ext.hawkular.impl.inventory;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.impl.codecs.JsonObjectMessageCodec;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -146,6 +144,7 @@ public class InventoryReporter {
   }
 
   private void handleWrapper(EntityReporter reporter) {
+    LOG.info("handling {0}", reporter.toString());
     Future<Void> fut = Future.future();
     handle(fut, reporter.buildPayload());
     fut.setHandler(ar -> {
@@ -160,10 +159,29 @@ public class InventoryReporter {
   }
 
   private void handle(Future<Void> reported, JsonObject payload) {
-    LOG.debug("handling {0}", payload.encode());
     HttpClientRequest request = httpClient.post(options.getInventoryServiceUri() + "/bulk", response -> {
       if (response.statusCode() == 201) {
-        reported.complete();
+        response.bodyHandler(buffer -> {
+          boolean succeed = true;
+          JsonObject json = new JsonObject(buffer.getString(0, buffer.length()));
+          String[] typeArray = {"feed", "resource", "resourceType", "metric", "metricType", "relationship"};
+          for (String type : typeArray) {
+            if (json.containsKey(type) && succeed) {
+              for (Object o : json.getJsonObject(type).getMap().values()) {
+                int status = ((Integer) o).intValue();
+                if (status != 201 && status != 409) {
+                  succeed = false;
+                  break;
+                }
+              }
+            }
+          }
+          if (succeed) {
+            reported.complete();
+          } else {
+            reported.fail("Part of the result failed.");
+          }
+        });
       } else {
         reported.fail(response.statusCode() + " " + response.statusMessage());
       }
@@ -192,13 +210,13 @@ public class InventoryReporter {
 
   public void registerHttpServer(SocketAddress address) {
     context.runOnContext(aVoid -> {
-      subEntityReporters.add(new HttpServerResourceReporter(options, address));
+      handleWrapper(new HttpServerResourceReporter(options, address));
     });
   }
 
   public void registerNetServer(SocketAddress address) {
     context.runOnContext(aVoid -> {
-      subEntityReporters.add(new NetServerResourceReporter(options, address));
+      handleWrapper(new NetServerResourceReporter(options, address));
     });
   }
 

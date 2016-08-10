@@ -27,7 +27,6 @@ public class HttpClientResourceReporter extends EntityReporter {
   private static final String errorCountMetricTypeId = "mt.counter.errorCount";
   private static final String requestCountMetricTypeId = "mt.counter.requestCount";
   private static final String responseTimeMetricTypeId = "mt.counter.responseTime";
-  private static final int numMetrics = 8;
 
   HttpClientResourceReporter(VertxHawkularOptions options) {
     super(options);
