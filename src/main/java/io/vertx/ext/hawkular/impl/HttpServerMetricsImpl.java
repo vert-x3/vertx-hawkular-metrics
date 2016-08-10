@@ -21,6 +21,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
+import io.vertx.ext.hawkular.impl.inventory.InventoryReporter;
 
 import java.util.concurrent.atomic.LongAdder;
 
@@ -47,10 +48,11 @@ public class HttpServerMetricsImpl implements HttpServerMetrics<Long, Void, Void
   private final SocketAddress localAddress;
   private final HttpServerMetricsSupplier httpServerMetricsSupplier;
 
-  public HttpServerMetricsImpl(SocketAddress localAddress, HttpServerMetricsSupplier httpServerMetricsSupplier) {
+  public HttpServerMetricsImpl(SocketAddress localAddress, HttpServerMetricsSupplier httpServerMetricsSupplier, InventoryReporter inventoryReporter) {
     this.localAddress = localAddress;
     this.httpServerMetricsSupplier = httpServerMetricsSupplier;
     httpServerMetricsSupplier.register(this);
+    inventoryReporter.registerHttpServer(localAddress);
   }
 
   @Override

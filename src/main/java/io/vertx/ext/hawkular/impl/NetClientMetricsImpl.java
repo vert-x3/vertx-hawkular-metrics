@@ -20,6 +20,7 @@ import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.hawkular.impl.NetClientConnectionsMeasurements.Snapshot;
+import io.vertx.ext.hawkular.impl.inventory.InventoryReporter;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,10 +34,12 @@ import static java.util.stream.Collectors.*;
 public class NetClientMetricsImpl implements TCPMetrics<SocketAddress> {
   private final ConcurrentMap<SocketAddress, NetClientConnectionsMeasurements> connectionsMeasurements = new ConcurrentHashMap<>(0);
   private final NetClientMetricsSupplier netClientMetricsSupplier;
+  private final InventoryReporter inventoryReporter;
 
-  public NetClientMetricsImpl(NetClientMetricsSupplier netClientMetricsSupplier) {
+  public NetClientMetricsImpl(NetClientMetricsSupplier netClientMetricsSupplier, InventoryReporter inventoryReporter) {
     this.netClientMetricsSupplier = netClientMetricsSupplier;
     netClientMetricsSupplier.register(this);
+    this.inventoryReporter = inventoryReporter;
   }
 
   @Override
@@ -45,6 +48,7 @@ public class NetClientMetricsImpl implements TCPMetrics<SocketAddress> {
     NetClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements == null) {
       measurements = connectionsMeasurements.computeIfAbsent(key, address -> new NetClientConnectionsMeasurements());
+      inventoryReporter.addNetClientRemoteAddress(key);
     }
     measurements.incrementConnections();
     return key;

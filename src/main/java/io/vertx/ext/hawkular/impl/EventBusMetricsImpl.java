@@ -17,6 +17,7 @@ package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
+import io.vertx.ext.hawkular.impl.inventory.InventoryReporter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,9 +51,14 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
   private final LongAdder deliveredLocalMessages = new LongAdder();
   private final LongAdder deliveredRemoteMessages = new LongAdder();
   private final LongAdder replyFailures = new LongAdder();
+  private InventoryReporter inventoryReporter;
 
   public EventBusMetricsImpl(String prefix) {
     baseName = prefix + (prefix.isEmpty() ? "" : ".") + "vertx.eventbus.";
+  }
+
+  public void setInventoryReporter(InventoryReporter inventoryReporter) {
+    this.inventoryReporter = inventoryReporter;
   }
 
   @Override
@@ -67,6 +73,7 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
           break;
         }
       } else {
+        inventoryReporter.addEventbusRemoteAddress(address);
         HandlersMeasurements candidate = new HandlersMeasurements();
         if (handlersMeasurements.putIfAbsent(address, candidate) == null) {
           break;
