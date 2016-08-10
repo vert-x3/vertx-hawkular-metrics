@@ -12,7 +12,7 @@ import io.vertx.ext.hawkular.VertxHawkularOptions;
 public class RootResourceReporter extends EntityReporter {
 
   private final String type;
-  RootResourceReporter(VertxHawkularOptions options, HttpClient httpClient, String type) {
+  RootResourceReporter(VertxHawkularOptions options, String type) {
     super(options);
     this.type = type;
   }

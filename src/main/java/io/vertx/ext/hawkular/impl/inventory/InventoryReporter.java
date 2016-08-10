@@ -113,7 +113,7 @@ public class InventoryReporter {
       httpClient = vertx.createHttpClient(httpClientOptions);
       feedReporter = new FeedReporter(options);
       String type = vertx.isClustered()? "cluster" : "standalone";
-      rootResourceReporter = new RootResourceReporter(options, httpClient, type);
+      rootResourceReporter = new RootResourceReporter(options, type);
       datagramSocketResourceReporter = new DatagramSocketResourceReporter(options);
       eventbusResourceReporter = new EventbusResourceReporter(options);
       httpClientResourceReporter = new HttpClientResourceReporter(options);
@@ -230,7 +230,6 @@ public class InventoryReporter {
     context.runOnContext(aVoid -> {
       datagramSocketResourceReporter.addSentAddress(address);
     });
-
   }
 
   public void addDatagramReceivedAddress(SocketAddress address) {
