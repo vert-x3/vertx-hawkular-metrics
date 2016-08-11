@@ -28,6 +28,7 @@ import io.vertx.ext.hawkular.impl.inventory.InventoryReporter;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -41,9 +42,9 @@ public class HttpClientMetricsImpl
 
   private final ConcurrentMap<SocketAddress, HttpClientConnectionsMeasurements> connectionsMeasurements = new ConcurrentHashMap<>(0);
   private final HttpClientMetricsSupplier httpClientMetricsSupplier;
-  private final InventoryReporter inventoryReporter;
+  private final Optional<InventoryReporter> inventoryReporter;
 
-  public HttpClientMetricsImpl(HttpClientMetricsSupplier httpClientMetricsSupplier, InventoryReporter inventoryReporter) {
+  public HttpClientMetricsImpl(HttpClientMetricsSupplier httpClientMetricsSupplier, Optional<InventoryReporter> inventoryReporter) {
     this.httpClientMetricsSupplier = httpClientMetricsSupplier;
     httpClientMetricsSupplier.register(this);
     this.inventoryReporter = inventoryReporter;
@@ -145,7 +146,7 @@ public class HttpClientMetricsImpl
     HttpClientConnectionsMeasurements measurements = connectionsMeasurements.get(key);
     if (measurements == null) {
       measurements = connectionsMeasurements.computeIfAbsent(key, address -> new HttpClientConnectionsMeasurements());
-      inventoryReporter.addHttpClientAddress(key);
+      inventoryReporter.ifPresent(ir -> ir.addHttpClientAddress(key));
     }
     measurements.incrementConnections();
     return key;
