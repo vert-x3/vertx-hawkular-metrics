@@ -19,6 +19,7 @@ import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.hawkular.impl.inventory.InventoryReporter;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -35,14 +36,12 @@ public class NetServerMetricsImpl implements TCPMetrics<Void> {
 
   private final SocketAddress localAddress;
   private final NetServerMetricsSupplier netServerMetricsSupplier;
-  private final InventoryReporter inventoryReporter;
 
-  public NetServerMetricsImpl(SocketAddress localAddress, NetServerMetricsSupplier netServerMetricsSupplier, InventoryReporter inventoryReporter) {
+  public NetServerMetricsImpl(SocketAddress localAddress, NetServerMetricsSupplier netServerMetricsSupplier, Optional<InventoryReporter> inventoryReporter) {
     this.localAddress = localAddress;
     this.netServerMetricsSupplier = netServerMetricsSupplier;
     netServerMetricsSupplier.register(this);
-    this.inventoryReporter = inventoryReporter;
-    inventoryReporter.registerNetServer(localAddress);
+    inventoryReporter.ifPresent(ir -> ir.registerNetServer(localAddress));
   }
 
   @Override
