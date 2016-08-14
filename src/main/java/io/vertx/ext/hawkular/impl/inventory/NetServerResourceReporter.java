@@ -19,11 +19,13 @@ public class NetServerResourceReporter extends EntityReporter {
   private static final String connectionsMetricTypeId = "mt.counter.connections";
   private final String netServerResourceId;
   private final SocketAddress localAddress;
+  private final String path;
 
   NetServerResourceReporter(VertxHawkularOptions options, SocketAddress localAddress) {
     super(options);
     this.localAddress = localAddress;
     netServerResourceId = rootResourceId + ".net.server."+localAddress.host()+":"+localAddress.port();
+    path = String.format("%s/r;%s", rootResourcePath, netServerResourceId);
   }
 
   protected JsonObject buildPayload() {
@@ -37,6 +39,10 @@ public class NetServerResourceReporter extends EntityReporter {
     return bulkJson;
   }
 
+  protected String getPath() {
+    return path;
+  }
+
   private void reportMetric(String metricTypeId, String postFix, String unit, String type) {
     String metricId = metricBasename+"net.server."+localAddress.host()+":"+localAddress.port()+postFix;
     JsonObject body = new JsonObject().put("id", metricTypeId).put("type", type).put("unit", unit).put("collectionInterval", collectionInterval);
@@ -44,7 +50,6 @@ public class NetServerResourceReporter extends EntityReporter {
 
     JsonObject body1 = new JsonObject().put("id", metricId).put("metricTypePath", feedPath + "/mt;" + metricTypeId)
             .put("properties", new JsonObject().put("metric-id", metricId));
-    String path = String.format("%s/r;%s", rootResourcePath, netServerResourceId);
     addEntity(feedPath, METRIC, body1);
     addEntity(path, RELATIONSHIP, new JsonObject().put("name", "incorporates").put("otherEnd", feedPath + "/m;" + metricId).put("direction", "outgoing"));
   }
