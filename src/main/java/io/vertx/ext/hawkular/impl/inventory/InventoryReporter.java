@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.stream.Collectors.toList;
 
@@ -59,6 +60,8 @@ public class InventoryReporter {
   private DatagramSocketResourceReporter datagramSocketResourceReporter;
   private NetClientResourceReporter netClientResourceReporter;
   private List<EntityReporter> subEntityReporters;
+  private Map<SocketAddress, HttpServerResourceReporter> httpServerResources;
+  private Map<SocketAddress, NetServerResourceReporter> netServerResources;
 
   private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
@@ -124,6 +127,8 @@ public class InventoryReporter {
       subEntityReporters.add(httpClientResourceReporter);
       subEntityReporters.add(datagramSocketResourceReporter);
       subEntityReporters.add(netClientResourceReporter);
+      httpServerResources = new ConcurrentHashMap<SocketAddress, HttpServerResourceReporter>();
+      netServerResources = new ConcurrentHashMap<SocketAddress, NetServerResourceReporter>();
       LOG.info("Inventory Reporter inited");
     });
   }
@@ -208,15 +213,53 @@ public class InventoryReporter {
     httpClient.close();
   }
 
+
+  private void deleteEntity(Future future, String path) {
+    LOG.info("deleting {0}", path);
+    HttpClientRequest request = httpClient.delete(options.getInventoryServiceUri() + "/entity" + path, response -> {
+      if (response.statusCode() == 204) {
+        future.complete();
+        LOG.info("Succeed to delete {0}", path);
+      } else {
+        response.bodyHandler(buffer -> {
+          System.err.println(buffer.getBuffer(0, buffer.length()));
+        });
+        future.fail("Failed to delete entity " + path);
+      }
+    });
+    addHeaders(request);
+    request.end();
+  }
+
   public void registerHttpServer(SocketAddress address) {
     context.runOnContext(aVoid -> {
-      handleWrapper(new HttpServerResourceReporter(options, address));
+      HttpServerResourceReporter r = new HttpServerResourceReporter(options, address);
+      handleWrapper(r);
+      httpServerResources.put(address, r);
+    });
+  }
+
+  public void unregisterHttpServer(SocketAddress address) {
+    context.runOnContext(aVoid -> {
+      Future<Void> future = Future.future();
+      deleteEntity(future, httpServerResources.get(address).getPath());
+      httpServerResources.remove(address);
     });
   }
 
   public void registerNetServer(SocketAddress address) {
     context.runOnContext(aVoid -> {
-      handleWrapper(new NetServerResourceReporter(options, address));
+      NetServerResourceReporter r = new NetServerResourceReporter(options, address);
+      handleWrapper(r);
+      netServerResources.put(address, r);
+    });
+  }
+
+  public void unregisterNetServer(SocketAddress address) {
+    context.runOnContext(aVoid -> {
+      Future<Void> future = Future.future();
+      deleteEntity(future, netServerResources.get(address).getPath());
+      netServerResources.remove(address);
     });
   }
 

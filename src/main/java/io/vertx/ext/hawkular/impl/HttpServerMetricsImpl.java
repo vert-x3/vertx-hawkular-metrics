@@ -48,11 +48,13 @@ public class HttpServerMetricsImpl implements HttpServerMetrics<Long, Void, Void
 
   private final SocketAddress localAddress;
   private final HttpServerMetricsSupplier httpServerMetricsSupplier;
+  private final Optional<InventoryReporter> inventoryReporter;
 
   public HttpServerMetricsImpl(SocketAddress localAddress, HttpServerMetricsSupplier httpServerMetricsSupplier, Optional<InventoryReporter> inventoryReporter) {
     this.localAddress = localAddress;
     this.httpServerMetricsSupplier = httpServerMetricsSupplier;
     httpServerMetricsSupplier.register(this);
+    this.inventoryReporter = inventoryReporter;
     inventoryReporter.ifPresent(ir -> ir.registerHttpServer(localAddress));
   }
 
@@ -195,5 +197,6 @@ public class HttpServerMetricsImpl implements HttpServerMetrics<Long, Void, Void
   @Override
   public void close() {
     httpServerMetricsSupplier.unregister(this);
+    inventoryReporter.ifPresent(ir -> ir.unregisterHttpServer(localAddress));
   }
 }

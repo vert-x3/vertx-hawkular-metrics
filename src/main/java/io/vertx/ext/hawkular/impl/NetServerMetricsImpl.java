@@ -36,11 +36,13 @@ public class NetServerMetricsImpl implements TCPMetrics<Void> {
 
   private final SocketAddress localAddress;
   private final NetServerMetricsSupplier netServerMetricsSupplier;
+  private final Optional<InventoryReporter> inventoryReporter;
 
   public NetServerMetricsImpl(SocketAddress localAddress, NetServerMetricsSupplier netServerMetricsSupplier, Optional<InventoryReporter> inventoryReporter) {
     this.localAddress = localAddress;
     this.netServerMetricsSupplier = netServerMetricsSupplier;
     netServerMetricsSupplier.register(this);
+    this.inventoryReporter = inventoryReporter;
     inventoryReporter.ifPresent(ir -> ir.registerNetServer(localAddress));
   }
 
@@ -113,5 +115,6 @@ public class NetServerMetricsImpl implements TCPMetrics<Void> {
   @Override
   public void close() {
     netServerMetricsSupplier.unregister(this);
+    inventoryReporter.ifPresent(ir -> ir.unregisterNetServer(localAddress));
   }
 }
