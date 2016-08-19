@@ -33,8 +33,11 @@ public class EntityReporter {
 
   EntityReporter(VertxHawkularOptions options) {
     feedId = options.getFeedId();
-    metricBasename = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.";
     rootResourceId = options.getVertxRootResourceId();
+    if (feedId == null || feedId.isEmpty() || rootResourceId == null || feedId.isEmpty()) {
+      throw new IllegalArgumentException("feed id and root resource id must not be null.");
+    }
+    metricBasename = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.";
     collectionInterval = options.getSchedule();
     tenant = options.getTenant();
     tenantPath = String.format("/t;%s", tenant);
