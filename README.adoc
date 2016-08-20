@@ -11,7 +11,7 @@ The http://vertx.io/docs/vertx-core/java/index.html#_metrics_spi[Vert.x Metrics 
 capture events from Vert.x in order to gather metrics.
 
 This project is an Hawkular implementation of the Vert.x Metrics SPI: metrics built from Vert.x events will be sent to
-an Hawkular Metrics service.
+an Hawkular Metrics service and the inventory structure generated will be sent to an Hawkular Inventory Service.
 
 == Quickstart
 
