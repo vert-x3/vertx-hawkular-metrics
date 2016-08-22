@@ -34,7 +34,7 @@ public class EntityReporter {
   EntityReporter(VertxHawkularOptions options) {
     feedId = options.getFeedId();
     rootResourceId = options.getVertxRootResourceId();
-    if (feedId == null || feedId.isEmpty() || rootResourceId == null || feedId.isEmpty()) {
+    if (feedId == null || feedId.isEmpty() || rootResourceId == null || rootResourceId.isEmpty()) {
       throw new IllegalArgumentException("feed id and root resource id must not be null.");
     }
     metricBasename = options.getPrefix() + (options.getPrefix().isEmpty() ? "" : ".") + "vertx.";
