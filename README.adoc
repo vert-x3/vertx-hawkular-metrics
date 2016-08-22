@@ -11,7 +11,7 @@ The http://vertx.io/docs/vertx-core/java/index.html#_metrics_spi[Vert.x Metrics 
 capture events from Vert.x in order to gather metrics.
 
 This project is an Hawkular implementation of the Vert.x Metrics SPI: metrics built from Vert.x events will be sent to
-an Hawkular Metrics service.
+an Hawkular Metrics service and the inventory structure generated will be sent to an Hawkular Inventory Service.
 
 == Quickstart
 
@@ -65,12 +65,17 @@ VertxHawkularOptions vertxHawkularOptions = new VertxHawkularOptions() // <1>
         .setSchedule(3); // <6>
 vertxHawkularOptions.setEnabled(true); // <7>
 
-vertxHawkularOptions.addDisabledMetricsType(MetricsType.NET_SERVER); // <8>
+vertxOptions.setInventoryEnabled(true)
+            .setFeedId("vertx-feed-id")
+            .setVertxRootResourceId("root-resource-id");  // <8>
+
+
+vertxHawkularOptions.addDisabledMetricsType(MetricsType.NET_SERVER); // <9>
 
 VertxOptions vertxOptions = new VertxOptions()
-        .setMetricsOptions(vertxHawkularOptions); // <9>
+        .setMetricsOptions(vertxHawkularOptions); // <10>
 
-Vertx vertx = Vertx.vertx(vertxOptions); // <10>
+Vertx vertx = Vertx.vertx(vertxOptions); // <11>
 ----
 <1> `VertxHawkularOptions` extends `io.vertx.core.metrics.MetricsOptions`
 <2> Host of the Hawkular Metrics server, defaults to `localhost`
@@ -80,10 +85,11 @@ Vertx vertx = Vertx.vertx(vertxOptions); // <10>
 by default
 <6> How often (in seconds) metrics will be collected and sent to the Hawkular server, defaults to `1` second
 <7> The *Vert.x Metrics SPI is disabled by default*, so make sure to enable it
-<8> Disable unwanted metrics by adding the type of the metrics into a set, defaults to an empty set.
+<8> The *Inventory is disabled by default*, so enable it and provide a *feed id* and a *root resource id* if you want to use it.
+<9> Disable unwanted metrics by adding the type of the metrics into a set, defaults to an empty set.
 Available Types : `NET_SERVER`, `NET_CLIENT`, `HTTP_SERVER`, `HTTP_CLIENT`, `DATAGRAM_SOCKET`, `EVENT_BUS`.
-<9> Add your `VertxHawkularOptions` to the `io.vertx.core.VertxOptions`
-<10> Create the Vert.x instance
+<10> Add your `VertxHawkularOptions` to the `io.vertx.core.VertxOptions`
+<11> Create the Vert.x instance
 
 == Limitations
 
