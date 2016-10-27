@@ -18,9 +18,11 @@ package io.vertx.ext.hawkular.impl;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.metrics.DatagramSocketMetrics;
+import io.vertx.ext.hawkular.impl.inventory.InventoryReporter;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.LongAdder;
@@ -37,17 +39,20 @@ public class DatagramSocketMetricsImpl implements DatagramSocketMetrics {
   private final ConcurrentMap<SocketAddress, LongAdder> bytesSent = new ConcurrentHashMap<>(0);
   private final LongAdder errors = new LongAdder();
   private final DatagramSocketMetricsSupplier datagramSocketMetricsSupplier;
+  private final Optional<InventoryReporter> inventoryReporter;
 
   private volatile SocketAddress localAddress;
 
-  public DatagramSocketMetricsImpl(DatagramSocketMetricsSupplier datagramSocketMetricsSupplier) {
+  public DatagramSocketMetricsImpl(DatagramSocketMetricsSupplier datagramSocketMetricsSupplier, Optional<InventoryReporter> inventoryReporter) {
     this.datagramSocketMetricsSupplier = datagramSocketMetricsSupplier;
     datagramSocketMetricsSupplier.register(this);
+    this.inventoryReporter = inventoryReporter;
   }
 
   @Override
   public void listening(String localName, SocketAddress localAddress) {
     this.localAddress = new SocketAddressImpl(localAddress.port(), localName);
+    inventoryReporter.ifPresent(ir -> ir.addDatagramReceivedAddress(localAddress));
   }
 
   @Override
@@ -64,6 +69,7 @@ public class DatagramSocketMetricsImpl implements DatagramSocketMetrics {
     LongAdder counter = bytesSent.get(remoteAddress);
     if (counter == null) {
       counter = bytesSent.computeIfAbsent(remoteAddress, address -> new LongAdder());
+      inventoryReporter.ifPresent(ir -> ir.addDatagramSentAddress(remoteAddress));
     }
     counter.add(numberOfBytes);
   }
