@@ -40,10 +40,12 @@ import io.vertx.core.spi.metrics.PoolMetrics;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.hawkular.MetricsType;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
+import io.vertx.ext.hawkular.impl.inventory.InventoryReporter;
 
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static io.vertx.ext.hawkular.MetricsType.*;
 
@@ -55,10 +57,12 @@ import static io.vertx.ext.hawkular.MetricsType.*;
 public class VertxMetricsImpl extends DummyVertxMetrics {
   private final Vertx vertx;
   private final VertxHawkularOptions options;
+  private Context context;
   private final Map<MetricsType, MetricSupplier> metricSuppliers;
 
   private Sender sender;
   private Scheduler scheduler;
+  private Optional<InventoryReporter> inventoryReporter;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -91,36 +95,37 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
       supplierMap.put(NAMED_POOLS, new NamedPoolMetricsSupplier(prefix));
     }
     metricSuppliers = Collections.unmodifiableMap(supplierMap);
+    inventoryReporter = Optional.empty();
   }
 
   @Override
   public HttpServerMetrics<Long, Void, Void> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
     HttpServerMetricsSupplier supplier = (HttpServerMetricsSupplier) metricSuppliers.get(HTTP_SERVER);
-    return supplier != null ? new HttpServerMetricsImpl(localAddress, supplier) : super.createMetrics(server, localAddress, options);
+    return supplier != null ? new HttpServerMetricsImpl(localAddress, supplier, inventoryReporter) : super.createMetrics(server, localAddress, options);
   }
 
   @Override
   public HttpClientMetrics createMetrics(HttpClient client, HttpClientOptions options) {
     HttpClientMetricsSupplier supplier = (HttpClientMetricsSupplier) metricSuppliers.get(HTTP_CLIENT);
-    return supplier != null ? new HttpClientMetricsImpl(supplier) : super.createMetrics(client, options);
+    return supplier != null ? new HttpClientMetricsImpl(supplier, inventoryReporter) : super.createMetrics(client, options);
   }
 
   @Override
   public TCPMetrics createMetrics(NetServer server, SocketAddress localAddress, NetServerOptions options) {
     NetServerMetricsSupplier supplier = (NetServerMetricsSupplier) metricSuppliers.get(NET_SERVER);
-    return supplier != null ? new NetServerMetricsImpl(localAddress, supplier) : super.createMetrics(server, localAddress, options);
+    return supplier != null ? new NetServerMetricsImpl(localAddress, supplier, inventoryReporter) : super.createMetrics(server, localAddress, options);
   }
 
   @Override
   public TCPMetrics createMetrics(NetClient client, NetClientOptions options) {
     NetClientMetricsSupplier supplier = (NetClientMetricsSupplier) metricSuppliers.get(NET_CLIENT);
-    return supplier != null ? new NetClientMetricsImpl(supplier) : super.createMetrics(client, options);
+    return supplier != null ? new NetClientMetricsImpl(supplier, inventoryReporter) : super.createMetrics(client, options);
   }
 
   @Override
   public DatagramSocketMetrics createMetrics(DatagramSocket socket, DatagramSocketOptions options) {
     DatagramSocketMetricsSupplier supplier = (DatagramSocketMetricsSupplier) metricSuppliers.get(DATAGRAM_SOCKET);
-    return supplier != null ? new DatagramSocketMetricsImpl(supplier) : super.createMetrics(socket, options);
+    return supplier != null ? new DatagramSocketMetricsImpl(supplier, inventoryReporter) : super.createMetrics(socket, options);
   }
 
   @Override
@@ -154,9 +159,14 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   @Override
   public void eventBusInitialized(EventBus bus) {
     // Finish setup
-    Context context = vertx.getOrCreateContext();
+    context = vertx.getOrCreateContext();
     sender = new Sender(vertx, options, context);
     scheduler = new Scheduler(vertx, options, context, sender);
+    if (options.isInventoryEnabled()) {
+      inventoryReporter = Optional.of(new InventoryReporter(vertx, options, context));
+    }
+    ((EventBusMetricsImpl)metricSuppliers.get(EVENT_BUS)).setInventoryReporter(inventoryReporter);
+    inventoryReporter.ifPresent(InventoryReporter::report);
     metricSuppliers.values().forEach(scheduler::register);
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
@@ -191,7 +201,6 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     metricSuppliers.values().forEach(scheduler::unregister);
     scheduler.stop();
     sender.stop();
+    inventoryReporter.ifPresent(ir -> ir.stop());
   }
-
-
 }
