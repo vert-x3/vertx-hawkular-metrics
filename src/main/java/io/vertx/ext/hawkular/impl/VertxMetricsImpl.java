@@ -106,9 +106,9 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   }
 
   @Override
-  public TCPMetrics createMetrics(NetServer server, SocketAddress localAddress, NetServerOptions options) {
+  public TCPMetrics createMetrics(SocketAddress localAddress, NetServerOptions options) {
     NetServerMetricsSupplier supplier = (NetServerMetricsSupplier) metricSuppliers.get(NET_SERVER);
-    return supplier != null ? new NetServerMetricsImpl(localAddress, supplier) : super.createMetrics(server, localAddress, options);
+    return supplier != null ? new NetServerMetricsImpl(localAddress, supplier) : super.createMetrics(localAddress, options);
   }
 
   @Override
