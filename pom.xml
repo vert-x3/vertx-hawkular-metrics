@@ -22,7 +22,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>23</version>
+    <version>24</version>
   </parent>
 
   <artifactId>vertx-hawkular-metrics</artifactId>
@@ -52,6 +52,7 @@
     <test.hawkular.server.logging.console.level>INFO</test.hawkular.server.logging.console.level>
     <test.hawkular.check.loops>2</test.hawkular.check.loops>
     <maven-failsafe-plugin.version>2.18.1</maven-failsafe-plugin.version>
+    <codegen.rxjava.deprecated>true</codegen.rxjava.deprecated>
   </properties>
 
   <dependencyManagement>
