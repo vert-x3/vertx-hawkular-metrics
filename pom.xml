@@ -89,6 +89,11 @@
     <!-- use for the documentation generation -->
     <dependency>
       <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-kotlin</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
       <artifactId>vertx-lang-groovy</artifactId>
       <optional>true</optional>
     </dependency>
