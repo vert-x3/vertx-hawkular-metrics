@@ -1,4 +1,0 @@
-moduleName = vertx-hawkular-module
-moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.ext.hawkular.GroovyExtension
-staticExtensionClasses = io.vertx.groovy.ext.hawkular.GroovyStaticExtension

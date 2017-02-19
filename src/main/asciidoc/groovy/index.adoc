@@ -35,7 +35,6 @@ Vert.x does not enable SPI implementations by default. You must enable metric co
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true
@@ -53,7 +52,6 @@ But in production, the Hawkular server will likely run on a separate machine:
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -70,7 +68,6 @@ Hawkular Metrics is a multi-tenant solution, and _vertx-hawkular-metrics_ can se
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -86,7 +83,6 @@ Requests sent to a Hawkular server must be authenticated and tenant must be set 
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -107,7 +103,6 @@ When working with Openshift's internal Metrics server, you can configure token a
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -127,7 +122,6 @@ _vertx-hawkular-metrics_ communicates with the Hawkular server over HTTP. In ord
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -463,7 +457,6 @@ enabled:
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -478,7 +471,6 @@ can be configured:
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -494,8 +486,6 @@ The metrics bridge handler expects messages in the JSON format. The JSON object 
 
 [source,groovy]
 ----
-import groovy.transform.Field
-@Field def vertx
 def message = [
   id:"myapp.files.opened",
   value:7
@@ -510,8 +500,6 @@ was processed. If the metric is a counter or if you prefer explicit configuratio
 
 [source,groovy]
 ----
-import groovy.transform.Field
-@Field def vertx
 def message = [
   id:"myapp.files.opened",
   type:"counter",

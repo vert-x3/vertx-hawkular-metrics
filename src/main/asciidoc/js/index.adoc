@@ -494,7 +494,6 @@ The metrics bridge handler expects messages in the JSON format. The JSON object 
 
 [source,js]
 ----
-var vertx;
 var message = {
   "id" : "myapp.files.opened",
   "value" : 7
@@ -509,7 +508,6 @@ was processed. If the metric is a counter or if you prefer explicit configuratio
 
 [source,js]
 ----
-var vertx;
 var message = {
   "id" : "myapp.files.opened",
   "type" : "counter",

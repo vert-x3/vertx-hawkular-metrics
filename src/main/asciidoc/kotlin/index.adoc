@@ -35,12 +35,6 @@ Vert.x does not enable SPI implementations by default. You must enable metric co
 
 [source,kotlin]
 ----
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
-import io.vertx.ext.hawkular.VertxHawkularOptions
-import io.vertx.kotlin.core.*
-import io.vertx.kotlin.ext.hawkular.*
-
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true)))
@@ -56,12 +50,6 @@ But in production, the Hawkular server will likely run on a separate machine:
 
 [source,kotlin]
 ----
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
-import io.vertx.ext.hawkular.VertxHawkularOptions
-import io.vertx.kotlin.core.*
-import io.vertx.kotlin.ext.hawkular.*
-
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true,
@@ -76,12 +64,6 @@ Hawkular Metrics is a multi-tenant solution, and _vertx-hawkular-metrics_ can se
 
 [source,kotlin]
 ----
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
-import io.vertx.ext.hawkular.VertxHawkularOptions
-import io.vertx.kotlin.core.*
-import io.vertx.kotlin.ext.hawkular.*
-
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true,
@@ -95,13 +77,6 @@ Requests sent to a Hawkular server must be authenticated and tenant must be set 
 
 [source,kotlin]
 ----
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
-import io.vertx.ext.hawkular.AuthenticationOptions
-import io.vertx.ext.hawkular.VertxHawkularOptions
-import io.vertx.kotlin.core.*
-import io.vertx.kotlin.ext.hawkular.*
-
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true,
@@ -119,13 +94,6 @@ When working with Openshift's internal Metrics server, you can configure token a
 
 [source,kotlin]
 ----
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
-import io.vertx.ext.hawkular.VertxHawkularOptions
-import io.vertx.kotlin.core.*
-import io.vertx.kotlin.core.json.*
-import io.vertx.kotlin.ext.hawkular.*
-
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true,
@@ -143,14 +111,6 @@ _vertx-hawkular-metrics_ communicates with the Hawkular server over HTTP. In ord
 
 [source,kotlin]
 ----
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
-import io.vertx.core.http.HttpClientOptions
-import io.vertx.ext.hawkular.VertxHawkularOptions
-import io.vertx.kotlin.core.*
-import io.vertx.kotlin.core.http.*
-import io.vertx.kotlin.ext.hawkular.*
-
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true,
@@ -483,12 +443,6 @@ enabled:
 
 [source,kotlin]
 ----
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
-import io.vertx.ext.hawkular.VertxHawkularOptions
-import io.vertx.kotlin.core.*
-import io.vertx.kotlin.ext.hawkular.*
-
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true,
@@ -501,12 +455,6 @@ can be configured:
 
 [source,kotlin]
 ----
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
-import io.vertx.ext.hawkular.VertxHawkularOptions
-import io.vertx.kotlin.core.*
-import io.vertx.kotlin.ext.hawkular.*
-
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true,
@@ -520,9 +468,6 @@ The metrics bridge handler expects messages in the JSON format. The JSON object 
 
 [source,kotlin]
 ----
-import io.vertx.kotlin.core.json.*
-
-var vertx: Vertx
 var message = json {
   obj(
     "id" to "myapp.files.opened",
@@ -539,9 +484,6 @@ was processed. If the metric is a counter or if you prefer explicit configuratio
 
 [source,kotlin]
 ----
-import io.vertx.kotlin.core.json.*
-
-var vertx: Vertx
 var message = json {
   obj(
     "id" to "myapp.files.opened",
