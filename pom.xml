@@ -23,7 +23,7 @@
   </parent>
 
   <artifactId>vertx-hawkular-metrics</artifactId>
-  <version>3.4.0</version>
+  <version>3.4.1-SNAPSHOT</version>
 
   <name>Vert.x Hawkular Metrics</name>
   <description>Hawkular implementation of the Vert.x Metrics SPI</description>
@@ -36,7 +36,7 @@
 
   <properties>
     <!-- Versioning properties -->
-    <stack.version>3.4.0</stack.version>
+    <stack.version>3.4.1-SNAPSHOT</stack.version>
     <version.org.wildfly>10.0.0.Final</version.org.wildfly>
     <version.org.hawkular.metrics>0.12.1.Final</version.org.hawkular.metrics>
     <version.org.hawkular.embedded-cassandra>0.3.5.Final</version.org.hawkular.embedded-cassandra>
