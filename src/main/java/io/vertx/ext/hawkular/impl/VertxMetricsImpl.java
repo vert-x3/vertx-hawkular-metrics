@@ -112,9 +112,9 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   }
 
   @Override
-  public TCPMetrics createMetrics(NetClient client, NetClientOptions options) {
+  public TCPMetrics createMetrics(NetClientOptions options) {
     NetClientMetricsSupplier supplier = (NetClientMetricsSupplier) metricSuppliers.get(NET_CLIENT);
-    return supplier != null ? new NetClientMetricsImpl(supplier) : super.createMetrics(client, options);
+    return supplier != null ? new NetClientMetricsImpl(supplier) : super.createMetrics(options);
   }
 
   @Override
