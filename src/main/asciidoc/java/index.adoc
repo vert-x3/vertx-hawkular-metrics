@@ -9,6 +9,12 @@ events will be sent to Hawkular, an http://www.hawkular.org[open source monitori
 `link:../../apidocs/io/vertx/core/eventbus/EventBus.html[EventBus]` and handlers
 * User defined metrics via an `link:../../apidocs/io/vertx/core/eventbus/EventBus.html[EventBus]` bridge.
 
+== Prerequisites
+
+Follow the http://www.hawkular.org/hawkular-services/docs/quickstart-guide/[instructions to get Hawkular up and running].
+
+NOTE: You can use a standalone https://github.com/hawkular/hawkular-metrics[Hawkular Metrics] server as well.
+
 == Getting started
 
 The _vertx-hawkular-metrics_ module must be present in the classpath.

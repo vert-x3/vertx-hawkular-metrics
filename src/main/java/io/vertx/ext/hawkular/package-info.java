@@ -26,6 +26,12 @@
  * {@link io.vertx.core.eventbus.EventBus} and handlers
  * * User defined metrics via an {@link io.vertx.core.eventbus.EventBus} bridge.
  *
+ * == Prerequisites
+ *
+ * Follow the http://www.hawkular.org/hawkular-services/docs/quickstart-guide/[instructions to get Hawkular up and running].
+ *
+ * NOTE: You can use a standalone https://github.com/hawkular/hawkular-metrics[Hawkular Metrics] server as well.
+ *
  * == Getting started
  *
  * The _${maven.artifactId}_ module must be present in the classpath.
