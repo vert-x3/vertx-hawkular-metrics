@@ -16,8 +16,8 @@
 
 package verticles
 
-import io.vertx.groovy.core.Future
-import io.vertx.groovy.core.eventbus.EventBus
+import io.vertx.core.Future
+import io.vertx.core.eventbus.EventBus
 
 /**
  * @author Clement Escoffier <clement@apache.org>

@@ -20,10 +20,10 @@ import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
+import io.vertx.core.Vertx
+import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.Timeout
-import io.vertx.groovy.core.Vertx
-import io.vertx.groovy.ext.unit.TestContext
-import io.vertx.groovy.ext.unit.junit.VertxUnitRunner
+import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
 import org.junit.BeforeClass
 import org.junit.Rule

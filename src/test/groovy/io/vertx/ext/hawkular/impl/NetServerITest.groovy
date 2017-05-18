@@ -16,7 +16,7 @@
 
 package io.vertx.ext.hawkular.impl
 
-import io.vertx.groovy.ext.unit.TestContext
+import io.vertx.ext.unit.TestContext
 import org.junit.Before
 import org.junit.Test
 

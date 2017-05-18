@@ -16,7 +16,7 @@
 
 package verticles
 
-import io.vertx.groovy.core.Future
+import io.vertx.core.Future
 
 
 /**
