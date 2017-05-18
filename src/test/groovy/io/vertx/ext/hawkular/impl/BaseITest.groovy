@@ -142,7 +142,7 @@ abstract class BaseITest {
 
   private static Double getGaugeValue(String tenantId, String gauge) {
     def data = hawkularMetrics.get([
-      path   : "gauges/${gauge}/data",
+      path   : "gauges/${gauge}/raw",
       headers: [(TENANT_HEADER_NAME): tenantId]
     ]).data ?: []
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as Double
@@ -188,7 +188,7 @@ abstract class BaseITest {
 
   private static Long getCounterValue(String tenantId, String counter) {
     def data = hawkularMetrics.get([
-      path   : "counters/${counter}/data",
+      path   : "counters/${counter}/raw",
       headers: [(TENANT_HEADER_NAME): tenantId]
     ]).data ?: []
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as Long
@@ -196,7 +196,7 @@ abstract class BaseITest {
 
   private static String getAvailabilityValue(String tenantId, String availability) {
     def data = hawkularMetrics.get([
-      path   : "availability/${availability}/data",
+      path   : "availability/${availability}/raw",
       headers: [(TENANT_HEADER_NAME): tenantId]
     ]).data ?: []
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as String
