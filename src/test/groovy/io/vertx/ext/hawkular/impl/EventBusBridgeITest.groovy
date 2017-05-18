@@ -16,7 +16,6 @@
 
 package io.vertx.ext.hawkular.impl
 
-import io.vertx.ext.unit.TestContext
 import org.junit.Test
 
 /**
@@ -24,46 +23,27 @@ import org.junit.Test
  */
 class EventBusBridgeITest extends BaseITest {
 
-  def testHost = 'localhost'
-  def testPort = getPort(9192)
-  def verticleName = 'verticles/metrics_sender.groovy'
-
-
   @Test
-  void shouldGetCustomMetrics(TestContext context) {
-    def instances = 1
-    def config = [
-            'host': testHost,
-            'port': testPort,
-            'id': 'my-metric'
-    ]
-    deployVerticle(verticleName, config, instances, context)
+  void shouldGetCustomMetrics() {
+    vertx.eventBus().send('hawkular.metrics', ['id': 'my-metric', 'timestamp': System.currentTimeMillis(), 'value': 1.0D])
     assertGaugeEquals(1.0, tenantId, "my-metric")
   }
 
   @Test
-  void shouldGetCustomMetricsWithTimestamp(TestContext context) {
-    def instances = 1
-    def config = [
-            'host': testHost,
-            'port': testPort,
-            'insert-timestamp': true,
-            'id': 'my-metric-ts'
-    ]
-    deployVerticle(verticleName, config, instances, context)
+  void shouldGetCustomMetricsWithTimestamp() {
+    vertx.eventBus().send('hawkular.metrics', ['id': 'my-metric-ts', 'value': 1.0D])
     assertGaugeEquals(1.0, tenantId, "my-metric-ts")
   }
 
   @Test
-  void shouldGetCustomMetricsSentAsCounter(TestContext context) {
-    def instances = 1
-    def config = [
-            'host': testHost,
-            'port': testPort,
-            'counter' : true,
-            'id': 'my-metric-counter'
-    ]
-    deployVerticle(verticleName, config, instances, context)
+  void shouldGetCustomMetricsSentAsCounter() {
+    vertx.eventBus().send('hawkular.metrics', ['id': 'my-metric-counter', 'type': 'counter', 'value': 1L])
     assertCounterEquals(1L, tenantId, "my-metric-counter")
+  }
+
+  @Test
+  void shouldGetCustomMetricsSentAsAvailability() {
+    vertx.eventBus().send('hawkular.metrics', ['id': 'my-metric-av', 'type': 'availability', 'value': 'down'])
+    assertAvailabilityEquals('down', tenantId, "my-metric-av")
   }
 }

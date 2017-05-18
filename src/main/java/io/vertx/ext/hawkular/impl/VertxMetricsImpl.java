@@ -27,9 +27,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.impl.DummyVertxMetrics;
-import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
-import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.DatagramSocketMetrics;
@@ -43,6 +41,7 @@ import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static io.vertx.ext.hawkular.MetricsType.*;
@@ -159,7 +158,7 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     scheduler = new Scheduler(vertx, options, context, sender);
     metricSuppliers.values().forEach(scheduler::register);
 
-    //Configure the metrics bridge. It just transforms the received metrics (json) to a Single Metric to enqueue it.
+    //Configure the metrics bridge. It just transforms the received metrics (json) to a DataPoint to enqueue it.
     if (options.isMetricsBridgeEnabled() && options.getMetricsBridgeAddress() != null) {
       context.runOnContext(v -> {
         bus.consumer(options.getMetricsBridgeAddress(), message -> {
@@ -173,12 +172,20 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
           // "counter" and "gauge" are supported.
           String type = json.getString("type", "");
           String name = json.getString("id");
-          long timestamp = json.getLong("timestamp", System.currentTimeMillis());
+          Long timestamp = json.getLong("timestamp");
+          if (timestamp == null) {
+            timestamp = System.currentTimeMillis();
+          }
           DataPoint dataPoint;
-          if ("counter".equals(type)) {
-            dataPoint = new CounterPoint(name, timestamp, json.getLong("value"));
-          } else {
-            dataPoint = new GaugePoint(name, timestamp, json.getDouble("value"));
+          switch (type.toLowerCase(Locale.ROOT)) {
+            case "counter":
+              dataPoint = new CounterPoint(name, timestamp, json.getLong("value"));
+              break;
+            case "availability":
+              dataPoint = new AvailabilityPoint(name, timestamp, json.getString("value"));
+              break;
+            default:
+              dataPoint = new GaugePoint(name, timestamp, json.getDouble("value"));
           }
           sender.handle(Collections.singletonList(dataPoint));
         });

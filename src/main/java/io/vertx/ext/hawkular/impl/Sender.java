@@ -213,6 +213,7 @@ public class Sender implements Handler<List<DataPoint>> {
     JsonObject json = new JsonObject();
     addMixedData(json, "gauges", mixedData.get(GaugePoint.class));
     addMixedData(json, "counters", mixedData.get(CounterPoint.class));
+    addMixedData(json, "availabilities", mixedData.get(AvailabilityPoint.class));
     return json;
   }
 

@@ -87,7 +87,7 @@ abstract class BaseITest {
     })
   }
 
-  static def Map createMetricsOptions(String tenantId) {
+  static Map createMetricsOptions(String tenantId) {
     def vertxOptions = [
       metricsOptions: [
         enabled             : true,
@@ -104,12 +104,12 @@ abstract class BaseITest {
     vertxOptions
   }
 
-  protected static def int getPort(int defaultValue) {
+  protected static int getPort(int defaultValue) {
     defaultValue + PORT_OFFSET
   }
 
-  protected static def void assertMetricsEquals(Set expected, String tenantId, Closure<Boolean> nameFilter,
-                                                Closure<String> nameTransformer) {
+  protected static void assertMetricsEquals(Set expected, String tenantId, Closure<Boolean> nameFilter,
+                                            Closure<String> nameTransformer) {
     long start = System.currentTimeMillis()
     def actual
     while (true) {
@@ -126,7 +126,7 @@ abstract class BaseITest {
     fail("Expected: ${expected.sort()}, actual: ${actual.sort()}")
   }
 
-  protected static def void assertGaugeEquals(Double expected, String tenantId, String gauge) {
+  protected static void assertGaugeEquals(Double expected, String tenantId, String gauge) {
     long start = System.currentTimeMillis()
     def actual
     while (true) {
@@ -140,7 +140,7 @@ abstract class BaseITest {
     fail("Expected: ${expected}, actual: ${actual}")
   }
 
-  private static def Double getGaugeValue(String tenantId, String gauge) {
+  private static Double getGaugeValue(String tenantId, String gauge) {
     def data = hawkularMetrics.get([
       path   : "gauges/${gauge}/data",
       headers: [(TENANT_HEADER_NAME): tenantId]
@@ -148,7 +148,7 @@ abstract class BaseITest {
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as Double
   }
 
-  protected static def void assertCounterEquals(Long expected, String tenantId, String counter) {
+  protected static void assertCounterEquals(Long expected, String tenantId, String counter) {
     long start = System.currentTimeMillis()
     def actual
     while (true) {
@@ -160,7 +160,19 @@ abstract class BaseITest {
     fail("Expected: ${expected}, actual: ${actual}")
   }
 
-  protected static def void assertCounterGreaterThan(Long expected, String tenantId, String counter) {
+  protected static void assertAvailabilityEquals(String expected, String tenantId, String availability) {
+    long start = System.currentTimeMillis()
+    def actual
+    while (true) {
+      actual = getAvailabilityValue(tenantId, availability)
+      if (expected.equals(actual)) return
+      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
+      sleep(SCHEDULE / 10 as long)
+    }
+    fail("Expected: ${expected}, actual: ${actual}")
+  }
+
+  protected static void assertCounterGreaterThan(Long expected, String tenantId, String counter) {
     long start = System.currentTimeMillis()
     def actual
     while (true) {
@@ -174,7 +186,7 @@ abstract class BaseITest {
     fail("Expected ${counter} value ${actual} to be greater than ${expected}")
   }
 
-  private static def Long getCounterValue(String tenantId, String counter) {
+  private static Long getCounterValue(String tenantId, String counter) {
     def data = hawkularMetrics.get([
       path   : "counters/${counter}/data",
       headers: [(TENANT_HEADER_NAME): tenantId]
@@ -182,7 +194,15 @@ abstract class BaseITest {
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as Long
   }
 
-  protected static def Handler<AsyncResult> assertAsyncSuccess(TestContext context) {
+  private static String getAvailabilityValue(String tenantId, String availability) {
+    def data = hawkularMetrics.get([
+      path   : "availability/${availability}/data",
+      headers: [(TENANT_HEADER_NAME): tenantId]
+    ]).data ?: []
+    data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as String
+  }
+
+  protected static Handler<AsyncResult> assertAsyncSuccess(TestContext context) {
     def async = context.async()
     return { res ->
       if (res.succeeded()) {

@@ -15,6 +15,8 @@
  */
 package io.vertx.ext.hawkular.impl;
 
+import java.util.Objects;
+
 /**
  * Base class for metric data points. Defines the metric name and timestamp of the point.
  *
@@ -25,6 +27,7 @@ public abstract class DataPoint {
   private final long timestamp;
 
   public DataPoint(String name, long timestamp) {
+    Objects.requireNonNull(name, "name");
     this.name = name;
     this.timestamp = timestamp;
   }
