@@ -36,4 +36,6 @@ public abstract class DataPoint {
   public long getTimestamp() {
     return timestamp;
   }
+
+  public abstract Object getValue();
 }

@@ -169,49 +169,30 @@ public class Sender implements Handler<List<DataPoint>> {
   }
 
   private JsonObject toHawkularMixedData(List<DataPoint> dataPoints) {
-    JsonArray gauges = new JsonArray();
-    JsonArray counters = new JsonArray();
+    Map<? extends Class<? extends DataPoint>, Map<String, List<DataPoint>>> mixedData;
+    mixedData = dataPoints.stream().collect(groupingBy(DataPoint::getClass, groupingBy(DataPoint::getName)));
+    JsonObject json = new JsonObject();
+    addMixedData(json, "gauges", mixedData.get(GaugePoint.class));
+    addMixedData(json, "counters", mixedData.get(CounterPoint.class));
+    return json;
+  }
 
-    dataPoints.forEach(metric -> {
-
-      if (metric instanceof GaugePoint) {
-        GaugePoint gaugePoint = (GaugePoint) metric;
-
-        JsonObject point = new JsonObject();
-        point.put("timestamp", gaugePoint.getTimestamp());
-        point.put("value", gaugePoint.getValue());
-
-        JsonObject gauge = new JsonObject();
-        gauge.put("id", gaugePoint.getName());
-        gauge.put("data", new JsonArray(Collections.singletonList(point)));
-
-        gauges.add(gauge);
-      }
-
-      if (metric instanceof CounterPoint) {
-        CounterPoint counterPoint = (CounterPoint) metric;
-
-        JsonObject point = new JsonObject();
-        point.put("timestamp", counterPoint.getTimestamp());
-        point.put("value", counterPoint.getValue());
-
-        JsonObject counter = new JsonObject();
-        counter.put("id", counterPoint.getName());
-        counter.put("data", new JsonArray(Collections.singletonList(point)));
-
-        counters.add(counter);
-      }
-
+  private void addMixedData(JsonObject json, String type, Map<String, List<DataPoint>> data) {
+    if (data == null) {
+      return;
+    }
+    JsonArray metrics = new JsonArray();
+    data.forEach((id, points) -> {
+      JsonArray jsonDataPoints = points.stream()
+        .map(this::toJsonDataPoint)
+        .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+      metrics.add(new JsonObject().put("id", id).put("data", jsonDataPoints));
     });
+    json.put(type, metrics);
+  }
 
-    JsonObject mixedData = new JsonObject();
-    if (!gauges.isEmpty()) {
-      mixedData.put("gauges", gauges);
-    }
-    if (!counters.isEmpty()) {
-      mixedData.put("counters", counters);
-    }
-    return mixedData;
+  private JsonObject toJsonDataPoint(DataPoint dataPoint) {
+    return new JsonObject().put("timestamp", dataPoint.getTimestamp()).put("value", dataPoint.getValue());
   }
 
   private void onResponse(HttpClientResponse response) {

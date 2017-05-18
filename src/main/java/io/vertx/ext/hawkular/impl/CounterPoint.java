@@ -30,7 +30,7 @@ public class CounterPoint extends DataPoint {
     this.value = value;
   }
 
-  public long getValue() {
+  public Long getValue() {
     return value;
   }
 

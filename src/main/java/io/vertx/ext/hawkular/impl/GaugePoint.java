@@ -28,7 +28,7 @@ public class GaugePoint extends DataPoint {
     this.value = value;
   }
 
-  public double getValue() {
+  public Double getValue() {
     return value;
   }
 
