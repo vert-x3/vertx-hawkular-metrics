@@ -15,7 +15,9 @@
  */
 package io.vertx.ext.hawkular.impl;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -37,6 +39,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.concurrent.TimeUnit.*;
 import static java.util.stream.Collectors.*;
@@ -52,8 +56,10 @@ public class Sender implements Handler<List<DataPoint>> {
   private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
 
+  private static final Pattern HAWKULAR_VERSION = Pattern.compile("([0-9]+)\\.([0-9]+)\\.(.+)");
+
   private final Vertx vertx;
-  private final String metricsURI;
+  private final String metricsServiceUri;
 
   private final CharSequence tenant;
   private final CharSequence auth;
@@ -67,6 +73,8 @@ public class Sender implements Handler<List<DataPoint>> {
   private HttpClient httpClient;
   private long timerId;
 
+  private String metricsDataUri;
+
   private long sendTime;
 
   /**
@@ -76,7 +84,7 @@ public class Sender implements Handler<List<DataPoint>> {
    */
   public Sender(Vertx vertx, VertxHawkularOptions options, Context context) {
     this.vertx = vertx;
-    metricsURI = options.getMetricsServiceUri() + "/metrics/data";
+    metricsServiceUri = options.getMetricsServiceUri();
 
     tenant = options.isSendTenantHeader() ? HttpHeaders.createOptimized(options.getTenant()) : null;
     AuthenticationOptions authenticationOptions = options.getAuthenticationOptions();
@@ -149,21 +157,54 @@ public class Sender implements Handler<List<DataPoint>> {
   }
 
   private void send(List<DataPoint> dataPoints) {
-    JsonObject mixedData = toHawkularMixedData(dataPoints);
-    HttpClientRequest request = httpClient.post(metricsURI, this::onResponse)
-      .exceptionHandler(err -> LOG.trace("Could not send metrics", err))
-      .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
+    String mixedData = toHawkularMixedData(dataPoints).encode();
+    getMetricsDataUri(ar -> {
+      if (ar.succeeded()) {
+        HttpClientRequest request = httpClient.post(ar.result(), this::onResponse)
+          .exceptionHandler(err -> LOG.trace("Could not send metrics", err))
+          .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
 
-    if (tenant != null) {
-      request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
-    }
-    if (auth != null) {
-      request.putHeader(HttpHeaders.AUTHORIZATION, auth);
-    }
-    httpHeaders.forEach(request::putHeader);
+        if (tenant != null) {
+          request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
+        }
+        if (auth != null) {
+          request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+        }
+        httpHeaders.forEach(request::putHeader);
 
-    request.end(mixedData.encode(), "UTF-8");
-    sendTime = System.nanoTime();
+        request.end(mixedData, "UTF-8");
+        sendTime = System.nanoTime();
+      }
+    });
+  }
+
+  private void getMetricsDataUri(Handler<AsyncResult<String>> handler) {
+    if (metricsDataUri != null) {
+      handler.handle(Future.succeededFuture(metricsDataUri));
+      return;
+    }
+    httpClient.get(metricsServiceUri + "/status", statusResponse -> {
+      statusResponse.bodyHandler(buffer -> {
+        String hawkularVersion = new JsonObject(buffer).getString("Implementation-Version");
+        if (hawkularVersion == null) {
+          handler.handle(Future.failedFuture("No version info in status data"));
+        } else {
+          Matcher matcher = HAWKULAR_VERSION.matcher(hawkularVersion);
+          if (!matcher.matches()) {
+            handler.handle(Future.failedFuture("Cannot parse version " + hawkularVersion));
+          } else if ("0".equals(matcher.group(1))) {
+            String minor = matcher.group(2);
+            if (minor.length() <= 2 && Integer.parseInt(minor) < 15) {
+              metricsDataUri = metricsServiceUri + "/metrics/data";
+            } else {
+              metricsDataUri = metricsServiceUri + "/metrics/raw";
+            }
+            handler.handle(Future.succeededFuture(metricsDataUri));
+          }
+        }
+      }).exceptionHandler(err -> handler.handle(Future.failedFuture(err)));
+    }).exceptionHandler(err -> handler.handle(Future.failedFuture(err)))
+      .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON).end();
   }
 
   private JsonObject toHawkularMixedData(List<DataPoint> dataPoints) {
