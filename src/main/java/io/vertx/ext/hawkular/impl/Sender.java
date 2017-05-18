@@ -160,9 +160,7 @@ public class Sender implements Handler<List<DataPoint>> {
     if (auth != null) {
       request.putHeader(HttpHeaders.AUTHORIZATION, auth);
     }
-    httpHeaders.entrySet().stream().forEach(httpHeader -> {
-      request.putHeader(httpHeader.getKey(), httpHeader.getValue());
-    });
+    httpHeaders.forEach(request::putHeader);
 
     request.end(mixedData.encode(), "UTF-8");
     sendTime = System.nanoTime();
