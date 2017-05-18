@@ -205,7 +205,7 @@
           <plugin>
             <groupId>org.wildfly.plugins</groupId>
             <artifactId>wildfly-maven-plugin</artifactId>
-            <version>1.1.0.Alpha4</version>
+            <version>1.1.0.Final</version>
             <configuration>
               <version>${version.org.wildfly}</version>
               <port>${test.hawkular.server.management.port}</port>
@@ -305,6 +305,18 @@
                 <phase>pre-integration-test</phase>
                 <goals>
                   <goal>deploy-artifact</goal>
+                </goals>
+                <configuration>
+                  <groupId>org.hawkular.metrics</groupId>
+                  <artifactId>hawkular-metrics-standalone-dist</artifactId>
+                  <name>hawkular-metrics.ear</name>
+                </configuration>
+              </execution>
+              <execution>
+                <id>undeploy-dist</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>undeploy-artifact</goal>
                 </goals>
                 <configuration>
                   <groupId>org.hawkular.metrics</groupId>
