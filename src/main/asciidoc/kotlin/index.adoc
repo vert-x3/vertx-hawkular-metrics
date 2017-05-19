@@ -484,13 +484,12 @@ vertx.eventBus().publish("metrics", message)
 
 ----
 
-The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message
-was processed. If the metric is a counter or if you prefer explicit configuration, set the `type` and
-`timestamp` attributes:
+The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message was processed.
+If the metric is a counter or availability, or if you prefer explicit configuration, set the `type` and/or `timestamp` attributes:
 
 [source,kotlin]
 ----
-var message = json {
+var counterMetric = json {
   obj(
     "id" to "myapp.files.opened",
     "type" to "counter",
@@ -498,7 +497,16 @@ var message = json {
     "value" to 7
   )
 }
-vertx.eventBus().publish("metrics", message)
+vertx.eventBus().publish("metrics", counterMetric)
+
+var availabilityMetric = json {
+  obj(
+    "id" to "myapp.mysubsystem.status",
+    "type" to "availability",
+    "value" to "up"
+  )
+}
+vertx.eventBus().publish("metrics", availabilityMetric)
 
 ----
 

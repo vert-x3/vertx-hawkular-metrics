@@ -508,19 +508,25 @@ message = {
 
 ----
 
-The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message
-was processed. If the metric is a counter or if you prefer explicit configuration, set the `type` and
-`timestamp` attributes:
+The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message was processed.
+If the metric is a counter or availability, or if you prefer explicit configuration, set the `type` and/or `timestamp` attributes:
 
 [source,ruby]
 ----
-message = {
+counterMetric = {
   'id' => "myapp.files.opened",
   'type' => "counter",
   'timestamp' => 189898098098908,
   'value' => 7
 }
-@vertx.event_bus().publish("metrics", message)
+@vertx.event_bus().publish("metrics", counterMetric)
+
+availabilityMetric = {
+  'id' => "myapp.mysubsystem.status",
+  'type' => "availability",
+  'value' => "up"
+}
+@vertx.event_bus().publish("metrics", availabilityMetric)
 
 ----
 

@@ -451,9 +451,8 @@
  * {@link examples.MetricsExamples#userDefinedMetric()}
  * ----
  *
- * The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message
- * was processed. If the metric is a counter or if you prefer explicit configuration, set the {@code type} and
- * {@code timestamp} attributes:
+ * The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message was processed.
+ * If the metric is a counter or availability, or if you prefer explicit configuration, set the {@code type} and/or {@code timestamp} attributes:
  *
  * [source,$lang]
  * ----

@@ -115,12 +115,18 @@ public class MetricsExamples {
   }
 
   public void userDefinedMetricExplicit() {
-    JsonObject message = new JsonObject()
+    JsonObject counterMetric = new JsonObject()
       .put("id", "myapp.files.opened")
       .put("type", "counter")
       .put("timestamp", 189898098098908L)
       .put("value", 7);
-    vertx.eventBus().publish("metrics", message);
+    vertx.eventBus().publish("metrics", counterMetric);
+
+    JsonObject availabilityMetric = new JsonObject()
+      .put("id", "myapp.mysubsystem.status")
+      .put("type", "availability")
+      .put("value", "up");
+    vertx.eventBus().publish("metrics", availabilityMetric);
   }
 
 }

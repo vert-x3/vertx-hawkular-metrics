@@ -480,18 +480,23 @@ JsonObject message = new JsonObject()
 vertx.eventBus().publish("metrics", message);
 ----
 
-The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message
-was processed. If the metric is a counter or if you prefer explicit configuration, set the `type` and
-`timestamp` attributes:
+The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message was processed.
+If the metric is a counter or availability, or if you prefer explicit configuration, set the `type` and/or `timestamp` attributes:
 
 [source,java]
 ----
-JsonObject message = new JsonObject()
+JsonObject counterMetric = new JsonObject()
   .put("id", "myapp.files.opened")
   .put("type", "counter")
   .put("timestamp", 189898098098908L)
   .put("value", 7);
-vertx.eventBus().publish("metrics", message);
+vertx.eventBus().publish("metrics", counterMetric);
+
+JsonObject availabilityMetric = new JsonObject()
+  .put("id", "myapp.mysubsystem.status")
+  .put("type", "availability")
+  .put("value", "up");
+vertx.eventBus().publish("metrics", availabilityMetric);
 ----
 
 Note that Hawkular understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.
