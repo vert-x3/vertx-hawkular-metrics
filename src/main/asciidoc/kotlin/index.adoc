@@ -480,7 +480,7 @@ var message = json {
     "value" to 7
   )
 }
-vertx.eventBus().publish("metrics", message)
+vertx.eventBus().publish("hawkular.metrics", message)
 
 ----
 
@@ -497,7 +497,7 @@ var counterMetric = json {
     "value" to 7
   )
 }
-vertx.eventBus().publish("metrics", counterMetric)
+vertx.eventBus().publish("hawkular.metrics", counterMetric)
 
 var availabilityMetric = json {
   obj(
@@ -506,7 +506,7 @@ var availabilityMetric = json {
     "value" to "up"
   )
 }
-vertx.eventBus().publish("metrics", availabilityMetric)
+vertx.eventBus().publish("hawkular.metrics", availabilityMetric)
 
 ----
 

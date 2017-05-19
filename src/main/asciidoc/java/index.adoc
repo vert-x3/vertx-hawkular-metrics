@@ -477,7 +477,7 @@ The metrics bridge handler expects messages in the JSON format. The JSON object 
 JsonObject message = new JsonObject()
   .put("id", "myapp.files.opened")
   .put("value", 7);
-vertx.eventBus().publish("metrics", message);
+vertx.eventBus().publish("hawkular.metrics", message);
 ----
 
 The handler will assume the metric is a gauge and will assign a timestamp corresponding to the time when the message was processed.
@@ -490,13 +490,13 @@ JsonObject counterMetric = new JsonObject()
   .put("type", "counter")
   .put("timestamp", 189898098098908L)
   .put("value", 7);
-vertx.eventBus().publish("metrics", counterMetric);
+vertx.eventBus().publish("hawkular.metrics", counterMetric);
 
 JsonObject availabilityMetric = new JsonObject()
   .put("id", "myapp.mysubsystem.status")
   .put("type", "availability")
   .put("value", "up");
-vertx.eventBus().publish("metrics", availabilityMetric);
+vertx.eventBus().publish("hawkular.metrics", availabilityMetric);
 ----
 
 Note that Hawkular understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.

@@ -504,7 +504,7 @@ var message = {
   "id" : "myapp.files.opened",
   "value" : 7
 };
-vertx.eventBus().publish("metrics", message);
+vertx.eventBus().publish("hawkular.metrics", message);
 
 ----
 
@@ -519,14 +519,14 @@ var counterMetric = {
   "timestamp" : 189898098098908,
   "value" : 7
 };
-vertx.eventBus().publish("metrics", counterMetric);
+vertx.eventBus().publish("hawkular.metrics", counterMetric);
 
 var availabilityMetric = {
   "id" : "myapp.mysubsystem.status",
   "type" : "availability",
   "value" : "up"
 };
-vertx.eventBus().publish("metrics", availabilityMetric);
+vertx.eventBus().publish("hawkular.metrics", availabilityMetric);
 
 ----
 

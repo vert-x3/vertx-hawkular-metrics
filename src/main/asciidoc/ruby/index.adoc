@@ -504,7 +504,7 @@ message = {
   'id' => "myapp.files.opened",
   'value' => 7
 }
-@vertx.event_bus().publish("metrics", message)
+@vertx.event_bus().publish("hawkular.metrics", message)
 
 ----
 
@@ -519,14 +519,14 @@ counterMetric = {
   'timestamp' => 189898098098908,
   'value' => 7
 }
-@vertx.event_bus().publish("metrics", counterMetric)
+@vertx.event_bus().publish("hawkular.metrics", counterMetric)
 
 availabilityMetric = {
   'id' => "myapp.mysubsystem.status",
   'type' => "availability",
   'value' => "up"
 }
-@vertx.event_bus().publish("metrics", availabilityMetric)
+@vertx.event_bus().publish("hawkular.metrics", availabilityMetric)
 
 ----
 

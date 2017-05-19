@@ -111,7 +111,7 @@ public class MetricsExamples {
     JsonObject message = new JsonObject()
       .put("id", "myapp.files.opened")
       .put("value", 7);
-    vertx.eventBus().publish("metrics", message);
+    vertx.eventBus().publish("hawkular.metrics", message);
   }
 
   public void userDefinedMetricExplicit() {
@@ -120,13 +120,13 @@ public class MetricsExamples {
       .put("type", "counter")
       .put("timestamp", 189898098098908L)
       .put("value", 7);
-    vertx.eventBus().publish("metrics", counterMetric);
+    vertx.eventBus().publish("hawkular.metrics", counterMetric);
 
     JsonObject availabilityMetric = new JsonObject()
       .put("id", "myapp.mysubsystem.status")
       .put("type", "availability")
       .put("value", "up");
-    vertx.eventBus().publish("metrics", availabilityMetric);
+    vertx.eventBus().publish("hawkular.metrics", availabilityMetric);
   }
 
 }
