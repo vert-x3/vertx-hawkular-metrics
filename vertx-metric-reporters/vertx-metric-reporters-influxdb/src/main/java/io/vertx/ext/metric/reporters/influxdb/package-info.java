@@ -55,7 +55,7 @@
  * ----
  *
  *
- * Please refer to {@link io.vertx.ext.metric.collect.ExtendedMetricsOptions} for an exhaustive list of options.
+ * Please refer to {@link io.vertx.ext.metric.reporters.influxdb.VertxInfluxDbOptions} for an exhaustive list of options.
  *
  * == Vert.x core tools metrics
  *

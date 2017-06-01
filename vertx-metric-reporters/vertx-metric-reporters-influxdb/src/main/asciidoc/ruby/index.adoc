@@ -38,7 +38,7 @@ compile 'io.vertx:vertx-metric-reporters-influxdb:3.4.2-SNAPSHOT'
 ----
 
 
-Please refer to `link:../../vertx-metric-collect/dataobjects.html#ExtendedMetricsOptions[ExtendedMetricsOptions]` for an exhaustive list of options.
+Please refer to `link:../dataobjects.html#VertxInfluxDbOptions[VertxInfluxDbOptions]` for an exhaustive list of options.
 
 == Vert.x core tools metrics
 

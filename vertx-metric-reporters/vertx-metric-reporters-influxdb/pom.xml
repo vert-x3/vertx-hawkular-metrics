@@ -44,11 +44,6 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>21.0</version>
-    </dependency>    
-    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-docgen</artifactId>
       <optional>true</optional>
@@ -96,12 +91,6 @@
       <artifactId>vertx-unit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.groovy.modules.http-builder</groupId>
-      <artifactId>http-builder</artifactId>
-      <version>0.7.1</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
@@ -132,10 +121,12 @@
         <version>${maven-failsafe-plugin.version}</version>
         <configuration>
           <includes>
-            <include>**/*Test*</include>
+            <include>**/*ITest*</include>
           </includes>
           <systemPropertyVariables>
+            <test.hawkular.server.base-url>${test.hawkular.server.base-url}</test.hawkular.server.base-url>
             <java.util.logging.config.file>${project.basedir}/log-test.properties</java.util.logging.config.file>
+            <test.hawkular.check.loops>${test.hawkular.check.loops}</test.hawkular.check.loops>
           </systemPropertyVariables>
         </configuration>
         <executions>
@@ -152,6 +143,14 @@
 
   <profiles>
     <profile>
+      <id>run-itests</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+    </profile>
+    <profile>
       <id>coverage</id>
       <build>
         <plugins>
@@ -162,10 +161,12 @@
             <configuration>
               <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
               <includes>
-                <include>**/*Test*</include>
+                <include>**/*ITest*</include>
               </includes>
               <systemPropertyVariables>
+                <test.hawkular.server.base-url>${test.hawkular.server.base-url}</test.hawkular.server.base-url>
                 <java.util.logging.config.file>${project.basedir}/log-test.properties</java.util.logging.config.file>
+                <test.hawkular.check.loops>${test.hawkular.check.loops}</test.hawkular.check.loops>
               </systemPropertyVariables>
               <argLine>@{surefireArgLine}</argLine>
             </configuration>

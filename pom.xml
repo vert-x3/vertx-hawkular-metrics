@@ -34,10 +34,9 @@
   </scm>
 
   <properties>
+    <doc.skip>true</doc.skip>
     <!-- Versioning properties -->
     <stack.version>3.4.2-SNAPSHOT</stack.version>
-    <doc.skip>true</doc.skip>
-    
     <version.org.wildfly>10.0.0.Final</version.org.wildfly>
     <version.org.hawkular.metrics>0.25.0.Final</version.org.hawkular.metrics>
     <version.org.hawkular.embedded-cassandra>0.9.2.Final</version.org.hawkular.embedded-cassandra>

@@ -10,10 +10,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.escape.Escaper;
-import com.google.common.escape.Escapers;
+import io.vertx.codegen.annotations.Nullable;
 
 /**
  * Representation of a InfluxDB database Point.
@@ -28,15 +25,6 @@ public class Point {
   private TimeUnit precision = TimeUnit.NANOSECONDS;
   private Map<String, Object> fields;
 
-  private static final Escaper FIELD_ESCAPER = Escapers.builder()
-                                                      .addEscape('\\', "\\\\")
-                                                      .addEscape('"', "\\\"")
-                                                      .build();
-  private static final Escaper KEY_ESCAPER = Escapers.builder()
-                                                     .addEscape(' ', "\\ ")
-                                                     .addEscape(',', "\\,")
-                                                     .addEscape('=', "\\=")
-                                                     .build();
   private static final int MAX_FRACTION_DIGITS = 340;
 
   Point() {
@@ -84,8 +72,8 @@ public class Point {
      * @return the Builder instance.
      */
     public Builder tag(final String tagName, final String value) {
-      Preconditions.checkArgument(tagName != null);
-      Preconditions.checkArgument(value != null);
+      checkArgument(tagName != null);
+      checkArgument(value != null);
       if (!tagName.isEmpty() && !value.isEmpty()) {
         tags.put(tagName, value);
       }
@@ -189,7 +177,7 @@ public class Point {
      * @return the Builder instance.
      */
     public Builder time(final long timeToSet, final TimeUnit precisionToSet) {
-      Preconditions.checkNotNull(precisionToSet, "Precision must be not null!");
+      checkNotNull(precisionToSet, "Precision must be not null!");
       this.time = timeToSet;
       this.precision = precisionToSet;
       return this;
@@ -201,12 +189,8 @@ public class Point {
      * @return the newly created Point.
      */
     public Point build() {
-      Preconditions
-          .checkArgument(!Strings.isNullOrEmpty(this.measurement),
-          "Point name must not be null or empty.");
-      Preconditions
-          .checkArgument(this.fields.size() > 0,
-          "Point must have at least one field specified.");
+          checkArgument(!(this.measurement == null || this.measurement.isEmpty()), "Point name must not be null or empty. Was: " + this.measurement);
+          checkArgument(this.fields.size() > 0,"Point must have at least one field specified.");
       Point point = new Point();
       point.setFields(this.fields);
       point.setMeasurement(this.measurement);
@@ -321,7 +305,7 @@ public class Point {
    */
   public String lineProtocol() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(KEY_ESCAPER.escape(this.measurement));
+    sb.append(escapeKey(this.measurement));
     sb.append(concatenatedTags());
     sb.append(concatenateFields());
     sb.append(formatedTime());
@@ -332,9 +316,9 @@ public class Point {
     final StringBuilder sb = new StringBuilder();
     for (Entry<String, String> tag : this.tags.entrySet()) {
       sb.append(",")
-        .append(KEY_ESCAPER.escape(tag.getKey()))
+        .append(escapeKey(tag.getKey()))
         .append("=")
-        .append(KEY_ESCAPER.escape(tag.getValue()));
+        .append(escapeKey(tag.getValue()));
     }
     sb.append(" ");
     return sb;
@@ -357,11 +341,12 @@ public class Point {
         continue;
       }
 
-      sb.append(KEY_ESCAPER.escape(field.getKey())).append("=");
+      sb.append(escapeKey(field.getKey())).append("=");
+
       if (value instanceof String) {
         String stringValue = (String) value;
-        sb.append("\"").append(FIELD_ESCAPER.escape(stringValue)).append("\"");
-      } else if (value instanceof Number) {
+        sb.append("\"").append(stringValue.replaceAll("\\", "\\\\").replaceAll("\"","\\\"")).append("\"");
+     } else if (value instanceof Number) {
         if (value instanceof Double || value instanceof Float || value instanceof BigDecimal) {
           sb.append(numberFormat.format(value));
         } else {
@@ -379,10 +364,55 @@ public class Point {
     return sb;
   }
 
+  private String escapeKey(String key) {
+    return key.replaceAll(" ", "\\ ").replaceAll(",", "\\,").replaceAll("=", "\\=");
+  }
+
   private StringBuilder formatedTime() {
     final StringBuilder sb = new StringBuilder();
     sb.append(" ").append(TimeUnit.NANOSECONDS.convert(this.time, this.precision));
     return sb;
   }
 
+  /**
+   * Ensures the truth of an expression involving one or more parameters to the calling method.
+   *
+   * @param expression a boolean expression
+   * @throws IllegalArgumentException if {@code expression} is false
+   */
+  public static void checkArgument(boolean expression) {
+    if (!expression) {
+      throw new IllegalArgumentException();
+    }
+  }
+  
+  /**
+   * Ensures the truth of an expression involving one or more parameters to the calling method.
+   *
+   * @param expression a boolean expression
+   * @param errorMessage the exception message to use if the check fails; will be converted to a
+   *     string using {@link String#valueOf(Object)}
+   * @throws IllegalArgumentException if {@code expression} is false
+   */
+  public static void checkArgument(boolean expression, @Nullable Object errorMessage) {
+    if (!expression) {
+      throw new IllegalArgumentException(String.valueOf(errorMessage));
+    }
+  }
+  
+  /**
+   * Ensures that an object reference passed as a parameter to the calling method is not null.
+   *
+   * @param reference an object reference
+   * @param errorMessage the exception message to use if the check fails; will be converted to a
+   *     string using {@link String#valueOf(Object)}
+   * @return the non-null reference that was validated
+   * @throws NullPointerException if {@code reference} is null
+   */
+  public static <T> T checkNotNull(T reference, @Nullable Object errorMessage) {
+    if (reference == null) {
+      throw new NullPointerException(String.valueOf(errorMessage));
+    }
+    return reference;
+  }
 }

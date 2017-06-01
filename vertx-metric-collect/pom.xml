@@ -23,6 +23,7 @@
   </parent>
 
   <artifactId>vertx-metric-collect</artifactId>
+  <version>3.4.2-SNAPSHOT</version>
   
 
   <name>Vert.x Metrics collector module</name>
@@ -46,61 +47,88 @@
     <codegen.rxjava.deprecated>true</codegen.rxjava.deprecated>
   </properties>
 
+  <dependencies>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-docgen</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codetrans</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <!-- use for the documentation generation -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-kotlin</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-groovy</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-ruby</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-lang-js</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-rx-java</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy.modules.http-builder</groupId>
+      <artifactId>http-builder</artifactId>
+      <version>0.7.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hawkular.metrics</groupId>
+      <artifactId>hawkular-metrics-standalone-dist</artifactId>
+      <version>${version.org.hawkular.metrics}</version>
+      <type>ear</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hawkular.commons</groupId>
+      <artifactId>hawkular-commons-embedded-cassandra-war</artifactId>
+      <version>${version.org.hawkular.embedded-cassandra}</version>
+      <type>war</type>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-jar</id>
-            <configuration>
-              <archive>
-                <!-- Generate a jar INDEX.LIST -->
-                <index>true</index>
-                <!-- A manifest containing the OSGi metadata has been generated using the maven-bundle-plugin -->
-                <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                <!-- Add the Maven coordinates in the manifest -->
-                <manifestEntries>
-                  <Maven-Group-Id>${project.groupId}</Maven-Group-Id>
-                  <Maven-Artifact-Id>${project.artifactId}</Maven-Artifact-Id>
-                  <Maven-Version>${project.version}</Maven-Version>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>    
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-maven-plugin</artifactId>
-        <version>3.2.0</version>
-
-        <executions>
-          <execution>
-            <id>default-bnd-process</id>
-            <goals>
-              <goal>bnd-process</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <bnd><![CDATA[
-          Import-Package: \
-            groovy.lang.*;resolution:=optional,\
-            org.codehaus.groovy.*;resolution:=optional,\
-            kotlin.*;resolution:=optional,\
-            io.vertx.groovy.*;resolution:=optional,\
-            io.vertx.lang.rxjava.*;resolution:=optional,\
-            io.vertx.lang.groovy.*;resolution:=optional,\
-            io.vertx.codegen.annotations;resolution:=optional,\
-            io.vertx.rx.java;resolution:=optional,\
-            io.vertx.rxjava.core.*;resolution:=optional,\
-            rx.*;resolution:=optional,\
-            *
-          -exportcontents: !examples, *
-          ]]></bnd>
-        </configuration>
-      </plugin>      
       <plugin>
         <groupId>org.codehaus.gmavenplus</groupId>
         <artifactId>gmavenplus-plugin</artifactId>
@@ -146,4 +174,83 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>run-itests</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <!-- Around integration tests, start and stop a Wildfly server with Hawkular Metrics and Embedded Cassandra -->
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>coverage</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${maven-failsafe-plugin.version}</version>
+            <configuration>
+              <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+              <includes>
+                <include>**/*ITest*</include>
+              </includes>
+              <systemPropertyVariables>
+                <test.hawkular.server.base-url>${test.hawkular.server.base-url}</test.hawkular.server.base-url>
+                <java.util.logging.config.file>${project.basedir}/log-test.properties</java.util.logging.config.file>
+                <test.hawkular.check.loops>${test.hawkular.check.loops}</test.hawkular.check.loops>
+              </systemPropertyVariables>
+              <argLine>@{surefireArgLine}</argLine>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${maven.jacoco.plugin.version}</version>
+            <executions>
+              <execution>
+                <id>pre-integration-test</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <phase>pre-integration-test</phase>
+                <configuration>
+                  <destFile>${sonar.jacoco.reportPath}</destFile>
+                  <propertyName>surefireArgLine</propertyName>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>post-integration-test</id>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <phase>post-integration-test</phase>
+                <configuration>
+                  <dataFile>${sonar.jacoco.reportPath}</dataFile>
+                  <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

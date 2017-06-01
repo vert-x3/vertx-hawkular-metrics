@@ -24,6 +24,7 @@
 
   <artifactId>vertx-metric-reporters</artifactId>
   <packaging>pom</packaging>
+  <version>3.4.2-SNAPSHOT</version>
 
   <modules>
 	 <module>vertx-metric-reporters-influxdb</module>

@@ -1,15 +1,11 @@
 package io.vertx.ext.metric.reporters.influxdb.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
+import java.util.TreeMap;
 
 /**
  * {Purpose of This Type}.
@@ -42,8 +38,8 @@ public class BatchPoints {
    * The Builder to create a new BatchPoints instance.
    */
   public static final class Builder {
-    private final Map<String, String> tags = Maps.newTreeMap(Ordering.natural());
-    private final List<Point> points = Lists.newArrayList();
+    private final Map<String, String> tags = new TreeMap<>();
+    private final List<Point> points = new ArrayList<>();
 
     Builder() {
     }
