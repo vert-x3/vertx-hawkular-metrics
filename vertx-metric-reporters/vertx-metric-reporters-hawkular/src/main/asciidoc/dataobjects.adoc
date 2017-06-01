@@ -1,0 +1,84 @@
+= Cheatsheets
+
+[[AuthenticationOptions]]
+== AuthenticationOptions
+
+++++
+ Authentication options.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[enabled]]`enabled`|`Boolean`|
++++
+Set whether authentication is enabled. Defaults to <code>false</code>.
++++
+|[[id]]`id`|`String`|
++++
+Set the identifier used for authentication.
++++
+|[[secret]]`secret`|`String`|
++++
+Set the secret used for authentication.
++++
+|===
+
+[[VertxHawkularOptions]]
+== VertxHawkularOptions
+
+++++
+ Vert.x Hawkular monitoring configuration.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[authenticationOptions]]`authenticationOptions`|`link:dataobjects.html#AuthenticationOptions[AuthenticationOptions]`|
++++
+Set the options for authentication.
++++
+|[[batchDelay]]`batchDelay`|`Number (int)`|-
+|[[batchSize]]`batchSize`|`Number (int)`|-
+|[[disabledMetricsTypes]]`disabledMetricsTypes`|`Array of link:enums.html#MetricsType[MetricsType]`|-
+|[[enabled]]`enabled`|`Boolean`|-
+|[[host]]`host`|`String`|
++++
+Set the Hawkular Metrics service host. Defaults to <code>localhost</code>.
++++
+|[[httpHeaders]]`httpHeaders`|`Json object`|
++++
+Set specific headers to include in HTTP requests.
++++
+|[[httpOptions]]`httpOptions`|`link:dataobjects.html#HttpClientOptions[HttpClientOptions]`|
++++
+Set the configuration of the Hawkular Metrics HTTP client.
++++
+|[[metricsBridgeAddress]]`metricsBridgeAddress`|`String`|-
+|[[metricsBridgeEnabled]]`metricsBridgeEnabled`|`Boolean`|-
+|[[metricsServiceUri]]`metricsServiceUri`|`String`|
++++
+Set the Hawkular Metrics service URI. Defaults to <code>/hawkular/metrics</code>. This can be useful if you host the
+ Hawkular server behind a proxy and manipulate the default service URI.
++++
+|[[port]]`port`|`Number (int)`|
++++
+Set the Hawkular Metrics service port.  Defaults to <code>8080</code>.
++++
+|[[prefix]]`prefix`|`String`|-
+|[[schedule]]`schedule`|`Number (int)`|-
+|[[sendTenantHeader]]`sendTenantHeader`|`Boolean`|
++++
+Set whether Hawkular tenant header should be sent. Defaults to <code>true</code>.
+ Must be set to <code>false</code> when working with pre-Alpha13 Hawkular servers.
++++
+|[[tenant]]`tenant`|`String`|
++++
+Set the Hawkular tenant. Defaults to <code>default</code>.
++++
+|===
+

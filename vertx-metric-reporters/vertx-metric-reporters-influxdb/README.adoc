@@ -1,27 +1,20 @@
-= vertx-metrics
+= vertx-metric-reporters-influxdb
 :source-language: java
 
 image::https://vertx.ci.cloudbees.com/buildStatus/icon?job=vert.x3-hawkular-metrics[link=https://vertx.ci.cloudbees.com/job/vert.x3-hawkular-metrics/]
 
-Vert.x-Metrics contains metrics collection and reporting to various target systems.
+Vert.x-Metrics-reporters-influxdb contains metrics collection and reporting to InfluxDb.
 
-
-
-Hawkular is an http://www.hawkular.org[open source monitoring and management solution].
+Hawkular is an http://www.influxdb.org[open source monitoring and management solution].
 
 The http://vertx.io/docs/vertx-core/java/index.html#_metrics_spi[Vert.x Metrics SPI] allows implementers to
 capture events from Vert.x in order to gather metrics.
 
-This project is an Hawkular implementation of the Vert.x Metrics SPI: metrics built from Vert.x events will be sent to
-an Hawkular Metrics service.
+This project is an InfluxDb implementation of the Vert.x Metrics SPI: metrics built from Vert.x events will be sent to
+an InfluxDb Timeseries database.
 
 Please see the in-source Asciidoc documentation or the main documentation on the web-site for a full description
 of this component:
 
 * link:http://vertx.io/docs/vertx-hawkular-metrics/java/[web-site docs]
 * link:src/main/asciidoc/java/index.adoc[in-source docs]
-
-== Reporters
-
-Reporter implementations are in the metric-reporters sub-project
-

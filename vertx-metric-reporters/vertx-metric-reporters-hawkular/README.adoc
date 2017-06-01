@@ -1,11 +1,9 @@
-= vertx-metrics
+= vertx-metric-reporters-hawkular
 :source-language: java
 
 image::https://vertx.ci.cloudbees.com/buildStatus/icon?job=vert.x3-hawkular-metrics[link=https://vertx.ci.cloudbees.com/job/vert.x3-hawkular-metrics/]
 
-Vert.x-Metrics contains metrics collection and reporting to various target systems.
-
-
+Vert.x-Metrics-reporters-hawkular contains metrics collection and reporting to Hawkular.
 
 Hawkular is an http://www.hawkular.org[open source monitoring and management solution].
 
@@ -20,8 +18,3 @@ of this component:
 
 * link:http://vertx.io/docs/vertx-hawkular-metrics/java/[web-site docs]
 * link:src/main/asciidoc/java/index.adoc[in-source docs]
-
-== Reporters
-
-Reporter implementations are in the metric-reporters sub-project
-
