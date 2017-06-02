@@ -48,6 +48,11 @@ public class VertxInfluxDbOptions extends ExtendedMetricsOptions {
   public static final String DEFAULT_DATABASE = "default";
 
   /**
+   * The default prefix = vert.x.
+   */
+  public static final String DEFAULT_PREFIX = "vert.x";
+  
+  /**
    * The default gzip enabled on InfluxDb.
    */
   public static final boolean DEFAULT_GZIP_ENABLED = true;
@@ -69,6 +74,7 @@ public class VertxInfluxDbOptions extends ExtendedMetricsOptions {
     httpOptions = new HttpClientOptions();
     metricsServiceUri = DEFAULT_METRICS_URI;
     database = DEFAULT_DATABASE;
+    setPrefix(DEFAULT_PREFIX);
     authenticationOptions = new AuthenticationOptions();
     httpHeaders = new JsonObject();
   }
