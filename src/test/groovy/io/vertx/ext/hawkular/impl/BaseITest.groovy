@@ -176,18 +176,6 @@ abstract class BaseITest {
     fail("Expected: ${expected}, actual: ${actual}")
   }
 
-  protected static void assertAvailabilityEquals(String expected, String tenantId, String availability) {
-    long start = System.currentTimeMillis()
-    def actual
-    while (true) {
-      actual = getAvailabilityValue(tenantId, availability)
-      if (expected.equals(actual)) return
-      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
-      sleep(SCHEDULE / 10 as long)
-    }
-    fail("Expected: ${expected}, actual: ${actual}")
-  }
-
   protected static void assertCounterGreaterThan(Long expected, String tenantId, String counter) {
     long start = System.currentTimeMillis()
     def actual
@@ -208,6 +196,18 @@ abstract class BaseITest {
       headers: [(TENANT_HEADER_NAME): tenantId]
     ]).data ?: []
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as Long
+  }
+
+  protected static void assertAvailabilityEquals(String expected, String tenantId, String availability) {
+    long start = System.currentTimeMillis()
+    def actual
+    while (true) {
+      actual = getAvailabilityValue(tenantId, availability)
+      if (expected.equals(actual)) return
+      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
+      sleep(SCHEDULE / 10 as long)
+    }
+    fail("Expected: ${expected}, actual: ${actual}")
   }
 
   private static String getAvailabilityValue(String tenantId, String availability) {
