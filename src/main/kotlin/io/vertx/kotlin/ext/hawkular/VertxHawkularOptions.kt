@@ -3,6 +3,7 @@ package io.vertx.kotlin.ext.hawkular
 import io.vertx.ext.hawkular.VertxHawkularOptions
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.ext.hawkular.AuthenticationOptions
+import io.vertx.ext.hawkular.MetricTagsMatch
 import io.vertx.ext.hawkular.MetricsType
 
 /**
@@ -18,6 +19,8 @@ import io.vertx.ext.hawkular.MetricsType
  * @param host  Set the Hawkular Metrics service host. Defaults to <code>localhost</code>.
  * @param httpHeaders  Set specific headers to include in HTTP requests.
  * @param httpOptions  Set the configuration of the Hawkular Metrics HTTP client.
+ * @param metricTagsMatches  Sets a list of [io.vertx.ext.hawkular.MetricTagsMatch].
+ * @param metricTagsMatchs  Adds a [io.vertx.ext.hawkular.MetricTagsMatch].
  * @param metricsBridgeAddress  Sets the metric bridge address on which the application is sending the custom metrics. Application can send metrics to this event bus address. The message is a JSON object specifying at least the <code>id</code> and <code>value</code> fields. <p/> Don't forget to also enable the bridge with <code>metricsBridgeEnabled</code>.
  * @param metricsBridgeEnabled  Sets whether or not the metrics bridge should be enabled. The metrics bridge is disabled by default.
  * @param metricsServiceUri  Set the Hawkular Metrics service URI. Defaults to <code>/hawkular/metrics</code>. This can be useful if you host the Hawkular server behind a proxy and manipulate the default service URI.
@@ -25,6 +28,8 @@ import io.vertx.ext.hawkular.MetricsType
  * @param prefix  Set the metric name prefix. Metric names are not prefixed by default. Prefixing metric names is required to distinguish data sent by different Vert.x instances.
  * @param schedule  Set the metric collection interval (in seconds). Defaults to <code>1</code>.
  * @param sendTenantHeader  Set whether Hawkular tenant header should be sent. Defaults to <code>true</code>. Must be set to <code>false</code> when working with pre-Alpha13 Hawkular servers.
+ * @param taggedMetricsCacheSize  Set the number of metric names to cache in order to avoid repeated tagging requests.
+ * @param tags  Set tags applied to all metrics.
  * @param tenant  Set the Hawkular tenant. Defaults to <code>default</code>.
  *
  * <p/>
@@ -39,6 +44,8 @@ fun VertxHawkularOptions(
   host: String? = null,
   httpHeaders: io.vertx.core.json.JsonObject? = null,
   httpOptions: io.vertx.core.http.HttpClientOptions? = null,
+  metricTagsMatches: Iterable<io.vertx.ext.hawkular.MetricTagsMatch>? = null,
+  metricTagsMatchs: Iterable<io.vertx.ext.hawkular.MetricTagsMatch>? = null,
   metricsBridgeAddress: String? = null,
   metricsBridgeEnabled: Boolean? = null,
   metricsServiceUri: String? = null,
@@ -46,6 +53,8 @@ fun VertxHawkularOptions(
   prefix: String? = null,
   schedule: Int? = null,
   sendTenantHeader: Boolean? = null,
+  taggedMetricsCacheSize: Int? = null,
+  tags: io.vertx.core.json.JsonObject? = null,
   tenant: String? = null): VertxHawkularOptions = io.vertx.ext.hawkular.VertxHawkularOptions().apply {
 
   if (authenticationOptions != null) {
@@ -72,6 +81,14 @@ fun VertxHawkularOptions(
   if (httpOptions != null) {
     this.setHttpOptions(httpOptions)
   }
+  if (metricTagsMatches != null) {
+    this.setMetricTagsMatches(metricTagsMatches.toList())
+  }
+  if (metricTagsMatchs != null) {
+    for (item in metricTagsMatchs) {
+      this.addMetricTagsMatch(item)
+    }
+  }
   if (metricsBridgeAddress != null) {
     this.setMetricsBridgeAddress(metricsBridgeAddress)
   }
@@ -92,6 +109,12 @@ fun VertxHawkularOptions(
   }
   if (sendTenantHeader != null) {
     this.setSendTenantHeader(sendTenantHeader)
+  }
+  if (taggedMetricsCacheSize != null) {
+    this.setTaggedMetricsCacheSize(taggedMetricsCacheSize)
+  }
+  if (tags != null) {
+    this.setTags(tags)
   }
   if (tenant != null) {
     this.setTenant(tenant)
