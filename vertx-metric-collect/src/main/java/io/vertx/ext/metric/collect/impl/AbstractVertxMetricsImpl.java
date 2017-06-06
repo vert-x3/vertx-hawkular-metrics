@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
@@ -42,6 +43,7 @@ public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics{
 
   private AbstractSender sender;
   protected final Map<MetricsType, MetricSupplier> metricSuppliers;
+  private Future<Void> metricsReady = Future.future();
   private Scheduler scheduler;
 
   public AbstractVertxMetricsImpl(Vertx vertx, ExtendedMetricsOptions options) {
@@ -169,7 +171,7 @@ public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics{
               dataPoint = new GaugePoint(name, timestamp, json.getDouble("value"));
           }
           sender.handle(Collections.singletonList(dataPoint));
-        });
+        }).completionHandler(metricsReady);
       });
     }
   }
@@ -182,4 +184,9 @@ public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics{
     scheduler.stop();
     sender.stop();
   }
+  
+  // Visible for testing
+  public Future<Void> getMetricsReady() {
+    return metricsReady;
+  }  
 }

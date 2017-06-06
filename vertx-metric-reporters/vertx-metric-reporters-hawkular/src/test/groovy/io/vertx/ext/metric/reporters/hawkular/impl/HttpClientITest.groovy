@@ -38,8 +38,9 @@ class HttpClientITest extends BaseITest {
   def concurrentClients = ForkJoinPool.commonPool().parallelism
   def List<HttpClient> httpClients = []
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+    void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/http_server.groovy'
     def instances = 1
     def config = [

@@ -35,8 +35,9 @@ class DatagramITest extends BaseITest {
 
   def DatagramSocket client
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/datagram_server.groovy'
     def instances = 1
     def config = [

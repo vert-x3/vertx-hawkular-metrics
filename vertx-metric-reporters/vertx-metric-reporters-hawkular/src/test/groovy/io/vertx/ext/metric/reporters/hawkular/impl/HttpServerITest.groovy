@@ -33,8 +33,9 @@ class HttpServerITest extends BaseITest {
   def metricPrefix = "${METRIC_PREFIX}.vertx.http.server.${testHost}:${testPort}."
   def requestDelay = 11L
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/http_server.groovy'
     def instances = 4
     def config = [

@@ -25,7 +25,7 @@
   <packaging>pom</packaging>  
   
   <artifactId>vertx-metric-parent</artifactId>
-  <version>3.4.2</version>
+  <version>3.4.2-SNAPSHOT</version>
 
   <scm>
     <connection>scm:git:ssh://github.com/vert-x3/vertx-hawkular-metrics</connection>

@@ -21,10 +21,12 @@ import groovyx.net.http.RESTClient
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
+import io.vertx.core.impl.VertxImpl
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.Timeout
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -60,6 +62,17 @@ abstract class BaseITest {
     hawkularMetrics = new RESTClient(SERVER_URL, ContentType.JSON)
   }
 
+  @Before
+  void before(TestContext context) throws Exception {
+    setUp(context)
+  }
+
+  void setUp(TestContext context) throws Exception {
+    def vertxImpl = (VertxImpl) vertx
+    def metrics = (VertxMetricsImpl) vertxImpl.metrics
+    metrics.metricsReady.setHandler(context.asyncAssertSuccess())
+  }
+
   protected def deployVerticle(String verticleName, Map config, int instances, TestContext testContext) {
     def async = testContext.async()
     vertx.deployVerticle(verticleName, [
@@ -76,7 +89,10 @@ abstract class BaseITest {
   }
 
   @After
-  void tearDown(TestContext context) {
+  void after(TestContext context)  {
+    tearDown(context)
+  }
+  void tearDown(TestContext context) throws Exception {   
     def async = context.async()
     vertx.close({ res ->
       if (res.succeeded()) {

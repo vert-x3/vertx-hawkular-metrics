@@ -35,8 +35,9 @@ class NamedPoolITest extends BaseITest {
 
   private WorkerExecutor workerExecutor
 
-  @Before
-  void createNamedPool() {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)    
     workerExecutor = vertx.createSharedWorkerExecutor(workerExecutorName, maxPoolSize)
   }
 

@@ -37,8 +37,9 @@ class NetClientITest extends BaseITest {
   def concurrentClients = ForkJoinPool.commonPool().parallelism
   def List<NetClient> netClients = []
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/net_server.groovy'
     def instances = 1
     def config = [
