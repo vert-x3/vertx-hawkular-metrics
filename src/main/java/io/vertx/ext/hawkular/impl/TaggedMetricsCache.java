@@ -39,6 +39,7 @@ class TaggedMetricsCache extends LinkedHashMap<TaggedMetricsCacheKey, Void> {
     put(new TaggedMetricsCacheKey(type, name), null);
   }
 
+  @Override
   protected boolean removeEldestEntry(Map.Entry<TaggedMetricsCacheKey, Void> eldest) {
     return size() > maxEntries;
   }

@@ -84,9 +84,9 @@ public class VertxHawkularOptions extends MetricsOptions {
   public static final boolean DEFAULT_METRICS_BRIDGE_ENABLED = false;
 
   /**
-   * The default number of metric names to cache in order to avoid repeated tagging requests = 100.
+   * The default number of metric names to cache in order to avoid repeated tagging requests = 4096.
    */
-  public static final int DEFAULT_TAGGED_METRICS_CACHE_SIZE = 100;
+  public static final int DEFAULT_TAGGED_METRICS_CACHE_SIZE = 4096;
 
   /**
    * The default list of metric tags matches. Empty by default.

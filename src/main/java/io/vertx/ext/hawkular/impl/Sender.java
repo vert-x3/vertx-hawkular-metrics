@@ -275,7 +275,6 @@ public class Sender implements Handler<List<DataPoint>> {
           }
         });
         if (json.isEmpty()) {
-          taggedMetricsCache.metricTagged(type, name);
           return;
         }
         try {
