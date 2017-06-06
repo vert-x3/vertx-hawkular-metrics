@@ -113,6 +113,27 @@
  * Note that all the usual {@link io.vertx.core.http.HttpClientOptions} properties can be used for SSL setup or client
  * tuning.
  *
+ * === Metric tags
+ *
+ * http://www.hawkular.org/hawkular-metrics/docs/user-guide/#_tagging[Tags] can be applied to metrics:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupMetricTags()}
+ * ----
+ *
+ * _${maven.artifactId}_ maintains a LRU cache of tagged metrics to avoid repeating tagging requests.
+ * The cache size can be configured and defaults to `100` metric names.
+ *
+ * It is also possible to apply tags to a specific set of metrics defined via exact match or regex match:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupMetricTagMatches()}
+ * ----
+ *
+ * WARNING: If you use regex match, a wrong regex can potentially match a lot of metrics.
+ *
  * Please refer to {@link io.vertx.ext.hawkular.VertxHawkularOptions} for an exhaustive list of options.
  *
  * == Vert.x core tools metrics

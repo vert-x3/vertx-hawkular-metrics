@@ -20,7 +20,9 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -81,6 +83,16 @@ public class VertxHawkularOptions extends MetricsOptions {
    */
   public static final boolean DEFAULT_METRICS_BRIDGE_ENABLED = false;
 
+  /**
+   * The default number of metric names to cache in order to avoid repeated tagging requests = 100.
+   */
+  public static final int DEFAULT_TAGGED_METRICS_CACHE_SIZE = 100;
+
+  /**
+   * The default list of metric tags matches. Empty by default.
+   */
+  public static final List<MetricTagsMatch> DEFAULT_METRIC_TAGS_MATCHES = new ArrayList<>();
+
   private String host;
   private int port;
   private HttpClientOptions httpOptions;
@@ -96,6 +108,9 @@ public class VertxHawkularOptions extends MetricsOptions {
   private boolean metricsBridgeEnabled;
   private String metricsBridgeAddress;
   private Set<MetricsType> disabledMetricsTypes;
+  private JsonObject tags;
+  private int taggedMetricsCacheSize;
+  private List<MetricTagsMatch> metricTagsMatches = DEFAULT_METRIC_TAGS_MATCHES;
 
   public VertxHawkularOptions() {
     host = DEFAULT_HOST;
@@ -113,6 +128,8 @@ public class VertxHawkularOptions extends MetricsOptions {
     metricsBridgeEnabled = DEFAULT_METRICS_BRIDGE_ENABLED;
     metricsBridgeAddress = DEFAULT_METRICS_BRIDGE_ADDRESS;
     disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
+    tags = new JsonObject();
+    taggedMetricsCacheSize = DEFAULT_TAGGED_METRICS_CACHE_SIZE;
   }
 
   public VertxHawkularOptions(VertxHawkularOptions other) {
@@ -132,6 +149,8 @@ public class VertxHawkularOptions extends MetricsOptions {
     metricsBridgeAddress = other.metricsBridgeAddress;
     metricsBridgeEnabled = other.metricsBridgeEnabled;
     disabledMetricsTypes = other.disabledMetricsTypes != null ? EnumSet.copyOf(other.disabledMetricsTypes) : EnumSet.noneOf(MetricsType.class);
+    tags = other.tags;
+    taggedMetricsCacheSize = other.taggedMetricsCacheSize;
   }
 
   public VertxHawkularOptions(JsonObject json) {
@@ -409,5 +428,63 @@ public class VertxHawkularOptions extends MetricsOptions {
 
   public boolean isMetricsTypeDisabled(MetricsType metricsType) {
     return this.disabledMetricsTypes.contains(metricsType);
+  }
+
+  /**
+   * @return tags applied to all metrics
+   */
+  public JsonObject getTags() {
+    return tags;
+  }
+
+  /**
+   * Set tags applied to all metrics.
+   */
+  public VertxHawkularOptions setTags(JsonObject tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * @return number of metric names to cache in order to avoid repeated tagging requests
+   */
+  public int getTaggedMetricsCacheSize() {
+    return taggedMetricsCacheSize;
+  }
+
+  /**
+   * Set the number of metric names to cache in order to avoid repeated tagging requests.
+   */
+  public VertxHawkularOptions setTaggedMetricsCacheSize(int taggedMetricsCacheSize) {
+    this.taggedMetricsCacheSize = taggedMetricsCacheSize;
+    return this;
+  }
+
+  /**
+   * @return the list of {@link MetricTagsMatch}
+   */
+  public List<MetricTagsMatch> getMetricTagsMatches() {
+    return metricTagsMatches;
+  }
+
+  /**
+   * Sets a list of {@link MetricTagsMatch}.
+   *
+   * @param metricTagsMatches a list of {@link MetricTagsMatch}
+   */
+  public VertxHawkularOptions setMetricTagsMatches(List<MetricTagsMatch> metricTagsMatches) {
+    this.metricTagsMatches = metricTagsMatches;
+    return this;
+  }
+
+  /**
+   * Adds a {@link MetricTagsMatch}.
+   */
+  public VertxHawkularOptions addMetricTagsMatch(MetricTagsMatch metricTagsMatch) {
+    if (metricTagsMatches == null) {
+      metricTagsMatches = new ArrayList<>();
+    }
+    metricTagsMatches.add(metricTagsMatch);
+    return this;
   }
 }

@@ -20,6 +20,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
@@ -33,6 +34,7 @@ import io.vertx.ext.hawkular.AuthenticationOptions;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -69,6 +71,10 @@ public class Sender implements Handler<List<DataPoint>> {
   private final int batchSize;
   private final long batchDelay;
   private final List<DataPoint> queue;
+
+  private final JsonObject tags;
+  private final List<MetricTagsMatcher> metricTagsMatchers;
+  private final TaggedMetricsCache taggedMetricsCache;
 
   private HttpClient httpClient;
   private long timerId;
@@ -120,6 +126,11 @@ public class Sender implements Handler<List<DataPoint>> {
     batchSize = options.getBatchSize();
     batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
     queue = new ArrayList<>(batchSize);
+    tags = options.getTags();
+    metricTagsMatchers = options.getMetricTagsMatches().stream()
+      .map(MetricTagsMatcher::new)
+      .collect(toList());
+    taggedMetricsCache = new TaggedMetricsCache(options.getTaggedMetricsCacheSize());
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()
         .setDefaultHost(options.getHost())
@@ -157,7 +168,8 @@ public class Sender implements Handler<List<DataPoint>> {
   }
 
   private void send(List<DataPoint> dataPoints) {
-    String mixedData = toHawkularMixedData(dataPoints).encode();
+    JsonObject hawkularMixedData = toHawkularMixedData(dataPoints);
+    Buffer json = hawkularMixedData.toBuffer();
     getMetricsDataUri(ar -> {
       if (ar.succeeded()) {
         HttpClientRequest request = httpClient.post(ar.result(), this::onResponse)
@@ -172,10 +184,13 @@ public class Sender implements Handler<List<DataPoint>> {
         }
         httpHeaders.forEach(request::putHeader);
 
-        request.end(mixedData, "UTF-8");
+        request.end(json);
         sendTime = System.nanoTime();
       }
     });
+    tagMetrics(hawkularMixedData.getJsonArray("gauges"), "gauges");
+    tagMetrics(hawkularMixedData.getJsonArray("counters"), "counters");
+    tagMetrics(hawkularMixedData.getJsonArray("availabilities"), "availability");
   }
 
   private void getMetricsDataUri(Handler<AsyncResult<String>> handler) {
@@ -241,6 +256,56 @@ public class Sender implements Handler<List<DataPoint>> {
         LOG.trace("Could not send metrics: " + response.statusCode() + " : " + msg.toString());
       });
     }
+  }
+
+  private void tagMetrics(JsonArray metrics, String type) {
+    if (metrics == null) {
+      return;
+    }
+    metrics.stream()
+      .map(JsonObject.class::cast)
+      .map(m -> m.getString("id"))
+      .filter(name -> !taggedMetricsCache.isMetricTagged(type, name))
+      .forEach(name -> {
+        JsonObject json = new JsonObject();
+        json.mergeIn(tags);
+        metricTagsMatchers.forEach(matcher -> {
+          if (matcher.matches(name)) {
+            json.mergeIn(matcher.getTags());
+          }
+        });
+        if (json.isEmpty()) {
+          taggedMetricsCache.metricTagged(type, name);
+          return;
+        }
+        try {
+          String uri = metricsServiceUri + "/" + type + "/" + URLEncoder.encode(name, "UTF-8") + "/tags";
+          HttpClientRequest request = httpClient.put(uri)
+            .handler(response -> {
+              if (response.statusCode() == 200) {
+                taggedMetricsCache.metricTagged(type, name);
+              } else if (LOG.isTraceEnabled()) {
+                response.bodyHandler(msg -> {
+                  LOG.trace("Could not send data: " + response.statusCode() + " : " + msg.toString());
+                });
+              }
+            })
+            .exceptionHandler(err -> LOG.trace("Could not send data", err))
+            .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
+
+          if (tenant != null) {
+            request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
+          }
+          if (auth != null) {
+            request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+          }
+          httpHeaders.forEach(request::putHeader);
+
+          request.end(json.toBuffer());
+        } catch (UnsupportedEncodingException e) {
+          LOG.trace("Could not encode metric name", e);
+        }
+      });
   }
 
   private void flushIfIdle(Long timerId) {
