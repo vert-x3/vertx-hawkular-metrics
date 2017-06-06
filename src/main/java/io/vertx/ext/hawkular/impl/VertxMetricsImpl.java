@@ -174,7 +174,8 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
           // the type of metrics can have been set in the message using the 'type' field. It not use 'gauge'. Only
           // "counter" and "gauge" are supported.
           String type = json.getString("type", "");
-          String name = json.getString("id");
+          String prefix = options.getPrefix();
+          String name = prefix.isEmpty() ? json.getString("id") : prefix + "." + json.getString("id");
           Long timestamp = json.getLong("timestamp");
           if (timestamp == null) {
             timestamp = System.currentTimeMillis();
