@@ -17,7 +17,6 @@
 package io.vertx.ext.hawkular.impl
 
 import io.vertx.ext.unit.TestContext
-import org.junit.Before
 import org.junit.Test
 
 /**
@@ -37,8 +36,9 @@ class EventBusITest extends BaseITest {
   def eventBus = vertx.eventBus()
   def instances = 3
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/event_bus_handler.groovy'
     def config = [:]
     deployVerticle(verticleName, config, instances, context)

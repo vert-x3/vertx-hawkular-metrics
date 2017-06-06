@@ -18,7 +18,6 @@ package io.vertx.ext.hawkular.impl
 
 import io.vertx.core.WorkerExecutor
 import io.vertx.ext.unit.TestContext
-import org.junit.Before
 import org.junit.Test
 
 /**
@@ -35,8 +34,9 @@ class NamedPoolITest extends BaseITest {
 
   private WorkerExecutor workerExecutor
 
-  @Before
-  void createNamedPool() {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     workerExecutor = vertx.createSharedWorkerExecutor(workerExecutorName, maxPoolSize)
   }
 

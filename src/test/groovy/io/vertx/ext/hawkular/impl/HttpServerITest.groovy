@@ -17,7 +17,6 @@
 package io.vertx.ext.hawkular.impl
 
 import io.vertx.ext.unit.TestContext
-import org.junit.Before
 import org.junit.Test
 
 /**
@@ -33,8 +32,9 @@ class HttpServerITest extends BaseITest {
   def metricPrefix = "${METRIC_PREFIX}.vertx.http.server.${testHost}:${testPort}."
   def requestDelay = 11L
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/http_server.groovy'
     def instances = 4
     def config = [
