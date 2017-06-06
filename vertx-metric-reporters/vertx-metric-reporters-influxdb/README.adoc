@@ -18,3 +18,10 @@ of this component:
 
 * link:http://vertx.io/docs/vertx-hawkular-metrics/java/[web-site docs]
 * link:src/main/asciidoc/java/index.adoc[in-source docs]
+
+If you want to test you can use this docker command to run an InfluxDb instance:
+
+docker run --rm --name vertx-influxdb -p 8086:8086 -p 8083:8083 -e INFLUXDB_ADMIN_ENABLED=true influxdb
+
+You can connect to the administration interface in your browser using http://localhost:8083. 
+InfluxDB will listen for api requests on port 8086 
