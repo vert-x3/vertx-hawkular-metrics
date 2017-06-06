@@ -52,7 +52,7 @@ class MetricTagsMatcher {
     }
   }
 
-  public JsonObject getTags() {
+  JsonObject getTags() {
     return tags;
   }
 }
