@@ -21,6 +21,7 @@ import groovyx.net.http.RESTClient
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
+import io.vertx.core.impl.VertxImpl
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.Timeout
 import io.vertx.ext.unit.junit.VertxUnitRunner
@@ -68,6 +69,9 @@ abstract class BaseITest {
   }
 
   void setUp(TestContext context) throws Exception {
+    def vertxImpl = (VertxImpl) vertx
+    def metrics = (VertxMetricsImpl) vertxImpl.metrics
+    metrics.metricsReady.setHandler(context.asyncAssertSuccess())
   }
 
   protected def deployVerticle(String verticleName, Map config, int instances, TestContext testContext) {

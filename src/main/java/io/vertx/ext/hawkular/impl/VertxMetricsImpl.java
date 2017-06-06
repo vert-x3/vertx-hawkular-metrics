@@ -17,6 +17,7 @@
 package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
@@ -55,6 +56,8 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   private final Vertx vertx;
   private final VertxHawkularOptions options;
   private final Map<MetricsType, MetricSupplier> metricSuppliers;
+
+  private Future<Void> metricsReady = Future.future();
 
   private Sender sender;
   private Scheduler scheduler;
@@ -188,8 +191,10 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
               dataPoint = new GaugePoint(name, timestamp, json.getDouble("value"));
           }
           sender.handle(Collections.singletonList(dataPoint));
-        });
+        }).completionHandler(metricsReady);
       });
+    } else {
+      metricsReady.complete();
     }
   }
 
@@ -200,5 +205,8 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     sender.stop();
   }
 
-
+  // Visible for testing
+  Future<Void> getMetricsReady() {
+    return metricsReady;
+  }
 }
