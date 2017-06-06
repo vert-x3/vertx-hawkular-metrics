@@ -18,8 +18,6 @@ package io.vertx.ext.hawkular.impl
 
 import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
-import io.vertx.core.AsyncResult
-import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.impl.VertxImpl
 import io.vertx.ext.unit.TestContext
@@ -218,16 +216,5 @@ abstract class BaseITest {
       headers: [(TENANT_HEADER_NAME): tenantId]
     ]).data ?: []
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as String
-  }
-
-  protected static Handler<AsyncResult> assertAsyncSuccess(TestContext context) {
-    def async = context.async()
-    return { res ->
-      if (res.succeeded()) {
-        async.complete()
-      } else {
-        context.fail()
-      }
-    }
   }
 }

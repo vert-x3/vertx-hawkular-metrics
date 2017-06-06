@@ -50,7 +50,7 @@ class DatagramITest extends BaseITest {
   @Test
   void shouldReportDatagramMetrics(TestContext context) {
     def sentCount = 5
-    sentCount.times { i -> client.send(CONTENT, testPort, testHost, assertAsyncSuccess(context)) }
+    sentCount.times { i -> client.send(CONTENT, testPort, testHost, context.asyncAssertSuccess()) }
 
     def nameFilter = { String id -> id.startsWith(baseName) }
     def nameTransformer = { String id ->
