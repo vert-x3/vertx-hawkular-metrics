@@ -309,8 +309,9 @@ public class Sender implements Handler<List<DataPoint>> {
 
   private void flushIfIdle(Long timerId) {
     if (System.nanoTime() - sendTime > batchDelay && !queue.isEmpty()) {
-      send(queue);
+      List<DataPoint> dataPoints = new ArrayList<>(queue);
       queue.clear();
+      send(dataPoints);
     }
   }
 
