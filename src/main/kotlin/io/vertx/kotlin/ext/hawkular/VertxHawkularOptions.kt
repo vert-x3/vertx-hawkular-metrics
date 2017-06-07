@@ -20,7 +20,6 @@ import io.vertx.ext.hawkular.MetricsType
  * @param httpHeaders  Set specific headers to include in HTTP requests.
  * @param httpOptions  Set the configuration of the Hawkular Metrics HTTP client.
  * @param metricTagsMatches  Sets a list of [io.vertx.ext.hawkular.MetricTagsMatch].
- * @param metricTagsMatchs  Adds a [io.vertx.ext.hawkular.MetricTagsMatch].
  * @param metricsBridgeAddress  Sets the metric bridge address on which the application is sending the custom metrics. Application can send metrics to this event bus address. The message is a JSON object specifying at least the <code>id</code> and <code>value</code> fields. <p/> Don't forget to also enable the bridge with <code>metricsBridgeEnabled</code>.
  * @param metricsBridgeEnabled  Sets whether or not the metrics bridge should be enabled. The metrics bridge is disabled by default.
  * @param metricsServiceUri  Set the Hawkular Metrics service URI. Defaults to <code>/hawkular/metrics</code>. This can be useful if you host the Hawkular server behind a proxy and manipulate the default service URI.
@@ -45,7 +44,6 @@ fun VertxHawkularOptions(
   httpHeaders: io.vertx.core.json.JsonObject? = null,
   httpOptions: io.vertx.core.http.HttpClientOptions? = null,
   metricTagsMatches: Iterable<io.vertx.ext.hawkular.MetricTagsMatch>? = null,
-  metricTagsMatchs: Iterable<io.vertx.ext.hawkular.MetricTagsMatch>? = null,
   metricsBridgeAddress: String? = null,
   metricsBridgeEnabled: Boolean? = null,
   metricsServiceUri: String? = null,
@@ -83,11 +81,6 @@ fun VertxHawkularOptions(
   }
   if (metricTagsMatches != null) {
     this.setMetricTagsMatches(metricTagsMatches.toList())
-  }
-  if (metricTagsMatchs != null) {
-    for (item in metricTagsMatchs) {
-      this.addMetricTagsMatch(item)
-    }
   }
   if (metricsBridgeAddress != null) {
     this.setMetricsBridgeAddress(metricsBridgeAddress)

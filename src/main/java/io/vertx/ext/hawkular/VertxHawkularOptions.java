@@ -16,6 +16,7 @@
 package io.vertx.ext.hawkular;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
@@ -424,13 +425,18 @@ public class VertxHawkularOptions extends MetricsOptions {
    * @param metricsType the type of metrics
    * @return the current {@link VertxHawkularOptions} instance
    */
+  @GenIgnore
   public VertxHawkularOptions addDisabledMetricsType(MetricsType metricsType) {
+    if (disabledMetricsTypes == null) {
+      disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
+    }
     this.disabledMetricsTypes.add(metricsType);
     return this;
   }
 
+  @GenIgnore
   public boolean isMetricsTypeDisabled(MetricsType metricsType) {
-    return this.disabledMetricsTypes.contains(metricsType);
+    return disabledMetricsTypes != null && disabledMetricsTypes.contains(metricsType);
   }
 
   /**
@@ -483,6 +489,7 @@ public class VertxHawkularOptions extends MetricsOptions {
   /**
    * Adds a {@link MetricTagsMatch}.
    */
+  @GenIgnore
   public VertxHawkularOptions addMetricTagsMatch(MetricTagsMatch metricTagsMatch) {
     if (metricTagsMatches == null) {
       metricTagsMatches = new ArrayList<>();

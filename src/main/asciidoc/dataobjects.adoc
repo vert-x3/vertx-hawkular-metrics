@@ -104,10 +104,6 @@ Set the configuration of the Hawkular Metrics HTTP client.
 +++
 Sets a list of link.
 +++
-|[[metricTagsMatchs]]`metricTagsMatchs`|`Array of link:dataobjects.html#MetricTagsMatch[MetricTagsMatch]`|
-+++
-Adds a link.
-+++
 |[[metricsBridgeAddress]]`metricsBridgeAddress`|`String`|
 +++
 Sets the metric bridge address on which the application is sending the custom metrics. Application can send
