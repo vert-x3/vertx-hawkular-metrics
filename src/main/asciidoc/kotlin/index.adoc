@@ -136,17 +136,16 @@ http://www.hawkular.org/hawkular-metrics/docs/user-guide/#_tagging[Tags] can be 
 
 [source,kotlin]
 ----
-var tags = json {
-  obj(
-    "dc" to "mars01",
-    "rack" to "web-paca",
-    "host" to "host13"
-  )
-}
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true,
-    tags = tags)))
+    tags = json {
+      obj(
+        "dc" to "mars01",
+        "rack" to "web-paca",
+        "host" to "host13"
+      )
+    })))
 
 ----
 
@@ -157,24 +156,19 @@ It is also possible to apply tags to a specific set of metrics defined via exact
 
 [source,kotlin]
 ----
-var matches = mutableListOf<Any?>()
-matches.add(MetricTagsMatch(
-  match = Match(
-    value = "myapp.foo.my-metric"),
-  tags = json {
-    obj("myapp" to "foo")
-  }))
-matches.add(MetricTagsMatch(
-  match = Match(
-    type = MatchType.REGEX,
-    value = ".*\\.foo\\.*"),
-  tags = json {
-    obj("myapp" to "foo")
-  }))
 var vertx = Vertx.vertx(VertxOptions(
   metricsOptions = VertxHawkularOptions(
     enabled = true,
-    metricTagsMatches = matches)))
+    metricTagsMatches = listOf(MetricTagsMatch(
+      value = "myapp.foo.my-metric",
+      tags = json {
+        obj("myapp" to "foo")
+      }), MetricTagsMatch(
+      type = MatchType.REGEX,
+      value = ".*\\.foo\\.*",
+      tags = json {
+        obj("myapp" to "foo")
+      })))))
 
 ----
 

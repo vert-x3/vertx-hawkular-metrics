@@ -17,7 +17,6 @@
 package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.hawkular.Match;
 import io.vertx.ext.hawkular.MatchType;
 import io.vertx.ext.hawkular.MetricTagsMatch;
 
@@ -33,9 +32,8 @@ class MetricTagsMatcher {
   private final String value;
   private final Pattern pattern;
 
-  MetricTagsMatcher(MetricTagsMatch metricTagsMatch) {
-    tags = metricTagsMatch.getTags();
-    Match match = metricTagsMatch.getMatch();
+  MetricTagsMatcher(MetricTagsMatch match) {
+    tags = match.getTags();
     matchType = match.getType();
     value = matchType == MatchType.EQUALS ? match.getValue() : null;
     pattern = matchType == MatchType.REGEX ? Pattern.compile(match.getValue()) : null;

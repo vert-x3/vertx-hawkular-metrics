@@ -60,13 +60,17 @@ Set the matched value.
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[match]]`match`|`link:dataobjects.html#Match[Match]`|
-+++
-Set the criteria for metric name.
-+++
 |[[tags]]`tags`|`Json object`|
 +++
 Set the tags to apply if metric name matches the criteria.
++++
+|[[type]]`type`|`link:enums.html#MatchType[MatchType]`|
++++
+Set the type of matching to apply.
++++
+|[[value]]`value`|`String`|
++++
+Set the matched value.
 +++
 |===
 

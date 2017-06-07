@@ -29,16 +29,12 @@ class TagsITest extends BaseITest {
     options.metricsOptions.metricTagsMatches = [
       [
         tags : [myapp: 'my-metric'],
-        match: [
-          type : 'REGEX',
-          value: '.+\\.my-metric-(gauge|counter|av)'
-        ]
+        type : 'REGEX',
+        value: '.+\\.my-metric-(gauge|counter|av)'
       ],
       [
         tags : [myapp: 'my-metric-av'],
-        match: [
-          value: METRIC_PREFIX + '.' + 'my-metric-av'
-        ]
+        value: METRIC_PREFIX + '.' + 'my-metric-av'
       ]
     ] as Serializable
     options

@@ -24,18 +24,18 @@ import io.vertx.core.json.JsonObject;
  *
  * @author Thomas Segismont
  */
-@DataObject(generateConverter = true)
-public class MetricTagsMatch {
+@DataObject(generateConverter = true, inheritConverter = true)
+public class MetricTagsMatch extends Match {
 
   private JsonObject tags;
-  private Match match;
 
   public MetricTagsMatch() {
+    tags = new JsonObject();
   }
 
   public MetricTagsMatch(MetricTagsMatch other) {
-    tags = other.tags;
-    match = other.match;
+    super(other);
+    tags = other.tags != null ? other.tags.copy() : new JsonObject();
   }
 
   public MetricTagsMatch(JsonObject json) {
@@ -58,18 +58,25 @@ public class MetricTagsMatch {
     return this;
   }
 
-  /**
-   * @return the criteria for metric name
-   */
-  public Match getMatch() {
-    return match;
+  @Override
+  public String getValue() {
+    return super.getValue();
   }
 
-  /**
-   * Set the criteria for metric name.
-   */
-  public MetricTagsMatch setMatch(Match match) {
-    this.match = match;
+  @Override
+  public MetricTagsMatch setValue(String value) {
+    super.setValue(value);
+    return this;
+  }
+
+  @Override
+  public MatchType getType() {
+    return super.getType();
+  }
+
+  @Override
+  public MetricTagsMatch setType(MatchType type) {
+    super.setType(type);
     return this;
   }
 }

@@ -17,7 +17,6 @@
 package io.vertx.ext.hawkular;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.JsonArray;
 
 /**
  * Converter for {@link io.vertx.ext.hawkular.MetricTagsMatch}.
@@ -27,17 +26,26 @@ import io.vertx.core.json.JsonArray;
 public class MetricTagsMatchConverter {
 
   public static void fromJson(JsonObject json, MetricTagsMatch obj) {
-    if (json.getValue("match") instanceof JsonObject) {
-      obj.setMatch(new io.vertx.ext.hawkular.Match((JsonObject)json.getValue("match")));
-    }
     if (json.getValue("tags") instanceof JsonObject) {
       obj.setTags(((JsonObject)json.getValue("tags")).copy());
+    }
+    if (json.getValue("type") instanceof String) {
+      obj.setType(io.vertx.ext.hawkular.MatchType.valueOf((String) json.getValue("type")));
+    }
+    if (json.getValue("value") instanceof String) {
+      obj.setValue((String) json.getValue("value"));
     }
   }
 
   public static void toJson(MetricTagsMatch obj, JsonObject json) {
     if (obj.getTags() != null) {
       json.put("tags", obj.getTags());
+    }
+    if (obj.getType() != null) {
+      json.put("type", obj.getType().name());
+    }
+    if (obj.getValue() != null) {
+      json.put("value", obj.getValue());
     }
   }
 }

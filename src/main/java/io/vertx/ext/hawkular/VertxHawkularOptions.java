@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +52,11 @@ public class VertxHawkularOptions extends MetricsOptions {
    * The default Hawkular tenant = default.
    */
   public static final String DEFAULT_TENANT = "default";
+
+  /**
+   * The default value to enable / disable sending the tenant header. Enabled by default.
+   */
+  public static final boolean DEFAULT_SEND_TENANT_HEADER = true;
 
   /**
    * Default value for metric collection interval (in seconds) = 1.
@@ -88,11 +94,6 @@ public class VertxHawkularOptions extends MetricsOptions {
    */
   public static final int DEFAULT_TAGGED_METRICS_CACHE_SIZE = 4096;
 
-  /**
-   * The default list of metric tags matches. Empty by default.
-   */
-  public static final List<MetricTagsMatch> DEFAULT_METRIC_TAGS_MATCHES = new ArrayList<>();
-
   private String host;
   private int port;
   private HttpClientOptions httpOptions;
@@ -110,7 +111,7 @@ public class VertxHawkularOptions extends MetricsOptions {
   private Set<MetricsType> disabledMetricsTypes;
   private JsonObject tags;
   private int taggedMetricsCacheSize;
-  private List<MetricTagsMatch> metricTagsMatches = DEFAULT_METRIC_TAGS_MATCHES;
+  private List<MetricTagsMatch> metricTagsMatches;
 
   public VertxHawkularOptions() {
     host = DEFAULT_HOST;
@@ -118,7 +119,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     httpOptions = new HttpClientOptions();
     metricsServiceUri = DEFAULT_METRICS_URI;
     tenant = DEFAULT_TENANT;
-    sendTenantHeader = true;
+    sendTenantHeader = DEFAULT_SEND_TENANT_HEADER;
     authenticationOptions = new AuthenticationOptions();
     httpHeaders = new JsonObject();
     schedule = DEFAULT_SCHEDULE;
@@ -130,6 +131,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
     tags = new JsonObject();
     taggedMetricsCacheSize = DEFAULT_TAGGED_METRICS_CACHE_SIZE;
+    metricTagsMatches = new ArrayList<>();
   }
 
   public VertxHawkularOptions(VertxHawkularOptions other) {
@@ -141,7 +143,7 @@ public class VertxHawkularOptions extends MetricsOptions {
     tenant = other.tenant;
     sendTenantHeader = other.sendTenantHeader;
     authenticationOptions = other.authenticationOptions != null ? new AuthenticationOptions(other.authenticationOptions) : new AuthenticationOptions();
-    httpHeaders = other.httpHeaders;
+    httpHeaders = other.httpHeaders != null ? other.httpHeaders.copy() : new JsonObject();
     schedule = other.schedule;
     prefix = other.prefix;
     batchSize = other.batchSize;
@@ -149,8 +151,9 @@ public class VertxHawkularOptions extends MetricsOptions {
     metricsBridgeAddress = other.metricsBridgeAddress;
     metricsBridgeEnabled = other.metricsBridgeEnabled;
     disabledMetricsTypes = other.disabledMetricsTypes != null ? EnumSet.copyOf(other.disabledMetricsTypes) : EnumSet.noneOf(MetricsType.class);
-    tags = other.tags;
+    tags = other.tags != null ? other.tags.copy() : new JsonObject();
     taggedMetricsCacheSize = other.taggedMetricsCacheSize;
+    metricTagsMatches = new ArrayList<>(other.metricTagsMatches != null ? other.metricTagsMatches : Collections.emptyList());
   }
 
   public VertxHawkularOptions(JsonObject json) {
