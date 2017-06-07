@@ -147,8 +147,61 @@ vertx = Vertx::Vertx.vertx({
 
 ----
 
-Note that all the usual `link:../../vertx-core/dataobjects.html#HttpClientOptions[HttpClientOptions]` properties can be used for SSL setup or client
+NOTE: The usual `link:../../vertx-core/dataobjects.html#HttpClientOptions[HttpClientOptions]` properties can be used for SSL setup or client
 tuning.
+
+=== Metric tags
+
+http://www.hawkular.org/hawkular-metrics/docs/user-guide/#_tagging[Tags] can be applied to metrics:
+
+[source,ruby]
+----
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'tags' => {
+      'dc' => "mars01",
+      'rack' => "web-paca",
+      'host' => "host13"
+    }
+  }
+})
+
+----
+
+_vertx-hawkular-metrics_ maintains a LRU cache of tagged metrics to avoid repeating tagging requests.
+The cache size can be configured and defaults to `4096` metric names.
+
+It is also possible to apply tags to a specific set of metrics defined via exact match or regex match:
+
+[source,ruby]
+----
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'metricTagsMatches' => [{
+      'value' => "myapp.foo.my-metric",
+      'tags' => {
+        'myapp' => "foo"
+      }
+    }, {
+      'type' => "REGEX",
+      'value' => ".*\\.foo\\.*",
+      'tags' => {
+        'myapp' => "foo"
+      }
+    }]
+  }
+})
+
+----
+
+WARNING: If you use regex match, a wrong regex can potentially match a lot of metrics.
+
+NOTE: When evaluating tags to apply, metric specific tags have higher priority than global tags.
+In other words, a metric specific tag may overwrite a global tag.
 
 Please refer to `link:../dataobjects.html#VertxHawkularOptions[VertxHawkularOptions]` for an exhaustive list of options.
 
@@ -418,7 +471,7 @@ There are two types currently supported:
 * _worker_ (see `link:../../yardoc/Vertx/WorkerExecutor.html[WorkerExecutor]`)
 * _datasource_ (created with Vert.x JDBC client)
 
-Note that Vert.x creates two worker pools upfront, _vert.x-worker-thread_ and _vert.x-internal-blocking_.
+NOTE: Vert.x creates two worker pools upfront, _vert.x-worker-thread_ and _vert.x-internal-blocking_.
 
 All metrics are prefixed with `<type>.<name>.`. For example, `worker.vert.x-internal-blocking.`.
 
@@ -530,4 +583,4 @@ availabilityMetric = {
 
 ----
 
-Note that Hawkular understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.
+NOTE: Hawkular understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.

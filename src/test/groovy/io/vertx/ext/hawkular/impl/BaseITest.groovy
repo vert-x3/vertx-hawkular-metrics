@@ -52,7 +52,7 @@ abstract class BaseITest {
   public Timeout timeout = new Timeout(1, MINUTES);
 
   protected def tenantId = TenantGenerator.instance.nextTenantId()
-  protected def vertxOptions = createMetricsOptions(tenantId)
+  protected def vertxOptions = createVertxOptions(tenantId)
   protected def vertx = Vertx.vertx(vertxOptions);
 
   @BeforeClass
@@ -103,7 +103,7 @@ abstract class BaseITest {
     })
   }
 
-  static Map createMetricsOptions(String tenantId) {
+  protected Map createVertxOptions(String tenantId) {
     def vertxOptions = [
       metricsOptions: [
         enabled             : true,
@@ -114,7 +114,8 @@ abstract class BaseITest {
         schedule            : SECONDS.convert(SCHEDULE, MILLISECONDS),
         // Event bus bridge configuration
         metricsBridgeEnabled: true,
-        metricsBridgeAddress: "hawkular.metrics"
+        metricsBridgeAddress: "hawkular.metrics",
+        tags                : [dc: 'mars01', host: 'host13']
       ]
     ]
     vertxOptions
@@ -216,5 +217,26 @@ abstract class BaseITest {
       headers: [(TENANT_HEADER_NAME): tenantId]
     ]).data ?: []
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as String
+  }
+
+  protected static void assertTagsEquals(Map expected, String tenantId, String type, String name) {
+    long start = System.currentTimeMillis()
+    def actual
+    while (true) {
+      actual = getTagsValue(tenantId, type, name)
+      if (expected == actual) {
+        return
+      }
+      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
+      sleep(SCHEDULE / 10 as long)
+    }
+    fail("Expected: ${expected}, actual: ${actual}")
+  }
+
+  private static Map getTagsValue(String tenantId, String type, String name) {
+    hawkularMetrics.get([
+      path   : "${type}/${name}/tags",
+      headers: [(TENANT_HEADER_NAME): tenantId]
+    ]).data ?: [:]
   }
 }

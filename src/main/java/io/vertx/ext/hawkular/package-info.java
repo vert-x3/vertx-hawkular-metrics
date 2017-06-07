@@ -110,8 +110,32 @@
  * {@link examples.MetricsExamples#setupSecured()}
  * ----
  *
- * Note that all the usual {@link io.vertx.core.http.HttpClientOptions} properties can be used for SSL setup or client
+ * NOTE: The usual {@link io.vertx.core.http.HttpClientOptions} properties can be used for SSL setup or client
  * tuning.
+ *
+ * === Metric tags
+ *
+ * http://www.hawkular.org/hawkular-metrics/docs/user-guide/#_tagging[Tags] can be applied to metrics:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupMetricTags()}
+ * ----
+ *
+ * _${maven.artifactId}_ maintains a LRU cache of tagged metrics to avoid repeating tagging requests.
+ * The cache size can be configured and defaults to `4096` metric names.
+ *
+ * It is also possible to apply tags to a specific set of metrics defined via exact match or regex match:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupMetricTagMatches()}
+ * ----
+ *
+ * WARNING: If you use regex match, a wrong regex can potentially match a lot of metrics.
+ *
+ * NOTE: When evaluating tags to apply, metric specific tags have higher priority than global tags.
+ * In other words, a metric specific tag may overwrite a global tag.
  *
  * Please refer to {@link io.vertx.ext.hawkular.VertxHawkularOptions} for an exhaustive list of options.
  *
@@ -381,7 +405,7 @@
  * * _worker_ (see {@link io.vertx.core.WorkerExecutor})
  * * _datasource_ (created with Vert.x JDBC client)
  *
- * Note that Vert.x creates two worker pools upfront, _vert.x-worker-thread_ and _vert.x-internal-blocking_.
+ * NOTE: Vert.x creates two worker pools upfront, _vert.x-worker-thread_ and _vert.x-internal-blocking_.
  *
  * All metrics are prefixed with {@code <type>.<name>.}. For example, {@code worker.vert.x-internal-blocking.}.
  *
@@ -459,7 +483,7 @@
  * {@link examples.MetricsExamples#userDefinedMetricExplicit()}
  * ----
  *
- * Note that Hawkular understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.
+ * NOTE: Hawkular understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.
  *
  */
 @ModuleGen(name = "vertx-hawkular", groupPackage = "io.vertx")

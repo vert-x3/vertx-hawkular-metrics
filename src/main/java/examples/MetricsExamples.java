@@ -21,7 +21,11 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.docgen.Source;
 import io.vertx.ext.hawkular.AuthenticationOptions;
+import io.vertx.ext.hawkular.MetricTagsMatch;
+import io.vertx.ext.hawkular.MetricTagsMatch.MatchType;
 import io.vertx.ext.hawkular.VertxHawkularOptions;
+
+import java.util.Arrays;
 
 /**
  * @author Thomas Segismont
@@ -129,4 +133,30 @@ public class MetricsExamples {
     vertx.eventBus().publish("hawkular.metrics", availabilityMetric);
   }
 
+  public void setupMetricTags() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+      new VertxHawkularOptions()
+        .setEnabled(true)
+        .setTags(new JsonObject()
+          .put("dc", "mars01")
+          .put("rack", "web-paca")
+          .put("host", "host13"))
+    ));
+  }
+
+  public void setupMetricTagMatches() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+      new VertxHawkularOptions()
+        .setEnabled(true)
+        .setMetricTagsMatches(Arrays.asList(
+          new MetricTagsMatch()
+            .setValue("myapp.foo.my-metric")
+            .setTags(new JsonObject().put("myapp", "foo")),
+          new MetricTagsMatch()
+            .setType(MatchType.REGEX).setValue(".*\\.foo\\.*")
+            .setTags(new JsonObject().put("myapp", "foo"))
+          )
+        )
+    ));
+  }
 }
