@@ -147,7 +147,7 @@ vertx = Vertx::Vertx.vertx({
 
 ----
 
-Note that all the usual `link:../../vertx-core/dataobjects.html#HttpClientOptions[HttpClientOptions]` properties can be used for SSL setup or client
+NOTE: The usual `link:../../vertx-core/dataobjects.html#HttpClientOptions[HttpClientOptions]` properties can be used for SSL setup or client
 tuning.
 
 === Metric tags
@@ -199,6 +199,9 @@ vertx = Vertx::Vertx.vertx({
 ----
 
 WARNING: If you use regex match, a wrong regex can potentially match a lot of metrics.
+
+NOTE: When evaluating tags to apply, metric specific tags have higher priority than global tags.
+In other words, a metric specific tag may overwrite a global tag.
 
 Please refer to `link:../dataobjects.html#VertxHawkularOptions[VertxHawkularOptions]` for an exhaustive list of options.
 
@@ -468,7 +471,7 @@ There are two types currently supported:
 * _worker_ (see `link:../../yardoc/Vertx/WorkerExecutor.html[WorkerExecutor]`)
 * _datasource_ (created with Vert.x JDBC client)
 
-Note that Vert.x creates two worker pools upfront, _vert.x-worker-thread_ and _vert.x-internal-blocking_.
+NOTE: Vert.x creates two worker pools upfront, _vert.x-worker-thread_ and _vert.x-internal-blocking_.
 
 All metrics are prefixed with `<type>.<name>.`. For example, `worker.vert.x-internal-blocking.`.
 
@@ -580,4 +583,4 @@ availabilityMetric = {
 
 ----
 
-Note that Hawkular understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.
+NOTE: Hawkular understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.
