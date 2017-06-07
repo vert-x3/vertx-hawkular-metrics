@@ -449,6 +449,20 @@
  *
  * |===
  *
+ * == Verticle metrics
+ *
+ * [cols="15,50,35", options="header"]
+ * |===
+ * |Metric type
+ * |Metric name
+ * |Description
+ *
+ * |Gauge
+ * |{@code vertx.verticle.<name>}
+ * |Number of verticle instances deployed.
+ *
+ * |===
+ *
  * == User defined metrics
  *
  * Users can send their own metrics to the Hawkular server. In order to do so, the event bus metrics bridge must be
