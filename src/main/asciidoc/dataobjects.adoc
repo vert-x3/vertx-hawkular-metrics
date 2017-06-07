@@ -26,28 +26,6 @@ Set the secret used for authentication.
 +++
 |===
 
-[[Match]]
-== Match
-
-++++
- A match for a value.
-++++
-'''
-
-[cols=">25%,^25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[type]]`type`|`link:enums.html#MatchType[MatchType]`|
-+++
-Set the type of matching to apply.
-+++
-|[[value]]`value`|`String`|
-+++
-Set the matched value.
-+++
-|===
-
 [[MetricTagsMatch]]
 == MetricTagsMatch
 

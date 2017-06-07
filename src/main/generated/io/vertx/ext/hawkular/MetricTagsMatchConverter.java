@@ -31,7 +31,7 @@ public class MetricTagsMatchConverter {
       obj.setTags(((JsonObject)json.getValue("tags")).copy());
     }
     if (json.getValue("type") instanceof String) {
-      obj.setType(io.vertx.ext.hawkular.MatchType.valueOf((String)json.getValue("type")));
+      obj.setType(io.vertx.ext.hawkular.MetricTagsMatch.MatchType.valueOf((String)json.getValue("type")));
     }
     if (json.getValue("value") instanceof String) {
       obj.setValue((String)json.getValue("value"));

@@ -1,7 +1,7 @@
 package io.vertx.kotlin.ext.hawkular
 
 import io.vertx.ext.hawkular.MetricTagsMatch
-import io.vertx.ext.hawkular.MatchType
+import io.vertx.ext.hawkular.MetricTagsMatch.MatchType
 
 /**
  * A function providing a DSL for building [io.vertx.ext.hawkular.MetricTagsMatch] objects.

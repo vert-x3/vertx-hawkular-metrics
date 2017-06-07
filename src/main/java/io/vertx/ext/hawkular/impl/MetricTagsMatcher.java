@@ -17,8 +17,8 @@
 package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.hawkular.MatchType;
 import io.vertx.ext.hawkular.MetricTagsMatch;
+import io.vertx.ext.hawkular.MetricTagsMatch.MatchType;
 
 import java.util.regex.Pattern;
 

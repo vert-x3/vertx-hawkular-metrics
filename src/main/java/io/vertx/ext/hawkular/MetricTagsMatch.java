@@ -24,23 +24,83 @@ import io.vertx.core.json.JsonObject;
  *
  * @author Thomas Segismont
  */
-@DataObject(generateConverter = true, inheritConverter = true)
-public class MetricTagsMatch extends Match {
+@DataObject(generateConverter = true)
+public class MetricTagsMatch {
 
+  /**
+   * The type of match.
+   *
+   * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
+   */
+  public enum MatchType {
+    EQUALS, REGEX
+  }
+
+  /**
+   * The default value for matching type = EQUALS.
+   */
+  public static final MatchType DEFAULT_TYPE = MatchType.EQUALS;
+
+  /**
+   * The default matching value (empty).
+   */
+  public static final String DEFAULT_VALUE = "";
+
+  private MatchType type;
+  private String value;
   private JsonObject tags;
 
   public MetricTagsMatch() {
+    type = DEFAULT_TYPE;
+    value = DEFAULT_VALUE;
     tags = new JsonObject();
   }
 
   public MetricTagsMatch(MetricTagsMatch other) {
-    super(other);
+    type = other.type;
+    value = other.value;
     tags = other.tags != null ? other.tags.copy() : new JsonObject();
   }
 
   public MetricTagsMatch(JsonObject json) {
     this();
     MetricTagsMatchConverter.fromJson(json, this);
+  }
+
+  /**
+   * @return the matcher type
+   */
+  public MatchType getType() {
+    return type;
+  }
+
+  /**
+   * Set the type of matching to apply.
+   *
+   * @param type the matcher type
+   * @return a reference to this, so the API can be used fluently
+   */
+  public MetricTagsMatch setType(MatchType type) {
+    this.type = type;
+    return this;
+  }
+
+  /**
+   * @return the matched value
+   */
+  public String getValue() {
+    return value;
+  }
+
+  /**
+   * Set the matched value.
+   *
+   * @param value the value to match
+   * @return a reference to this, so the API can be used fluently
+   */
+  public MetricTagsMatch setValue(String value) {
+    this.value = value;
+    return this;
   }
 
   /**
@@ -55,28 +115,6 @@ public class MetricTagsMatch extends Match {
    */
   public MetricTagsMatch setTags(JsonObject tags) {
     this.tags = tags;
-    return this;
-  }
-
-  @Override
-  public String getValue() {
-    return super.getValue();
-  }
-
-  @Override
-  public MetricTagsMatch setValue(String value) {
-    super.setValue(value);
-    return this;
-  }
-
-  @Override
-  public MatchType getType() {
-    return super.getType();
-  }
-
-  @Override
-  public MetricTagsMatch setType(MatchType type) {
-    super.setType(type);
     return this;
   }
 }
