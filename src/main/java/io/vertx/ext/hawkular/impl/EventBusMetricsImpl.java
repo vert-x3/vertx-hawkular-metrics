@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.LongAdder;
 public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetrics>, MetricSupplier {
   private final String baseName;
   private final LongAdder handlers = new LongAdder();
-  private final ConcurrentMap<String, HandlersMeasurements> handlersMeasurements = new ConcurrentHashMap<>(0);
+  private final ConcurrentMap<String, HandlersMeasurements> handlersMeasurements = new ConcurrentHashMap<>();
   private final LongAdder errorCount = new LongAdder();
   private final LongAdder bytesWritten = new LongAdder();
   private final LongAdder bytesRead = new LongAdder();

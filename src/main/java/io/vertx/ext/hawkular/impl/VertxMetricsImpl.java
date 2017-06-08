@@ -18,6 +18,7 @@ package io.vertx.ext.hawkular.impl;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
@@ -92,6 +93,9 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
     if (!options.isMetricsTypeDisabled(NAMED_POOLS)) {
       supplierMap.put(NAMED_POOLS, new NamedPoolMetricsSupplier(prefix));
     }
+    if (!options.isMetricsTypeDisabled(VERTICLES)) {
+      supplierMap.put(VERTICLES, new VerticleMetricsSupplier(prefix));
+    }
     metricSuppliers = Collections.unmodifiableMap(supplierMap);
   }
 
@@ -123,6 +127,22 @@ public class VertxMetricsImpl extends DummyVertxMetrics {
   public DatagramSocketMetrics createMetrics(DatagramSocket socket, DatagramSocketOptions options) {
     DatagramSocketMetricsSupplier supplier = (DatagramSocketMetricsSupplier) metricSuppliers.get(DATAGRAM_SOCKET);
     return supplier != null ? new DatagramSocketMetricsImpl(supplier) : super.createMetrics(socket, options);
+  }
+
+  @Override
+  public void verticleDeployed(Verticle verticle) {
+    VerticleMetricsSupplier supplier = (VerticleMetricsSupplier) metricSuppliers.get(VERTICLES);
+    if (supplier != null) {
+      supplier.verticleDeployed(verticle);
+    }
+  }
+
+  @Override
+  public void verticleUndeployed(Verticle verticle) {
+    VerticleMetricsSupplier supplier = (VerticleMetricsSupplier) metricSuppliers.get(VERTICLES);
+    if (supplier != null) {
+      supplier.verticleUndeployed(verticle);
+    }
   }
 
   @Override

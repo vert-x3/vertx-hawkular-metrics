@@ -31,7 +31,7 @@ import static java.util.stream.Collectors.*;
  * @author Thomas Segismont
  */
 public class NetClientMetricsImpl implements TCPMetrics<SocketAddress> {
-  private final ConcurrentMap<SocketAddress, NetClientConnectionsMeasurements> connectionsMeasurements = new ConcurrentHashMap<>(0);
+  private final ConcurrentMap<SocketAddress, NetClientConnectionsMeasurements> connectionsMeasurements = new ConcurrentHashMap<>();
   private final NetClientMetricsSupplier netClientMetricsSupplier;
 
   public NetClientMetricsImpl(NetClientMetricsSupplier netClientMetricsSupplier) {
