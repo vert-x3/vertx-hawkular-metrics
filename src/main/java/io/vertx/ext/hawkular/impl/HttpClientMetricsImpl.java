@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.*;
 public class HttpClientMetricsImpl
   implements HttpClientMetrics<HttpClientRequestMetrics, SocketAddress, SocketAddress, Void, Void> {
 
-  private final ConcurrentMap<SocketAddress, HttpClientConnectionsMeasurements> connectionsMeasurements = new ConcurrentHashMap<>(0);
+  private final ConcurrentMap<SocketAddress, HttpClientConnectionsMeasurements> connectionsMeasurements = new ConcurrentHashMap<>();
   private final HttpClientMetricsSupplier httpClientMetricsSupplier;
 
   public HttpClientMetricsImpl(HttpClientMetricsSupplier httpClientMetricsSupplier) {

@@ -33,8 +33,8 @@ import static java.util.stream.Collectors.*;
  * @author Thomas Segismont
  */
 public class DatagramSocketMetricsImpl implements DatagramSocketMetrics {
-  private final ConcurrentMap<SocketAddress, LongAdder> bytesReceived = new ConcurrentHashMap<>(0);
-  private final ConcurrentMap<SocketAddress, LongAdder> bytesSent = new ConcurrentHashMap<>(0);
+  private final ConcurrentMap<SocketAddress, LongAdder> bytesReceived = new ConcurrentHashMap<>();
+  private final ConcurrentMap<SocketAddress, LongAdder> bytesSent = new ConcurrentHashMap<>();
   private final LongAdder errors = new LongAdder();
   private final DatagramSocketMetricsSupplier datagramSocketMetricsSupplier;
 

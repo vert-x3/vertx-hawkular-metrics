@@ -28,7 +28,7 @@ import static java.util.stream.Collectors.*;
  * @author Thomas Segismont
  */
 public class VerticleMetricsSupplier implements MetricSupplier {
-  private final ConcurrentMap<String, Integer> verticleInstances = new ConcurrentHashMap<>(0);
+  private final ConcurrentMap<String, Integer> verticleInstances = new ConcurrentHashMap<>();
   private final String baseName;
 
   public VerticleMetricsSupplier(String prefix) {
@@ -39,7 +39,7 @@ public class VerticleMetricsSupplier implements MetricSupplier {
   public List<DataPoint> collect() {
     long timestamp = System.currentTimeMillis();
     return verticleInstances.entrySet().stream()
-      .map(entry -> new GaugePoint(baseName + entry.getKey(), timestamp, entry.getValue().doubleValue()))
+      .map(entry -> new GaugePoint(entry.getKey(), timestamp, entry.getValue().doubleValue()))
       .collect(toList());
   }
 
@@ -48,7 +48,7 @@ public class VerticleMetricsSupplier implements MetricSupplier {
   }
 
   private String nameOf(Verticle verticle) {
-    return verticle.getClass().getName();
+    return baseName + verticle.getClass().getName();
   }
 
   public void verticleUndeployed(Verticle verticle) {
