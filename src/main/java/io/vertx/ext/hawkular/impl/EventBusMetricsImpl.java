@@ -59,20 +59,7 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
   public EventBusHandlerMetrics handlerRegistered(String address, String repliedAddress) {
     handlers.increment();
     EventBusHandlerMetrics handlerMetrics = new EventBusHandlerMetrics(address);
-    while (true) {
-      HandlersMeasurements current = handlersMeasurements.get(address);
-      if (current != null) {
-        HandlersMeasurements candidate = current.incrementHandlersCount();
-        if (handlersMeasurements.replace(address, current, candidate)) {
-          break;
-        }
-      } else {
-        HandlersMeasurements candidate = new HandlersMeasurements();
-        if (handlersMeasurements.putIfAbsent(address, candidate) == null) {
-          break;
-        }
-      }
-    }
+    handlersMeasurements.compute(address, (key, value) -> value == null ? new HandlersMeasurements() : value.incrementHandlersCount());
     return handlerMetrics;
   }
 
@@ -81,19 +68,7 @@ public class EventBusMetricsImpl implements EventBusMetrics<EventBusHandlerMetri
   public void handlerUnregistered(EventBusHandlerMetrics handlerMetrics) {
     handlers.decrement();
     String address = handlerMetrics.getAddress();
-    while (true) {
-      HandlersMeasurements current = handlersMeasurements.get(address);
-      HandlersMeasurements candidate = current.decrementHandlersCount();
-      if (candidate.handlersCount() == 0) {
-        if (handlersMeasurements.remove(address, current)) {
-          break;
-        }
-      } else {
-        if (handlersMeasurements.replace(address, current, candidate)) {
-          break;
-        }
-      }
-    }
+    handlersMeasurements.compute(address, (key, value) -> value.handlersCount() == 1 ? null : value.decrementHandlersCount());
   }
 
   @Override
