@@ -64,17 +64,19 @@ class HttpClientITest extends BaseITest {
 
     concurrentClients.times { i ->
       ForkJoinPool.commonPool().execute({
-        runClient(httpClients[i], sentCount, requestContent, context)
+        httpRequest(httpClients[i], sentCount, requestContent, context)
+        wsRequest(httpClients[i], requestContent, context)
       })
     }
 
-    assertCounterEquals(concurrentClients * sentCount * requestContent.bytes.length, tenantId, "${metricPrefix}bytesReceived")
-    assertCounterEquals(concurrentClients * sentCount * RESPONSE_CONTENT.bytes.length, tenantId, "${metricPrefix}bytesSent")
+    assertGaugeEquals(0, tenantId, "${metricPrefix}wsConnections")
+    assertCounterEquals(concurrentClients * (sentCount + 1) * requestContent.bytes.length, tenantId, "${metricPrefix}bytesReceived")
+    assertCounterEquals(concurrentClients * (sentCount + 1) * RESPONSE_CONTENT.bytes.length, tenantId, "${metricPrefix}bytesSent")
     assertCounterEquals(concurrentClients * sentCount, tenantId, "${metricPrefix}requestCount")
-    assertCounterGreaterThan(concurrentClients * sentCount * requestDelay, tenantId, "${metricPrefix}responseTime")
+    assertCounterGreaterThan(concurrentClients * (sentCount + 1) * requestDelay, tenantId, "${metricPrefix}responseTime")
   }
 
-  private void runClient(HttpClient httpClient, int sentCount, String requestContent, TestContext context) {
+  private void httpRequest(HttpClient httpClient, int sentCount, String requestContent, TestContext context) {
     (1..sentCount).collect { i ->
       def async = context.async()
 
@@ -91,6 +93,18 @@ class HttpClientITest extends BaseITest {
     }.each { async ->
       async.await()
     }
+  }
+
+  private void wsRequest(HttpClient httpClient, String requestContent, TestContext context) {
+    def async = context.async()
+    httpClient.websocket(testPort, testHost, "", { ws ->
+      ws.handler({ event ->
+        async.complete()
+        ws.close()
+      })
+      ws.writeTextMessage(requestContent)
+    })
+    async.await()
   }
 
   @Override
