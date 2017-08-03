@@ -80,6 +80,7 @@ class NetClientITest extends BaseITest {
           async.complete()
           context.fail(t)
         })
+        socket.handler({ buf -> })
         socket.write(requestContent)
         socket.closeHandler({ aVoid ->
           async.complete()
