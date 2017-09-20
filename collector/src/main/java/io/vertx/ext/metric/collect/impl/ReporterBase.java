@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.metric.collect.ExtendedMetricsOptions;
+import io.vertx.ext.metric.collect.Reporter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ import static java.util.stream.Collectors.*;
  * @author Thomas Segismont
  * @author Dan Kristensen
  */
-public abstract class ReporterBase implements Handler<List<DataPoint>> {
+public abstract class ReporterBase implements Reporter {
   private static final Logger LOG = LoggerFactory.getLogger(ReporterBase.class);
 
   private final Vertx vertx;
@@ -150,6 +151,7 @@ public abstract class ReporterBase implements Handler<List<DataPoint>> {
     }
   }
 
+  @Override
   public void stop() {
     vertx.cancelTimer(timerId);
   }

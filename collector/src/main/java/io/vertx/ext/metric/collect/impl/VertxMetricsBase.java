@@ -39,6 +39,7 @@ import io.vertx.core.spi.metrics.PoolMetrics;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.metric.collect.ExtendedMetricsOptions;
 import io.vertx.ext.metric.collect.MetricsType;
+import io.vertx.ext.metric.collect.Reporter;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -59,7 +60,7 @@ public abstract class VertxMetricsBase<T extends ExtendedMetricsOptions> extends
 
   private Future<Void> metricsReady = Future.future();
 
-  private ReporterBase reporter;
+  private Reporter reporter;
   private Scheduler scheduler;
 
   public VertxMetricsBase(Vertx vertx, T options) {
@@ -219,7 +220,7 @@ public abstract class VertxMetricsBase<T extends ExtendedMetricsOptions> extends
    *
    * @param context the context on which the reporter should operate.
    */
-  protected abstract ReporterBase createReporter(Context context);
+  protected abstract Reporter createReporter(Context context);
 
   @Override
   public void close() {

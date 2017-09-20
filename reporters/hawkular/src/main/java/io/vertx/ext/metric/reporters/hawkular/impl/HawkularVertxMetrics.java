@@ -18,12 +18,12 @@ package io.vertx.ext.metric.reporters.hawkular.impl;
 
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import io.vertx.ext.metric.collect.impl.ReporterBase;
+import io.vertx.ext.metric.collect.Reporter;
 import io.vertx.ext.metric.collect.impl.VertxMetricsBase;
 import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptions;
 
 /**
- * Metrics SPI implementation.
+ * Metrics SPI implementation for Hawkular.
  *
  * @author Thomas Segismont
  * @author Dan Kristensen
@@ -39,7 +39,7 @@ public class HawkularVertxMetrics extends VertxMetricsBase<VertxHawkularOptions>
   }
 
   @Override
-  public ReporterBase createReporter(Context context) {
+  public Reporter createReporter(Context context) {
     return new HawkularReporter(vertx, options, context);
   }
 }

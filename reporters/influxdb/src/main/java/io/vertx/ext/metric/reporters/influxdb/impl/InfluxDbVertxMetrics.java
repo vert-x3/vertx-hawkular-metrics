@@ -18,14 +18,14 @@ package io.vertx.ext.metric.reporters.influxdb.impl;
 
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import io.vertx.ext.metric.collect.impl.ReporterBase;
+import io.vertx.ext.metric.collect.Reporter;
 import io.vertx.ext.metric.collect.impl.VertxMetricsBase;
 import io.vertx.ext.metric.reporters.influxdb.VertxInfluxDbOptions;
 
 /**
- * Metrics SPI implementation.
+ * Metrics SPI implementation for InfluxDb.
  *
- * @author Thomas Segismont
+ * @author Dan Kristensen
  */
 public class InfluxDbVertxMetrics extends VertxMetricsBase<VertxInfluxDbOptions> {
 
@@ -38,7 +38,7 @@ public class InfluxDbVertxMetrics extends VertxMetricsBase<VertxInfluxDbOptions>
   }
 
   @Override
-  public ReporterBase createReporter(Context context) {
+  public Reporter createReporter(Context context) {
     return new InfluxDbReporter(vertx, options, context);
   }
 }
