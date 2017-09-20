@@ -17,7 +17,6 @@
 package io.vertx.ext.metric.reporters.hawkular.impl
 
 import io.vertx.ext.unit.TestContext
-import org.junit.Before
 import org.junit.Test
 
 /**
@@ -25,10 +24,10 @@ import org.junit.Test
  */
 class EventBusITest extends BaseITest {
   static final EVENT_BUS_METRICS = ['handlers', 'processingTime', 'errorCount', 'bytesWritten', 'bytesRead', 'pending',
-                             'pendingLocal', 'pendingRemote', 'publishedMessages', 'publishedLocalMessages',
-                             'publishedRemoteMessages', 'sentMessages', 'sentLocalMessages', 'sentRemoteMessages',
-                             'receivedMessages', 'receivedLocalMessages', 'receivedRemoteMessages', 'deliveredMessages',
-                             'deliveredLocalMessages', 'deliveredRemoteMessages', 'replyFailures']
+                                    'pendingLocal', 'pendingRemote', 'publishedMessages', 'publishedLocalMessages',
+                                    'publishedRemoteMessages', 'sentMessages', 'sentLocalMessages', 'sentRemoteMessages',
+                                    'receivedMessages', 'receivedLocalMessages', 'receivedRemoteMessages', 'deliveredMessages',
+                                    'deliveredLocalMessages', 'deliveredRemoteMessages', 'replyFailures']
 
   def String address = "testSubject"
   def baseName = "${METRIC_PREFIX}.vertx.eventbus."
@@ -37,8 +36,9 @@ class EventBusITest extends BaseITest {
   def eventBus = vertx.eventBus()
   def instances = 3
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/event_bus_handler.groovy'
     def config = [:]
     deployVerticle(verticleName, config, instances, context)

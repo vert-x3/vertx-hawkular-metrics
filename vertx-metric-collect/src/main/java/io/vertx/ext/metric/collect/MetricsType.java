@@ -19,37 +19,41 @@ import io.vertx.codegen.annotations.VertxGen;
 
 
 /**
- *  Metrics types for each metrics.
+ * Metrics types for each metrics.
  */
 @VertxGen
 public enum MetricsType {
 
   /**
-   * Type for net server metrics
+   * Net server metrics.
    */
   NET_SERVER,
   /**
-   * Type for net client metrics
+   * Net client metrics.
    */
   NET_CLIENT,
   /**
-   * Type for http server metrics
+   * Http server metrics.
    */
   HTTP_SERVER,
   /**
-   * Type for http client metrics
+   * Http client metrics.
    */
   HTTP_CLIENT,
   /**
-   * Type for datagram socket metrics
+   * Datagram socket metrics.
    */
   DATAGRAM_SOCKET,
   /**
-   * Type for event bus metrics
+   * Event bus metrics.
    */
   EVENT_BUS,
   /**
-   * Named pools metrics
+   * Named pools metrics.
    */
-  NAMED_POOLS
+  NAMED_POOLS,
+  /**
+   * Verticle metrics.
+   */
+  VERTICLES
 }

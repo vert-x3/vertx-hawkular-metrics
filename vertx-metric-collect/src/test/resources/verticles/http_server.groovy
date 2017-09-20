@@ -25,7 +25,13 @@ import io.vertx.core.Future
 void vertxStart(Future startFuture) {
   def config = vertx.getOrCreateContext().config()
   httpServer = vertx.createHttpServer()
-  httpServer.requestHandler({ req ->
+  httpServer.websocketHandler({ ws ->
+    ws.handler({ event ->
+      vertx.setTimer(config.requestDelay as long, { timer ->
+        ws.writeTextMessage(config.content).end();
+      })
+    })
+  }).requestHandler({ req ->
     // Timer as artificial processing time
     vertx.setTimer(config.requestDelay as long, { handler ->
       req.response().setChunked(true).putHeader('Content-Type', 'text/plain').write(config.content as String).end()

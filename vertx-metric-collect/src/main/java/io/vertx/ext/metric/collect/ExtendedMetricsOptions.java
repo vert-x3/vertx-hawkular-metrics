@@ -16,6 +16,7 @@
 package io.vertx.ext.metric.collect;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 
@@ -54,7 +55,7 @@ public class ExtendedMetricsOptions extends MetricsOptions {
    * message containing at least the <code>source</code> and <code>value</code> (double) fields.
    */
   public static final String DEFAULT_METRICS_BRIDGE_ADDRESS = "hawkular.metrics";
-  
+
   /**
    * The default value to enable / disable the metrics bridge. Disable by default.
    */
@@ -74,6 +75,7 @@ public class ExtendedMetricsOptions extends MetricsOptions {
     batchSize = DEFAULT_BATCH_SIZE;
     batchDelay = DEFAULT_BATCH_DELAY;
     metricsBridgeEnabled = DEFAULT_METRICS_BRIDGE_ENABLED;
+    metricsBridgeAddress = DEFAULT_METRICS_BRIDGE_ADDRESS;
     disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
   }
 
@@ -234,12 +236,17 @@ public class ExtendedMetricsOptions extends MetricsOptions {
    * @param metricsType the type of metrics
    * @return the current {@link ExtendedMetricsOptions} instance
    */
+  @GenIgnore
   public ExtendedMetricsOptions addDisabledMetricsType(MetricsType metricsType) {
+    if (disabledMetricsTypes == null) {
+      disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
+    }
     this.disabledMetricsTypes.add(metricsType);
     return this;
   }
 
+  @GenIgnore
   public boolean isMetricsTypeDisabled(MetricsType metricsType) {
-    return this.disabledMetricsTypes.contains(metricsType);
+    return disabledMetricsTypes != null && disabledMetricsTypes.contains(metricsType);
   }
 }

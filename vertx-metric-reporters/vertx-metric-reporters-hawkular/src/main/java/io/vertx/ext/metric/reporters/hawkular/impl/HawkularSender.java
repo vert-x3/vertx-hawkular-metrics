@@ -34,7 +34,7 @@ import io.vertx.ext.metric.reporters.hawkular.AuthenticationOptions;
 import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptions;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.concurrent.TimeUnit.*;
 import static java.util.stream.Collectors.*;
 
 /**
@@ -65,6 +64,10 @@ public class HawkularSender extends AbstractSender {
   private final CharSequence auth;
 
   private final Map<CharSequence, Iterable<CharSequence>> httpHeaders;
+
+  private final JsonObject tags;
+  private final List<MetricTagsMatcher> metricTagsMatchers;
+  private final TaggedMetricsCache taggedMetricsCache;
 
   private HttpClient httpClient;
   private String metricsDataUri;
@@ -109,6 +112,11 @@ public class HawkularSender extends AbstractSender {
       this.httpHeaders = Collections.emptyMap();
     }
 
+    tags = options.getTags();
+    metricTagsMatchers = options.getMetricTagsMatches().stream()
+      .map(MetricTagsMatcher::new)
+      .collect(toList());
+    taggedMetricsCache = new TaggedMetricsCache(options.getTaggedMetricsCacheSize());
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()
         .setDefaultHost(options.getHost())
@@ -121,18 +129,23 @@ public class HawkularSender extends AbstractSender {
   @Override
   protected void sendDataTo(String metricsDataUri, Object mixedData, String encoding) {
     HttpClientRequest request = httpClient.post(metricsDataUri, this::onResponse)
-        .exceptionHandler(err -> LOG.trace("Could not send metrics. Payload was: " + mixedData, err))
-        .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
+      .exceptionHandler(err -> LOG.trace("Could not send metrics. Payload was: " + mixedData, err))
+      .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
 
-      if (tenant != null) {
-        request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
-      }
-      if (auth != null) {
-        request.putHeader(HttpHeaders.AUTHORIZATION, auth);
-      }
-      httpHeaders.forEach(request::putHeader);
+    if (tenant != null) {
+      request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
+    }
+    if (auth != null) {
+      request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+    }
+    httpHeaders.forEach(request::putHeader);
 
-      request.end((String)mixedData, "UTF-8");
+    request.end((String) mixedData, "UTF-8");
+
+    JsonObject hawkularMixedData = new JsonObject((String) mixedData);
+    tagMetrics(hawkularMixedData.getJsonArray("gauges"), "gauges");
+    tagMetrics(hawkularMixedData.getJsonArray("counters"), "counters");
+    tagMetrics(hawkularMixedData.getJsonArray("availabilities"), "availability");
   }
 
   @Override
@@ -164,12 +177,62 @@ public class HawkularSender extends AbstractSender {
     }).exceptionHandler(err -> handler.handle(Future.failedFuture(err)))
       .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON).end();
   }
+
   private void onResponse(HttpClientResponse response) {
     if (response.statusCode() != 200 && LOG.isTraceEnabled()) {
       response.bodyHandler(msg -> {
         LOG.trace("Could not send metrics: " + response.statusCode() + " : " + msg.toString());
       });
     }
+  }
+
+  private void tagMetrics(JsonArray metrics, String type) {
+    if (metrics == null) {
+      return;
+    }
+    metrics.stream()
+      .map(JsonObject.class::cast)
+      .map(m -> m.getString("id"))
+      .filter(name -> !taggedMetricsCache.isMetricTagged(type, name))
+      .forEach(name -> {
+        JsonObject json = new JsonObject();
+        json.mergeIn(tags);
+        metricTagsMatchers.forEach(matcher -> {
+          if (matcher.matches(name)) {
+            json.mergeIn(matcher.getTags());
+          }
+        });
+        if (json.isEmpty()) {
+          return;
+        }
+        try {
+          String uri = metricsServiceUri + "/" + type + "/" + URLEncoder.encode(name, "UTF-8") + "/tags";
+          HttpClientRequest request = httpClient.put(uri)
+            .handler(response -> {
+              if (response.statusCode() == 200) {
+                taggedMetricsCache.metricTagged(type, name);
+              } else if (LOG.isTraceEnabled()) {
+                response.bodyHandler(msg -> {
+                  LOG.trace("Could not send data: " + response.statusCode() + " : " + msg.toString());
+                });
+              }
+            })
+            .exceptionHandler(err -> LOG.trace("Could not send data", err))
+            .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
+
+          if (tenant != null) {
+            request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
+          }
+          if (auth != null) {
+            request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+          }
+          httpHeaders.forEach(request::putHeader);
+
+          request.end(json.toBuffer());
+        } catch (UnsupportedEncodingException e) {
+          LOG.trace("Could not encode metric name", e);
+        }
+      });
   }
 
   @Override

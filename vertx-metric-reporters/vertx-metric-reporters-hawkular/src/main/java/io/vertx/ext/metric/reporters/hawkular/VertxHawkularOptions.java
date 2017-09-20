@@ -16,10 +16,14 @@
 package io.vertx.ext.metric.reporters.hawkular;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.metric.collect.ExtendedMetricsOptions;
-import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptionsConverter;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Vert.x Hawkular monitoring configuration.
@@ -48,11 +52,15 @@ public class VertxHawkularOptions extends ExtendedMetricsOptions {
    */
   public static final String DEFAULT_TENANT = "default";
 
+  /**
+   * The default value to enable / disable sending the tenant header. Enabled by default.
+   */
+  public static final boolean DEFAULT_SEND_TENANT_HEADER = true;
 
   /**
-   * The default value to enable / disable the metrics bridge. Disable by default.
+   * The default number of metric names to cache in order to avoid repeated tagging requests = 4096.
    */
-  public static final boolean DEFAULT_METRICS_BRIDGE_ENABLED = false;
+  public static final int DEFAULT_TAGGED_METRICS_CACHE_SIZE = 4096;
 
   private String host;
   private int port;
@@ -62,6 +70,9 @@ public class VertxHawkularOptions extends ExtendedMetricsOptions {
   private boolean sendTenantHeader;
   private AuthenticationOptions authenticationOptions;
   private JsonObject httpHeaders;
+  private JsonObject tags;
+  private int taggedMetricsCacheSize;
+  private List<MetricTagsMatch> metricTagsMatches;
 
   public VertxHawkularOptions() {
     host = DEFAULT_HOST;
@@ -69,9 +80,12 @@ public class VertxHawkularOptions extends ExtendedMetricsOptions {
     httpOptions = new HttpClientOptions();
     metricsServiceUri = DEFAULT_METRICS_URI;
     tenant = DEFAULT_TENANT;
-    sendTenantHeader = true;
+    sendTenantHeader = DEFAULT_SEND_TENANT_HEADER;
     authenticationOptions = new AuthenticationOptions();
     httpHeaders = new JsonObject();
+    tags = new JsonObject();
+    taggedMetricsCacheSize = DEFAULT_TAGGED_METRICS_CACHE_SIZE;
+    metricTagsMatches = new ArrayList<>();
   }
 
   public VertxHawkularOptions(VertxHawkularOptions other) {
@@ -84,11 +98,20 @@ public class VertxHawkularOptions extends ExtendedMetricsOptions {
     sendTenantHeader = other.sendTenantHeader;
     authenticationOptions = other.authenticationOptions != null ? new AuthenticationOptions(other.authenticationOptions) : new AuthenticationOptions();
     httpHeaders = other.httpHeaders;
+    tags = other.tags != null ? other.tags.copy() : new JsonObject();
+    taggedMetricsCacheSize = other.taggedMetricsCacheSize;
+    metricTagsMatches = new ArrayList<>(other.metricTagsMatches != null ? other.metricTagsMatches : Collections.emptyList());
   }
 
   public VertxHawkularOptions(JsonObject json) {
     this();
     VertxHawkularOptionsConverter.fromJson(json, this);
+  }
+
+  @Override
+  public VertxHawkularOptions setEnabled(boolean enable) {
+    super.setEnabled(enable);
+    return this;
   }
 
   /**
@@ -210,6 +233,65 @@ public class VertxHawkularOptions extends ExtendedMetricsOptions {
    */
   public VertxHawkularOptions setHttpHeaders(JsonObject httpHeaders) {
     this.httpHeaders = httpHeaders;
+    return this;
+  }
+
+  /**
+   * @return tags applied to all metrics
+   */
+  public JsonObject getTags() {
+    return tags;
+  }
+
+  /**
+   * Set tags applied to all metrics.
+   */
+  public VertxHawkularOptions setTags(JsonObject tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  /**
+   * @return number of metric names to cache in order to avoid repeated tagging requests
+   */
+  public int getTaggedMetricsCacheSize() {
+    return taggedMetricsCacheSize;
+  }
+
+  /**
+   * Set the number of metric names to cache in order to avoid repeated tagging requests.
+   */
+  public VertxHawkularOptions setTaggedMetricsCacheSize(int taggedMetricsCacheSize) {
+    this.taggedMetricsCacheSize = taggedMetricsCacheSize;
+    return this;
+  }
+
+  /**
+   * @return the list of {@link MetricTagsMatch}
+   */
+  public List<MetricTagsMatch> getMetricTagsMatches() {
+    return metricTagsMatches;
+  }
+
+  /**
+   * Sets a list of {@link MetricTagsMatch}.
+   *
+   * @param metricTagsMatches a list of {@link MetricTagsMatch}
+   */
+  public VertxHawkularOptions setMetricTagsMatches(List<MetricTagsMatch> metricTagsMatches) {
+    this.metricTagsMatches = metricTagsMatches;
+    return this;
+  }
+
+  /**
+   * Adds a {@link MetricTagsMatch}.
+   */
+  @GenIgnore
+  public VertxHawkularOptions addMetricTagsMatch(MetricTagsMatch metricTagsMatch) {
+    if (metricTagsMatches == null) {
+      metricTagsMatches = new ArrayList<>();
+    }
+    metricTagsMatches.add(metricTagsMatch);
     return this;
   }
 }

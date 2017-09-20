@@ -104,7 +104,7 @@ public class HttpClientConnectionsMeasurements {
    * Decrement the number of opened websocket connections.
    */
   public void decrementWsConnectionCount() {
-    wsConnections.increment();
+    wsConnections.decrement();
   }
 
   /**

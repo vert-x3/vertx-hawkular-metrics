@@ -1,19 +1,23 @@
+/*
+ * Copyright 2015 Red Hat, Inc.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Apache License v2.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  The Apache License v2.0 is available at
+ *  http://www.opensource.org/licenses/apache2.0.php
+ *
+ *  You may elect to redistribute this code under either of these licenses.
+ */
 package io.vertx.ext.metric.collect.impl;
 
-import static io.vertx.ext.metric.collect.MetricsType.DATAGRAM_SOCKET;
-import static io.vertx.ext.metric.collect.MetricsType.EVENT_BUS;
-import static io.vertx.ext.metric.collect.MetricsType.HTTP_CLIENT;
-import static io.vertx.ext.metric.collect.MetricsType.HTTP_SERVER;
-import static io.vertx.ext.metric.collect.MetricsType.NAMED_POOLS;
-import static io.vertx.ext.metric.collect.MetricsType.NET_CLIENT;
-import static io.vertx.ext.metric.collect.MetricsType.NET_SERVER;
-
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Locale;
-import java.util.Map;
-
 import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
@@ -36,12 +40,26 @@ import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.ext.metric.collect.ExtendedMetricsOptions;
 import io.vertx.ext.metric.collect.MetricsType;
 
-public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics{
-  protected Vertx vertx;
-  protected ExtendedMetricsOptions options;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.Map;
+
+import static io.vertx.ext.metric.collect.MetricsType.*;
+
+/**
+ * Metrics SPI implementation.
+ *
+ * @author Thomas Segismont
+ */
+public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics {
+  protected final Vertx vertx;
+  protected final ExtendedMetricsOptions options;
+  protected final Map<MetricsType, MetricSupplier> metricSuppliers;
+
+  private Future<Void> metricsReady = Future.future();
 
   private AbstractSender sender;
-  protected final Map<MetricsType, MetricSupplier> metricSuppliers;
   private Scheduler scheduler;
 
   public AbstractVertxMetricsImpl(Vertx vertx, ExtendedMetricsOptions options) {
@@ -70,10 +88,12 @@ public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics{
     if (!options.isMetricsTypeDisabled(NAMED_POOLS)) {
       supplierMap.put(NAMED_POOLS, new NamedPoolMetricsSupplier(prefix));
     }
+    if (!options.isMetricsTypeDisabled(VERTICLES)) {
+      supplierMap.put(VERTICLES, new VerticleMetricsSupplier(prefix));
+    }
     metricSuppliers = Collections.unmodifiableMap(supplierMap);
   }
 
-  
   @Override
   public HttpServerMetrics<Long, Void, Void> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
     HttpServerMetricsSupplier supplier = (HttpServerMetricsSupplier) metricSuppliers.get(HTTP_SERVER);
@@ -105,6 +125,22 @@ public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics{
   }
 
   @Override
+  public void verticleDeployed(Verticle verticle) {
+    VerticleMetricsSupplier supplier = (VerticleMetricsSupplier) metricSuppliers.get(VERTICLES);
+    if (supplier != null) {
+      supplier.verticleDeployed(verticle);
+    }
+  }
+
+  @Override
+  public void verticleUndeployed(Verticle verticle) {
+    VerticleMetricsSupplier supplier = (VerticleMetricsSupplier) metricSuppliers.get(VERTICLES);
+    if (supplier != null) {
+      supplier.verticleUndeployed(verticle);
+    }
+  }
+
+  @Override
   public EventBusMetrics createMetrics(EventBus eventBus) {
     EventBusMetrics supplier = (EventBusMetrics) metricSuppliers.get(EVENT_BUS);
     return supplier != null ? supplier : super.createMetrics(eventBus);
@@ -131,6 +167,7 @@ public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics{
   public boolean isEnabled() {
     return true;
   }
+
   @Override
   public void eventBusInitialized(EventBus bus) {
     // Finish setup
@@ -152,7 +189,8 @@ public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics{
           // the type of metrics can have been set in the message using the 'type' field. It not use 'gauge'. Only
           // "counter" and "gauge" are supported.
           String type = json.getString("type", "");
-          String name = json.getString("id");
+          String prefix = options.getPrefix();
+          String name = prefix.isEmpty() ? json.getString("id") : prefix + "." + json.getString("id");
           Long timestamp = json.getLong("timestamp");
           if (timestamp == null) {
             timestamp = System.currentTimeMillis();
@@ -169,17 +207,24 @@ public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics{
               dataPoint = new GaugePoint(name, timestamp, json.getDouble("value"));
           }
           sender.handle(Collections.singletonList(dataPoint));
-        });
+        }).completionHandler(metricsReady);
       });
+    } else {
+      metricsReady.complete();
     }
   }
 
   public abstract AbstractSender createSender(Context context);
-  
+
   @Override
   public void close() {
     metricSuppliers.values().forEach(scheduler::unregister);
     scheduler.stop();
     sender.stop();
+  }
+
+  // Visible for testing
+  public Future<Void> getMetricsReady() {
+    return metricsReady;
   }
 }

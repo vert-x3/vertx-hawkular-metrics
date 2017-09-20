@@ -58,7 +58,7 @@ public abstract class AbstractSender implements Handler<List<DataPoint>> {
    */
   public AbstractSender(Vertx vertx, ExtendedMetricsOptions options, Context context) {
     this.vertx = vertx;
-    
+
     batchSize = options.getBatchSize();
     batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
     queue = new ArrayList<>(batchSize);
@@ -80,7 +80,7 @@ public abstract class AbstractSender implements Handler<List<DataPoint>> {
 
     if (queue.size() + dataPoints.size() < batchSize) {
       if (LOG.isTraceEnabled()) {
-        LOG.trace("Will queue datapoints. Queue size will be " + (queue.size()+dataPoints.size()));
+        LOG.trace("Will queue datapoints. Queue size will be " + (queue.size() + dataPoints.size()));
       }
       queue.addAll(dataPoints);
       return;
@@ -109,12 +109,13 @@ public abstract class AbstractSender implements Handler<List<DataPoint>> {
   }
 
   protected abstract void sendDataTo(String metricsDataUri, Object mixedData, String encoding);
+
   protected abstract void getMetricsDataUri(Handler<AsyncResult<String>> handler);
-  
-  protected Object toMixedData(List<DataPoint> dataPoints) { 
+
+  protected Object toMixedData(List<DataPoint> dataPoints) {
     Map<? extends Class<? extends DataPoint>, Map<String, List<DataPoint>>> mixedData;
     mixedData = dataPoints.stream().collect(groupingBy(DataPoint::getClass, groupingBy(DataPoint::getName)));
-    
+
     JsonObject json = new JsonObject();
     addMixedData(json, "gauges", mixedData.get(GaugePoint.class));
     addMixedData(json, "counters", mixedData.get(CounterPoint.class));

@@ -17,7 +17,6 @@
 package io.vertx.ext.metric.reporters.hawkular.impl
 
 import io.vertx.ext.unit.TestContext
-import org.junit.Before
 import org.junit.Test
 
 /**
@@ -31,8 +30,9 @@ class NetServerITest extends BaseITest {
   def testPort = getPort(9193)
   def metricPrefix = "${METRIC_PREFIX}.vertx.net.server.${testHost}:${testPort}."
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/net_server.groovy'
     def instances = 4
     def config = [

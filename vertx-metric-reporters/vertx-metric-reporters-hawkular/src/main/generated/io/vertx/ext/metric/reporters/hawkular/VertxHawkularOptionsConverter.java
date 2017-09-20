@@ -37,10 +37,12 @@ public class VertxHawkularOptionsConverter {
       obj.setBatchSize(((Number)json.getValue("batchSize")).intValue());
     }
     if (json.getValue("disabledMetricsTypes") instanceof JsonArray) {
-      json.getJsonArray("disabledMetricsTypes").forEach(item -> {
+      java.util.HashSet<io.vertx.ext.metric.collect.MetricsType> list = new java.util.HashSet<>();
+      json.getJsonArray("disabledMetricsTypes").forEach( item -> {
         if (item instanceof String)
-          obj.addDisabledMetricsType(io.vertx.ext.metric.collect.MetricsType.valueOf((String)item));
+          list.add(io.vertx.ext.metric.collect.MetricsType.valueOf((String)item));
       });
+      obj.setDisabledMetricsTypes(list);
     }
     if (json.getValue("enabled") instanceof Boolean) {
       obj.setEnabled((Boolean)json.getValue("enabled"));
@@ -53,6 +55,14 @@ public class VertxHawkularOptionsConverter {
     }
     if (json.getValue("httpOptions") instanceof JsonObject) {
       obj.setHttpOptions(new io.vertx.core.http.HttpClientOptions((JsonObject)json.getValue("httpOptions")));
+    }
+    if (json.getValue("metricTagsMatches") instanceof JsonArray) {
+      java.util.ArrayList<io.vertx.ext.metric.reporters.hawkular.MetricTagsMatch> list = new java.util.ArrayList<>();
+      json.getJsonArray("metricTagsMatches").forEach( item -> {
+        if (item instanceof JsonObject)
+          list.add(new io.vertx.ext.metric.reporters.hawkular.MetricTagsMatch((JsonObject)item));
+      });
+      obj.setMetricTagsMatches(list);
     }
     if (json.getValue("metricsBridgeAddress") instanceof String) {
       obj.setMetricsBridgeAddress((String)json.getValue("metricsBridgeAddress"));
@@ -74,6 +84,12 @@ public class VertxHawkularOptionsConverter {
     }
     if (json.getValue("sendTenantHeader") instanceof Boolean) {
       obj.setSendTenantHeader((Boolean)json.getValue("sendTenantHeader"));
+    }
+    if (json.getValue("taggedMetricsCacheSize") instanceof Number) {
+      obj.setTaggedMetricsCacheSize(((Number)json.getValue("taggedMetricsCacheSize")).intValue());
+    }
+    if (json.getValue("tags") instanceof JsonObject) {
+      obj.setTags(((JsonObject)json.getValue("tags")).copy());
     }
     if (json.getValue("tenant") instanceof String) {
       obj.setTenant((String)json.getValue("tenant"));
@@ -111,6 +127,10 @@ public class VertxHawkularOptionsConverter {
     }
     json.put("schedule", obj.getSchedule());
     json.put("sendTenantHeader", obj.isSendTenantHeader());
+    json.put("taggedMetricsCacheSize", obj.getTaggedMetricsCacheSize());
+    if (obj.getTags() != null) {
+      json.put("tags", obj.getTags());
+    }
     if (obj.getTenant() != null) {
       json.put("tenant", obj.getTenant());
     }

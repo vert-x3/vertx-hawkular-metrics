@@ -39,7 +39,7 @@ public class VertxInfluxDbMetricsImpl extends AbstractVertxMetricsImpl {
 
   @Override
   public AbstractSender createSender(Context context) {
-    return new InfluxDbSender(vertx, (VertxInfluxDbOptions)options, context);
+    return new InfluxDbSender(vertx, (VertxInfluxDbOptions) options, context);
   }
 
 

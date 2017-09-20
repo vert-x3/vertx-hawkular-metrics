@@ -16,67 +16,69 @@
 
 package io.vertx.ext.metric.reporters.influxdb;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 /**
  * Converter for {@link io.vertx.ext.metric.reporters.influxdb.VertxInfluxDbOptions}.
- *
+ * <p>
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.metric.reporters.influxdb.VertxInfluxDbOptions} original class using Vert.x codegen.
  */
 public class VertxInfluxDbOptionsConverter {
 
   public static void fromJson(JsonObject json, VertxInfluxDbOptions obj) {
     if (json.getValue("authenticationOptions") instanceof JsonObject) {
-      obj.setAuthenticationOptions(new io.vertx.ext.metric.reporters.influxdb.AuthenticationOptions((JsonObject)json.getValue("authenticationOptions")));
+      obj.setAuthenticationOptions(new io.vertx.ext.metric.reporters.influxdb.AuthenticationOptions((JsonObject) json.getValue("authenticationOptions")));
     }
     if (json.getValue("batchDelay") instanceof Number) {
-      obj.setBatchDelay(((Number)json.getValue("batchDelay")).intValue());
+      obj.setBatchDelay(((Number) json.getValue("batchDelay")).intValue());
     }
     if (json.getValue("batchSize") instanceof Number) {
-      obj.setBatchSize(((Number)json.getValue("batchSize")).intValue());
+      obj.setBatchSize(((Number) json.getValue("batchSize")).intValue());
     }
     if (json.getValue("database") instanceof String) {
-      obj.setDatabase((String)json.getValue("database"));
+      obj.setDatabase((String) json.getValue("database"));
     }
     if (json.getValue("disabledMetricsTypes") instanceof JsonArray) {
+      java.util.HashSet<io.vertx.ext.metric.collect.MetricsType> list = new java.util.HashSet<>();
       json.getJsonArray("disabledMetricsTypes").forEach(item -> {
         if (item instanceof String)
-          obj.addDisabledMetricsType(io.vertx.ext.metric.collect.MetricsType.valueOf((String)item));
+          list.add(io.vertx.ext.metric.collect.MetricsType.valueOf((String) item));
       });
+      obj.setDisabledMetricsTypes(list);
     }
     if (json.getValue("enabled") instanceof Boolean) {
-      obj.setEnabled((Boolean)json.getValue("enabled"));
+      obj.setEnabled((Boolean) json.getValue("enabled"));
     }
     if (json.getValue("gzipEnabled") instanceof Boolean) {
-      obj.setGzipEnabled((Boolean)json.getValue("gzipEnabled"));
+      obj.setGzipEnabled((Boolean) json.getValue("gzipEnabled"));
     }
     if (json.getValue("host") instanceof String) {
-      obj.setHost((String)json.getValue("host"));
+      obj.setHost((String) json.getValue("host"));
     }
     if (json.getValue("httpHeaders") instanceof JsonObject) {
-      obj.setHttpHeaders(((JsonObject)json.getValue("httpHeaders")).copy());
+      obj.setHttpHeaders(((JsonObject) json.getValue("httpHeaders")).copy());
     }
     if (json.getValue("httpOptions") instanceof JsonObject) {
-      obj.setHttpOptions(new io.vertx.core.http.HttpClientOptions((JsonObject)json.getValue("httpOptions")));
+      obj.setHttpOptions(new io.vertx.core.http.HttpClientOptions((JsonObject) json.getValue("httpOptions")));
     }
     if (json.getValue("metricsBridgeAddress") instanceof String) {
-      obj.setMetricsBridgeAddress((String)json.getValue("metricsBridgeAddress"));
+      obj.setMetricsBridgeAddress((String) json.getValue("metricsBridgeAddress"));
     }
     if (json.getValue("metricsBridgeEnabled") instanceof Boolean) {
-      obj.setMetricsBridgeEnabled((Boolean)json.getValue("metricsBridgeEnabled"));
+      obj.setMetricsBridgeEnabled((Boolean) json.getValue("metricsBridgeEnabled"));
     }
     if (json.getValue("metricsServiceUri") instanceof String) {
-      obj.setMetricsServiceUri((String)json.getValue("metricsServiceUri"));
+      obj.setMetricsServiceUri((String) json.getValue("metricsServiceUri"));
     }
     if (json.getValue("port") instanceof Number) {
-      obj.setPort(((Number)json.getValue("port")).intValue());
+      obj.setPort(((Number) json.getValue("port")).intValue());
     }
     if (json.getValue("prefix") instanceof String) {
-      obj.setPrefix((String)json.getValue("prefix"));
+      obj.setPrefix((String) json.getValue("prefix"));
     }
     if (json.getValue("schedule") instanceof Number) {
-      obj.setSchedule(((Number)json.getValue("schedule")).intValue());
+      obj.setSchedule(((Number) json.getValue("schedule")).intValue());
     }
   }
 

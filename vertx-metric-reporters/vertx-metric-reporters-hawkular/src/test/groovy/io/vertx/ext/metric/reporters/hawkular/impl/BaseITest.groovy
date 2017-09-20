@@ -18,13 +18,13 @@ package io.vertx.ext.metric.reporters.hawkular.impl
 
 import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
-import io.vertx.core.AsyncResult
-import io.vertx.core.Handler
 import io.vertx.core.Vertx
+import io.vertx.core.impl.VertxImpl
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.Timeout
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -52,12 +52,24 @@ abstract class BaseITest {
   public Timeout timeout = new Timeout(1, MINUTES);
 
   protected def tenantId = TenantGenerator.instance.nextTenantId()
-  protected def vertxOptions = createMetricsOptions(tenantId)
+  protected def vertxOptions = createVertxOptions(tenantId)
   protected def vertx = Vertx.vertx(vertxOptions);
 
   @BeforeClass
   static void createRestClient() {
     hawkularMetrics = new RESTClient(SERVER_URL, ContentType.JSON)
+  }
+
+
+  @Before
+  void before(TestContext context) throws Exception {
+    setUp(context)
+  }
+
+  void setUp(TestContext context) throws Exception {
+    def vertxImpl = (VertxImpl) vertx
+    def metrics = (VertxMetricsImpl) vertxImpl.metrics
+    metrics.getMetricsReady().setHandler(context.asyncAssertSuccess())
   }
 
   protected def deployVerticle(String verticleName, Map config, int instances, TestContext testContext) {
@@ -76,7 +88,11 @@ abstract class BaseITest {
   }
 
   @After
-  void tearDown(TestContext context) {
+  void after(TestContext context) throws Exception {
+    tearDown(context)
+  }
+
+  void tearDown(TestContext context) throws Exception {
     def async = context.async()
     vertx.close({ res ->
       if (res.succeeded()) {
@@ -87,7 +103,7 @@ abstract class BaseITest {
     })
   }
 
-  static Map createMetricsOptions(String tenantId) {
+  protected Map createVertxOptions(String tenantId) {
     def vertxOptions = [
       metricsOptions: [
         enabled             : true,
@@ -98,7 +114,8 @@ abstract class BaseITest {
         schedule            : SECONDS.convert(SCHEDULE, MILLISECONDS),
         // Event bus bridge configuration
         metricsBridgeEnabled: true,
-        metricsBridgeAddress: "hawkular.metrics"
+        metricsBridgeAddress: "hawkular.metrics",
+        tags                : [dc: 'mars01', host: 'host13']
       ]
     ]
     vertxOptions
@@ -160,18 +177,6 @@ abstract class BaseITest {
     fail("Expected: ${expected}, actual: ${actual}")
   }
 
-  protected static void assertAvailabilityEquals(String expected, String tenantId, String availability) {
-    long start = System.currentTimeMillis()
-    def actual
-    while (true) {
-      actual = getAvailabilityValue(tenantId, availability)
-      if (expected.equals(actual)) return
-      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
-      sleep(SCHEDULE / 10 as long)
-    }
-    fail("Expected: ${expected}, actual: ${actual}")
-  }
-
   protected static void assertCounterGreaterThan(Long expected, String tenantId, String counter) {
     long start = System.currentTimeMillis()
     def actual
@@ -194,6 +199,18 @@ abstract class BaseITest {
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as Long
   }
 
+  protected static void assertAvailabilityEquals(String expected, String tenantId, String availability) {
+    long start = System.currentTimeMillis()
+    def actual
+    while (true) {
+      actual = getAvailabilityValue(tenantId, availability)
+      if (expected.equals(actual)) return
+      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
+      sleep(SCHEDULE / 10 as long)
+    }
+    fail("Expected: ${expected}, actual: ${actual}")
+  }
+
   private static String getAvailabilityValue(String tenantId, String availability) {
     def data = hawkularMetrics.get([
       path   : "availability/${availability}/raw",
@@ -202,14 +219,24 @@ abstract class BaseITest {
     data.isEmpty() ? null : data.sort(DATAPOINT_COMPARATOR)[0].value as String
   }
 
-  protected static Handler<AsyncResult> assertAsyncSuccess(TestContext context) {
-    def async = context.async()
-    return { res ->
-      if (res.succeeded()) {
-        async.complete()
-      } else {
-        context.fail()
+  protected static void assertTagsEquals(Map expected, String tenantId, String type, String name) {
+    long start = System.currentTimeMillis()
+    def actual
+    while (true) {
+      actual = getTagsValue(tenantId, type, name)
+      if (expected == actual) {
+        return
       }
+      if (System.currentTimeMillis() - start > LOOPS * SCHEDULE) break;
+      sleep(SCHEDULE / 10 as long)
     }
+    fail("Expected: ${expected}, actual: ${actual}")
+  }
+
+  private static Map getTagsValue(String tenantId, String type, String name) {
+    hawkularMetrics.get([
+      path   : "${type}/${name}/tags",
+      headers: [(TENANT_HEADER_NAME): tenantId]
+    ]).data ?: [:]
   }
 }

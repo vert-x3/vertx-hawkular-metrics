@@ -18,8 +18,6 @@ package io.vertx.ext.metric.reporters.hawkular.impl
 
 import io.vertx.core.net.NetClient
 import io.vertx.ext.unit.TestContext
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
 import java.util.concurrent.ForkJoinPool
@@ -37,8 +35,9 @@ class NetClientITest extends BaseITest {
   def concurrentClients = ForkJoinPool.commonPool().parallelism
   def List<NetClient> netClients = []
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/net_server.groovy'
     def instances = 1
     def config = [
@@ -81,6 +80,7 @@ class NetClientITest extends BaseITest {
           async.complete()
           context.fail(t)
         })
+        socket.handler({ buf -> })
         socket.write(requestContent)
         socket.closeHandler({ aVoid ->
           async.complete()
@@ -92,10 +92,11 @@ class NetClientITest extends BaseITest {
     }
   }
 
-  @After
-  void tearDown() {
+  @Override
+  void tearDown(TestContext context) throws Exception {
     concurrentClients.times { i ->
       netClients[i].close()
     }
+    super.tearDown(context)
   }
 }

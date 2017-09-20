@@ -18,8 +18,6 @@ package io.vertx.ext.metric.reporters.hawkular.impl
 
 import io.vertx.core.http.HttpClient
 import io.vertx.ext.unit.TestContext
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
 import java.util.concurrent.ForkJoinPool
@@ -38,8 +36,9 @@ class HttpClientITest extends BaseITest {
   def concurrentClients = ForkJoinPool.commonPool().parallelism
   def List<HttpClient> httpClients = []
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/http_server.groovy'
     def instances = 1
     def config = [
@@ -65,17 +64,19 @@ class HttpClientITest extends BaseITest {
 
     concurrentClients.times { i ->
       ForkJoinPool.commonPool().execute({
-        runClient(httpClients[i], sentCount, requestContent, context)
+        httpRequest(httpClients[i], sentCount, requestContent, context)
+        wsRequest(httpClients[i], requestContent, context)
       })
     }
 
-    assertCounterEquals(concurrentClients * sentCount * requestContent.bytes.length, tenantId, "${metricPrefix}bytesReceived")
-    assertCounterEquals(concurrentClients * sentCount * RESPONSE_CONTENT.bytes.length, tenantId, "${metricPrefix}bytesSent")
+    assertGaugeEquals(0, tenantId, "${metricPrefix}wsConnections")
+    assertCounterEquals(concurrentClients * (sentCount + 1) * requestContent.bytes.length, tenantId, "${metricPrefix}bytesReceived")
+    assertCounterEquals(concurrentClients * (sentCount + 1) * RESPONSE_CONTENT.bytes.length, tenantId, "${metricPrefix}bytesSent")
     assertCounterEquals(concurrentClients * sentCount, tenantId, "${metricPrefix}requestCount")
-    assertCounterGreaterThan(concurrentClients * sentCount * requestDelay, tenantId, "${metricPrefix}responseTime")
+    assertCounterGreaterThan(concurrentClients * (sentCount + 1) * requestDelay, tenantId, "${metricPrefix}responseTime")
   }
 
-  private void runClient(HttpClient httpClient, int sentCount, String requestContent, TestContext context) {
+  private void httpRequest(HttpClient httpClient, int sentCount, String requestContent, TestContext context) {
     (1..sentCount).collect { i ->
       def async = context.async()
 
@@ -94,10 +95,23 @@ class HttpClientITest extends BaseITest {
     }
   }
 
-  @After
-  void tearDown() {
+  private void wsRequest(HttpClient httpClient, String requestContent, TestContext context) {
+    def async = context.async()
+    httpClient.websocket(testPort, testHost, "", { ws ->
+      ws.handler({ event ->
+        async.complete()
+        ws.close()
+      })
+      ws.writeTextMessage(requestContent)
+    })
+    async.await()
+  }
+
+  @Override
+  void tearDown(TestContext context) throws Exception {
     concurrentClients.times { i ->
       httpClients[i].close()
     }
+    super.tearDown(context)
   }
 }

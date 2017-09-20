@@ -18,7 +18,6 @@ package io.vertx.ext.metric.reporters.hawkular.impl
 
 import io.vertx.core.datagram.DatagramSocket
 import io.vertx.ext.unit.TestContext
-import org.junit.Before
 import org.junit.Test
 
 /**
@@ -35,8 +34,9 @@ class DatagramITest extends BaseITest {
 
   def DatagramSocket client
 
-  @Before
-  void setup(TestContext context) {
+  @Override
+  void setUp(TestContext context) throws Exception {
+    super.setUp(context)
     def verticleName = 'verticles/datagram_server.groovy'
     def instances = 1
     def config = [
@@ -49,22 +49,16 @@ class DatagramITest extends BaseITest {
 
   @Test
   void shouldReportDatagramMetrics(TestContext context) {
-    println "Starting shouldReportDatagramMetrics"
     def sentCount = 5
-    println "Sending data 5 times"
-    sentCount.times { i -> client.send(CONTENT, testPort, testHost, assertAsyncSuccess(context)) }
-    println "Data sent 5 times"
+    sentCount.times { i -> client.send(CONTENT, testPort, testHost, context.asyncAssertSuccess()) }
 
     def nameFilter = { String id -> id.startsWith(baseName) }
     def nameTransformer = { String id ->
       id.startsWith(baseNameWithAddress) ? id.substring(baseNameWithAddress.length()) : id.substring(baseName.length())
     }
-    println "Testing metrics equals"
     assertMetricsEquals(DATAGRAM_METRICS as Set, tenantId, nameFilter, nameTransformer)
 
-    println "Testing counter equals1"
     assertCounterEquals(sentCount * CONTENT.bytes.length, tenantId, "${baseNameWithAddress}bytesReceived")
-    println "Testing counter equals2"
     assertCounterEquals(sentCount * CONTENT.bytes.length, tenantId, "${baseNameWithAddress}bytesSent")
     assertCounterEquals(0, tenantId, "${baseName}errorCount")
   }

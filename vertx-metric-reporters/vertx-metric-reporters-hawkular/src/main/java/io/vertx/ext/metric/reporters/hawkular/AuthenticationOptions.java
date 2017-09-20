@@ -18,7 +18,6 @@ package io.vertx.ext.metric.reporters.hawkular;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.metric.reporters.hawkular.AuthenticationOptionsConverter;
 
 /**
  * Authentication options.

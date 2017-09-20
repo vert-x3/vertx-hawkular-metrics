@@ -21,7 +21,11 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.docgen.Source;
 import io.vertx.ext.metric.reporters.hawkular.AuthenticationOptions;
+import io.vertx.ext.metric.reporters.hawkular.MetricTagsMatch;
+import io.vertx.ext.metric.reporters.hawkular.MetricTagsMatch.MatchType;
 import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptions;
+
+import java.util.Arrays;
 
 /**
  * @author Thomas Segismont
@@ -41,23 +45,24 @@ public class MetricsExamples {
   public void setupRemote() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
       new VertxHawkularOptions()
+        .setEnabled(true)
         .setHost("hawkular.example.com")
         .setPort(8080)
-        .setEnabled(true)
     ));
   }
 
   public void setupTenant() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
       new VertxHawkularOptions()
-        .setTenant("sales-department")
         .setEnabled(true)
+        .setTenant("sales-department")
     ));
   }
 
   public void setupHawkularServer() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
       new VertxHawkularOptions()
+        .setEnabled(true)
         .setTenant("hawkular")
         .setAuthenticationOptions(
           new AuthenticationOptions()
@@ -65,28 +70,27 @@ public class MetricsExamples {
             .setId("username")
             .setSecret("password")
         )
-        .setEnabled(true)
     ));
   }
 
   public void setupOpenshiftTokenAuthentication() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
       new VertxHawkularOptions()
+        .setEnabled(true)
         .setTenant("my-namespace")
         .setHttpHeaders(new JsonObject()
           .put("Authorization", "Bearer xkjdksf9890-shjkjhkjlkjlk")
         )
-        .setEnabled(true)
     ));
   }
 
   public void setupSecured() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
       new VertxHawkularOptions()
+        .setEnabled(true)
         .setHost("hawkular.example.com")
         .setPort(443)
         .setHttpOptions(new HttpClientOptions().setSsl(true))
-        .setEnabled(true)
     ));
   }
 
@@ -129,4 +133,30 @@ public class MetricsExamples {
     vertx.eventBus().publish("hawkular.metrics", availabilityMetric);
   }
 
+  public void setupMetricTags() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+      new VertxHawkularOptions()
+        .setEnabled(true)
+        .setTags(new JsonObject()
+          .put("dc", "mars01")
+          .put("rack", "web-paca")
+          .put("host", "host13"))
+    ));
+  }
+
+  public void setupMetricTagMatches() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+      new VertxHawkularOptions()
+        .setEnabled(true)
+        .setMetricTagsMatches(Arrays.asList(
+          new MetricTagsMatch()
+            .setValue("myapp.foo.my-metric")
+            .setTags(new JsonObject().put("myapp", "foo")),
+          new MetricTagsMatch()
+            .setType(MatchType.REGEX).setValue(".*\\.foo\\.*")
+            .setTags(new JsonObject().put("myapp", "foo"))
+          )
+        )
+    ));
+  }
 }

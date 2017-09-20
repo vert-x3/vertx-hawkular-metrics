@@ -51,7 +51,7 @@ public class VertxInfluxDbOptions extends ExtendedMetricsOptions {
    * The default prefix = vert.x.
    */
   public static final String DEFAULT_PREFIX = "vert.x";
-  
+
   /**
    * The default gzip enabled on InfluxDb.
    */
@@ -70,7 +70,7 @@ public class VertxInfluxDbOptions extends ExtendedMetricsOptions {
   public VertxInfluxDbOptions() {
     host = DEFAULT_HOST;
     port = DEFAULT_PORT;
-    gzipEnabled=DEFAULT_GZIP_ENABLED;
+    gzipEnabled = DEFAULT_GZIP_ENABLED;
     httpOptions = new HttpClientOptions();
     metricsServiceUri = DEFAULT_METRICS_URI;
     database = DEFAULT_DATABASE;
@@ -204,9 +204,9 @@ public class VertxInfluxDbOptions extends ExtendedMetricsOptions {
   public boolean isGzipEnabled() {
     return gzipEnabled;
   }
-  
+
   public VertxInfluxDbOptions setGzipEnabled(boolean gzipEnabled) {
-    this.gzipEnabled=gzipEnabled;
+    this.gzipEnabled = gzipEnabled;
     return this;
   }
 }

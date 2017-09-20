@@ -26,24 +26,24 @@ class EventBusBridgeITest extends BaseITest {
   @Test
   void shouldGetCustomMetrics() {
     vertx.eventBus().send('hawkular.metrics', ['id': 'my-metric', 'timestamp': System.currentTimeMillis(), 'value': 1.0D])
-    assertGaugeEquals(1.0, tenantId, "my-metric")
+    assertGaugeEquals(1.0, tenantId, "${METRIC_PREFIX}.my-metric")
   }
 
   @Test
   void shouldGetCustomMetricsWithTimestamp() {
     vertx.eventBus().send('hawkular.metrics', ['id': 'my-metric-ts', 'value': 1.0D])
-    assertGaugeEquals(1.0, tenantId, "my-metric-ts")
+    assertGaugeEquals(1.0, tenantId, "${METRIC_PREFIX}.my-metric-ts")
   }
 
   @Test
   void shouldGetCustomMetricsSentAsCounter() {
     vertx.eventBus().send('hawkular.metrics', ['id': 'my-metric-counter', 'type': 'counter', 'value': 1L])
-    assertCounterEquals(1L, tenantId, "my-metric-counter")
+    assertCounterEquals(1L, tenantId, "${METRIC_PREFIX}.my-metric-counter")
   }
 
   @Test
   void shouldGetCustomMetricsSentAsAvailability() {
     vertx.eventBus().send('hawkular.metrics', ['id': 'my-metric-av', 'type': 'availability', 'value': 'down'])
-    assertAvailabilityEquals('down', tenantId, "my-metric-av")
+    assertAvailabilityEquals('down', tenantId, "${METRIC_PREFIX}.my-metric-av")
   }
 }
