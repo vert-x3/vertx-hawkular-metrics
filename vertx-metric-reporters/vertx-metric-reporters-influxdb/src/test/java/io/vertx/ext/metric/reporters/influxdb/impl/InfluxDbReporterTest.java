@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(VertxUnitRunner.class)
-public class InfluxDbSenderTest {
+public class InfluxDbReporterTest {
 
   private Vertx vertx;
 

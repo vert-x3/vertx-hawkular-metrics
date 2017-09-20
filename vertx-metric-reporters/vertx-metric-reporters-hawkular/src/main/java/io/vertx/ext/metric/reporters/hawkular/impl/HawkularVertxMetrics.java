@@ -18,7 +18,7 @@ package io.vertx.ext.metric.reporters.hawkular.impl;
 
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import io.vertx.ext.metric.collect.impl.AbstractSender;
+import io.vertx.ext.metric.collect.impl.ReporterBase;
 import io.vertx.ext.metric.collect.impl.VertxMetricsBase;
 import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptions;
 
@@ -39,7 +39,7 @@ public class HawkularVertxMetrics extends VertxMetricsBase<VertxHawkularOptions>
   }
 
   @Override
-  public AbstractSender createSender(Context context) {
-    return new HawkularSender(vertx, options, context);
+  public ReporterBase createReporter(Context context) {
+    return new HawkularReporter(vertx, options, context);
   }
 }

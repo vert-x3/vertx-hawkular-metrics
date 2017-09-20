@@ -29,7 +29,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.metric.collect.impl.AbstractSender;
+import io.vertx.ext.metric.collect.impl.ReporterBase;
 import io.vertx.ext.metric.reporters.hawkular.AuthenticationOptions;
 import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptions;
 
@@ -50,8 +50,8 @@ import static java.util.stream.Collectors.*;
  *
  * @author Thomas Segismont
  */
-public class HawkularSender extends AbstractSender {
-  private static final Logger LOG = LoggerFactory.getLogger(HawkularSender.class);
+public class HawkularReporter extends ReporterBase {
+  private static final Logger LOG = LoggerFactory.getLogger(HawkularReporter.class);
 
   private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
   private static final CharSequence HTTP_HEADER_HAWKULAR_TENANT = HttpHeaders.createOptimized("Hawkular-Tenant");
@@ -77,7 +77,7 @@ public class HawkularSender extends AbstractSender {
    * @param options Vertx Hawkular options
    * @param context the metric collection and sending execution context
    */
-  public HawkularSender(Vertx vertx, VertxHawkularOptions options, Context context) {
+  public HawkularReporter(Vertx vertx, VertxHawkularOptions options, Context context) {
     super(vertx, options, context);
     metricsServiceUri = options.getMetricsServiceUri();
 

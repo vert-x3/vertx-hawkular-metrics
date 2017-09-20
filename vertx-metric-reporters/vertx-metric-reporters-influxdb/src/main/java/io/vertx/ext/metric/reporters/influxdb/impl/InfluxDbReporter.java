@@ -14,11 +14,11 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.metric.collect.impl.AbstractSender;
 import io.vertx.ext.metric.collect.impl.AvailabilityPoint;
 import io.vertx.ext.metric.collect.impl.CounterPoint;
 import io.vertx.ext.metric.collect.impl.DataPoint;
 import io.vertx.ext.metric.collect.impl.GaugePoint;
+import io.vertx.ext.metric.collect.impl.ReporterBase;
 import io.vertx.ext.metric.reporters.influxdb.AuthenticationOptions;
 import io.vertx.ext.metric.reporters.influxdb.VertxInfluxDbOptions;
 import io.vertx.ext.metric.reporters.influxdb.impl.Point.Builder;
@@ -34,8 +34,8 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.*;
 
-public class InfluxDbSender extends AbstractSender {
-  private static final Logger LOG = LoggerFactory.getLogger(InfluxDbSender.class);
+public class InfluxDbReporter extends ReporterBase {
+  private static final Logger LOG = LoggerFactory.getLogger(InfluxDbReporter.class);
   private static final CharSequence MEDIA_TYPE_TEXT_PLAIN = HttpHeaders.createOptimized("text/plain");
 
   private final String metricsServiceUri;
@@ -52,7 +52,7 @@ public class InfluxDbSender extends AbstractSender {
    * @param options Vertx InflxuDb options
    * @param context the metric collection and sending execution context
    */
-  public InfluxDbSender(Vertx vertx, VertxInfluxDbOptions options, Context context) {
+  public InfluxDbReporter(Vertx vertx, VertxInfluxDbOptions options, Context context) {
     super(vertx, options, context);
 
     AuthenticationOptions authenticationOptions = options.getAuthenticationOptions();

@@ -38,8 +38,8 @@ import static java.util.stream.Collectors.*;
  * @author Thomas Segismont
  * @author Dan Kristensen
  */
-public abstract class AbstractSender implements Handler<List<DataPoint>> {
-  private static final Logger LOG = LoggerFactory.getLogger(AbstractSender.class);
+public abstract class ReporterBase implements Handler<List<DataPoint>> {
+  private static final Logger LOG = LoggerFactory.getLogger(ReporterBase.class);
 
   private final Vertx vertx;
 
@@ -56,7 +56,7 @@ public abstract class AbstractSender implements Handler<List<DataPoint>> {
    * @param options Vertx Extended metrics options
    * @param context the metric collection and sending execution context
    */
-  public AbstractSender(Vertx vertx, ExtendedMetricsOptions options, Context context) {
+  public ReporterBase(Vertx vertx, ExtendedMetricsOptions options, Context context) {
     this.vertx = vertx;
 
     batchSize = options.getBatchSize();

@@ -59,7 +59,7 @@ public abstract class VertxMetricsBase<T extends ExtendedMetricsOptions> extends
 
   private Future<Void> metricsReady = Future.future();
 
-  private AbstractSender sender;
+  private ReporterBase reporter;
   private Scheduler scheduler;
 
   public VertxMetricsBase(Vertx vertx, T options) {
@@ -172,8 +172,8 @@ public abstract class VertxMetricsBase<T extends ExtendedMetricsOptions> extends
   public void eventBusInitialized(EventBus bus) {
     // Finish setup
     Context context = vertx.getOrCreateContext();
-    sender = createSender(context);
-    scheduler = new Scheduler(vertx, options, context, sender);
+    reporter = createReporter(context);
+    scheduler = new Scheduler(vertx, options, context, reporter);
     metricSuppliers.values().forEach(scheduler::register);
 
     //Configure the metrics bridge. It just transforms the received metrics (json) to a DataPoint to enqueue it.
@@ -206,7 +206,7 @@ public abstract class VertxMetricsBase<T extends ExtendedMetricsOptions> extends
             default:
               dataPoint = new GaugePoint(name, timestamp, json.getDouble("value"));
           }
-          sender.handle(Collections.singletonList(dataPoint));
+          reporter.handle(Collections.singletonList(dataPoint));
         }).completionHandler(metricsReady);
       });
     } else {
@@ -217,15 +217,15 @@ public abstract class VertxMetricsBase<T extends ExtendedMetricsOptions> extends
   /**
    * Creates a reporter. Implementation specific.
    *
-   * @param context the context on which the sender should operate.
+   * @param context the context on which the reporter should operate.
    */
-  protected abstract AbstractSender createSender(Context context);
+  protected abstract ReporterBase createReporter(Context context);
 
   @Override
   public void close() {
     metricSuppliers.values().forEach(scheduler::unregister);
     scheduler.stop();
-    sender.stop();
+    reporter.stop();
   }
 
   // Visible for testing
