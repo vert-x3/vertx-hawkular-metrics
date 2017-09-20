@@ -52,9 +52,9 @@ public class ExtendedMetricsOptions extends MetricsOptions {
 
   /**
    * Default event bus address where applications can send business-related metrics. The metrics are sent as JSON
-   * message containing at least the <code>source</code> and <code>value</code> (double) fields.
+   * message containing at least the <code>source</code> and <code>value</code> fields.
    */
-  public static final String DEFAULT_METRICS_BRIDGE_ADDRESS = "hawkular.metrics";
+  public static final String DEFAULT_METRICS_BRIDGE_ADDRESS = "metrics.bridge";
 
   /**
    * The default value to enable / disable the metrics bridge. Disable by default.

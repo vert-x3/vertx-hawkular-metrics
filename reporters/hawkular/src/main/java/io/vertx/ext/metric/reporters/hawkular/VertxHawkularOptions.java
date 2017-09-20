@@ -86,6 +86,7 @@ public class VertxHawkularOptions extends ExtendedMetricsOptions {
     tags = new JsonObject();
     taggedMetricsCacheSize = DEFAULT_TAGGED_METRICS_CACHE_SIZE;
     metricTagsMatches = new ArrayList<>();
+    setMetricsBridgeAddress("hawkular.metrics");
   }
 
   public VertxHawkularOptions(VertxHawkularOptions other) {
