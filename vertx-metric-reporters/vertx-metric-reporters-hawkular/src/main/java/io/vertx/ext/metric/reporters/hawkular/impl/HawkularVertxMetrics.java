@@ -28,7 +28,8 @@ import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptions;
  * @author Thomas Segismont
  * @author Dan Kristensen
  */
-public class HawkularVertxMetrics extends VertxMetricsBase {
+public class HawkularVertxMetrics extends VertxMetricsBase<VertxHawkularOptions> {
+
   /**
    * @param vertx   the {@link Vertx} managed instance
    * @param options Vertx Hawkular options
@@ -39,6 +40,6 @@ public class HawkularVertxMetrics extends VertxMetricsBase {
 
   @Override
   public AbstractSender createSender(Context context) {
-    return new HawkularSender(vertx, (VertxHawkularOptions) options, context);
+    return new HawkularSender(vertx, options, context);
   }
 }

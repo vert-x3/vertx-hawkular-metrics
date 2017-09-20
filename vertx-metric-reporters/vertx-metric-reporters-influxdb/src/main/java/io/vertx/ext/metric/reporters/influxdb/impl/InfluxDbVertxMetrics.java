@@ -27,7 +27,7 @@ import io.vertx.ext.metric.reporters.influxdb.VertxInfluxDbOptions;
  *
  * @author Thomas Segismont
  */
-public class InfluxDbVertxMetrics extends VertxMetricsBase {
+public class InfluxDbVertxMetrics extends VertxMetricsBase<VertxInfluxDbOptions> {
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -39,6 +39,6 @@ public class InfluxDbVertxMetrics extends VertxMetricsBase {
 
   @Override
   public AbstractSender createSender(Context context) {
-    return new InfluxDbSender(vertx, (VertxInfluxDbOptions) options, context);
+    return new InfluxDbSender(vertx, options, context);
   }
 }

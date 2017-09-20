@@ -52,9 +52,9 @@ import static io.vertx.ext.metric.collect.MetricsType.*;
  *
  * @author Thomas Segismont
  */
-public abstract class VertxMetricsBase extends DummyVertxMetrics {
+public abstract class VertxMetricsBase<T extends ExtendedMetricsOptions> extends DummyVertxMetrics {
   protected final Vertx vertx;
-  protected final ExtendedMetricsOptions options;
+  protected final T options;
   protected final Map<MetricsType, MetricSupplier> metricSuppliers;
 
   private Future<Void> metricsReady = Future.future();
@@ -62,7 +62,7 @@ public abstract class VertxMetricsBase extends DummyVertxMetrics {
   private AbstractSender sender;
   private Scheduler scheduler;
 
-  public VertxMetricsBase(Vertx vertx, ExtendedMetricsOptions options) {
+  public VertxMetricsBase(Vertx vertx, T options) {
     this.vertx = vertx;
     this.options = options;
     String prefix = options.getPrefix();
@@ -214,7 +214,12 @@ public abstract class VertxMetricsBase extends DummyVertxMetrics {
     }
   }
 
-  public abstract AbstractSender createSender(Context context);
+  /**
+   * Creates a reporter. Implementation specific.
+   *
+   * @param context the context on which the sender should operate.
+   */
+  protected abstract AbstractSender createSender(Context context);
 
   @Override
   public void close() {
