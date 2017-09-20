@@ -14,33 +14,31 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.metric.reporters.influxdb.impl;
+package io.vertx.ext.metric.reporters.hawkular.impl;
 
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.ext.metric.collect.impl.AbstractSender;
-import io.vertx.ext.metric.collect.impl.AbstractVertxMetricsImpl;
-import io.vertx.ext.metric.reporters.influxdb.VertxInfluxDbOptions;
+import io.vertx.ext.metric.collect.impl.VertxMetricsBase;
+import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptions;
 
 /**
  * Metrics SPI implementation.
  *
  * @author Thomas Segismont
+ * @author Dan Kristensen
  */
-public class VertxInfluxDbMetricsImpl extends AbstractVertxMetricsImpl {
-
+public class HawkularVertxMetrics extends VertxMetricsBase {
   /**
    * @param vertx   the {@link Vertx} managed instance
-   * @param options Vertx InfluxDb options
+   * @param options Vertx Hawkular options
    */
-  public VertxInfluxDbMetricsImpl(Vertx vertx, VertxInfluxDbOptions options) {
+  public HawkularVertxMetrics(Vertx vertx, VertxHawkularOptions options) {
     super(vertx, options);
   }
 
   @Override
   public AbstractSender createSender(Context context) {
-    return new InfluxDbSender(vertx, (VertxInfluxDbOptions) options, context);
+    return new HawkularSender(vertx, (VertxHawkularOptions) options, context);
   }
-
-
 }

@@ -35,7 +35,7 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
     } else {
       vertxHawkularOptions = new VertxHawkularOptions(metricsOptions.toJson());
     }
-    return new VertxMetricsImpl(vertx, vertxHawkularOptions);
+    return new HawkularVertxMetrics(vertx, vertxHawkularOptions);
   }
 
   @Override

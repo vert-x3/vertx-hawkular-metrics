@@ -35,7 +35,7 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
     } else {
       vertxInfluxDbOptions = new VertxInfluxDbOptions(metricsOptions.toJson());
     }
-    return new VertxInfluxDbMetricsImpl(vertx, vertxInfluxDbOptions);
+    return new InfluxDbVertxMetrics(vertx, vertxInfluxDbOptions);
   }
 
   @Override

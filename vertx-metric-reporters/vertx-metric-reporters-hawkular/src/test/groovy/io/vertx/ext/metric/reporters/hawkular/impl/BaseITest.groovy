@@ -68,7 +68,7 @@ abstract class BaseITest {
 
   void setUp(TestContext context) throws Exception {
     def vertxImpl = (VertxImpl) vertx
-    def metrics = (VertxMetricsImpl) vertxImpl.metrics
+    def metrics = (HawkularVertxMetrics) vertxImpl.metrics
     metrics.getMetricsReady().setHandler(context.asyncAssertSuccess())
   }
 

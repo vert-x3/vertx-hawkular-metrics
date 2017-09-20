@@ -52,7 +52,7 @@ import static io.vertx.ext.metric.collect.MetricsType.*;
  *
  * @author Thomas Segismont
  */
-public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics {
+public abstract class VertxMetricsBase extends DummyVertxMetrics {
   protected final Vertx vertx;
   protected final ExtendedMetricsOptions options;
   protected final Map<MetricsType, MetricSupplier> metricSuppliers;
@@ -62,7 +62,7 @@ public abstract class AbstractVertxMetricsImpl extends DummyVertxMetrics {
   private AbstractSender sender;
   private Scheduler scheduler;
 
-  public AbstractVertxMetricsImpl(Vertx vertx, ExtendedMetricsOptions options) {
+  public VertxMetricsBase(Vertx vertx, ExtendedMetricsOptions options) {
     this.vertx = vertx;
     this.options = options;
     String prefix = options.getPrefix();
