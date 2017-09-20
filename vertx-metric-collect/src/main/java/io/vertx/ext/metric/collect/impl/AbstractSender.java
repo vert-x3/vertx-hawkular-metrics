@@ -63,7 +63,7 @@ public abstract class AbstractSender implements Handler<List<DataPoint>> {
     batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
     queue = new ArrayList<>(batchSize);
     context.runOnContext(aVoid -> {
-      timerId = vertx.setPeriodic(MILLISECONDS.convert(batchDelay, NANOSECONDS), this::flushIfIdle);
+      timerId = vertx.setPeriodic(MILLISECONDS.convert(batchDelay, NANOSECONDS), tid -> flushIfIdle());
     });
     sendTime = System.nanoTime();
   }
@@ -141,7 +141,7 @@ public abstract class AbstractSender implements Handler<List<DataPoint>> {
     return new JsonObject().put("timestamp", dataPoint.getTimestamp()).put("value", dataPoint.getValue());
   }
 
-  private void flushIfIdle(Long timerId) {
+  private void flushIfIdle() {
     if (System.nanoTime() - sendTime > batchDelay && !queue.isEmpty()) {
       LOG.trace("Flushing queue with " + queue.size() + " elements");
       List<DataPoint> dataPoints = new ArrayList<>(queue);
