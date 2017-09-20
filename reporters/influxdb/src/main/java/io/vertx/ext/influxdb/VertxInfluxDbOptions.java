@@ -18,7 +18,7 @@ package io.vertx.ext.influxdb;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.metrics.collector.ExtendedMetricsOptions;
+import io.vertx.ext.metrics.collector.BatchingReporterOptions;
 
 /**
  * Vert.x InfluxDb monitoring configuration.
@@ -26,7 +26,7 @@ import io.vertx.ext.metrics.collector.ExtendedMetricsOptions;
  * @author Dan Kristensen
  */
 @DataObject(generateConverter = true, inheritConverter = true)
-public class VertxInfluxDbOptions extends ExtendedMetricsOptions {
+public class VertxInfluxDbOptions extends BatchingReporterOptions {
   /**
    * The default InfluxDb server host = localhost.
    */

@@ -20,13 +20,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 
 /**
- * Converter for {@link io.vertx.ext.metrics.collector.ExtendedMetricsOptions}.
+ * Converter for {@link io.vertx.ext.metrics.collector.BatchingReporterOptions}.
  *
- * NOTE: This class has been automatically generated from the {@link io.vertx.ext.metrics.collector.ExtendedMetricsOptions} original class using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.metrics.collector.BatchingReporterOptions} original class using Vert.x codegen.
  */
-public class ExtendedMetricsOptionsConverter {
+public class BatchingReporterOptionsConverter {
 
-  public static void fromJson(JsonObject json, ExtendedMetricsOptions obj) {
+  public static void fromJson(JsonObject json, BatchingReporterOptions obj) {
     if (json.getValue("batchDelay") instanceof Number) {
       obj.setBatchDelay(((Number)json.getValue("batchDelay")).intValue());
     }
@@ -58,7 +58,7 @@ public class ExtendedMetricsOptionsConverter {
     }
   }
 
-  public static void toJson(ExtendedMetricsOptions obj, JsonObject json) {
+  public static void toJson(BatchingReporterOptions obj, JsonObject json) {
     json.put("batchDelay", obj.getBatchDelay());
     json.put("batchSize", obj.getBatchSize());
     if (obj.getDisabledMetricsTypes() != null) {

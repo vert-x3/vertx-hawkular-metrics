@@ -537,7 +537,14 @@ enabled:
 <p>
 [source,ruby]
 ----
-Code not translatable
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'metricsBridgeEnabled' => true
+  }
+})
+
 ----
 <p>
 By default, the metrics bus handler is listening to the `hawkular.metrics` address. But the bridge address
@@ -545,7 +552,15 @@ can be configured:
 <p>
 [source,ruby]
 ----
-Code not translatable
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'metricsBridgeEnabled' => true,
+    'metricsBridgeAddress' => "__hawkular_metrics"
+  }
+})
+
 ----
 <p>
 The metrics bridge handler expects messages in the JSON format. The JSON object must at least provide a metric

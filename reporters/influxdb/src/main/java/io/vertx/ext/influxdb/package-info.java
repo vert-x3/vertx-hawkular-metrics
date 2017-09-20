@@ -403,7 +403,7 @@
  * <p>
  * Note that InfluxDb understands all timestamps as milliseconds since January 1, 1970, 00:00:00 UTC.
  */
-@ModuleGen(name = "vertx-metric-reporters-influxdb", groupPackage = "io.vertx")
+@ModuleGen(name = "vertx-influxdb", groupPackage = "io.vertx")
 @Document(fileName = "index.adoc")
 package io.vertx.ext.influxdb;
 

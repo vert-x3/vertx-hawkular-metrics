@@ -18,7 +18,7 @@ package io.vertx.ext.metrics.collector.impl;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.ext.metrics.collector.ExtendedMetricsOptions;
+import io.vertx.ext.metrics.collector.MetricsOptionsBase;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,7 +43,7 @@ public class Scheduler {
    * @param context the metric collection and sending execution context
    * @param sender  the object responsible for sending metrics to the Hawkular server
    */
-  public Scheduler(Vertx vertx, ExtendedMetricsOptions options, Context context, Handler<List<DataPoint>> sender) {
+  public Scheduler(Vertx vertx, MetricsOptionsBase options, Context context, Handler<List<DataPoint>> sender) {
     this.vertx = vertx;
     this.sender = sender;
     suppliers = new CopyOnWriteArrayList<>();

@@ -19,11 +19,13 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.metrics.collector.ExtendedMetricsOptions;
+import io.vertx.ext.metrics.collector.BatchingReporterOptions;
+import io.vertx.ext.metrics.collector.MetricsType;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Vert.x Hawkular monitoring configuration.
@@ -31,7 +33,7 @@ import java.util.List;
  * @author Thomas Segismont
  */
 @DataObject(generateConverter = true, inheritConverter = true)
-public class VertxHawkularOptions extends ExtendedMetricsOptions {
+public class VertxHawkularOptions extends BatchingReporterOptions {
   /**
    * The default Hawkular server host = localhost.
    */
@@ -112,6 +114,54 @@ public class VertxHawkularOptions extends ExtendedMetricsOptions {
   @Override
   public VertxHawkularOptions setEnabled(boolean enable) {
     super.setEnabled(enable);
+    return this;
+  }
+
+  @Override
+  public VertxHawkularOptions setBatchSize(int batchSize) {
+    super.setBatchSize(batchSize);
+    return this;
+  }
+
+  @Override
+  public VertxHawkularOptions setBatchDelay(int batchDelay) {
+    super.setBatchDelay(batchDelay);
+    return this;
+  }
+
+  @Override
+  public VertxHawkularOptions setSchedule(int schedule) {
+    super.setSchedule(schedule);
+    return this;
+  }
+
+  @Override
+  public VertxHawkularOptions setPrefix(String prefix) {
+    super.setPrefix(prefix);
+    return this;
+  }
+
+  @Override
+  public VertxHawkularOptions setMetricsBridgeAddress(String metricsBridgeAddress) {
+    super.setMetricsBridgeAddress(metricsBridgeAddress);
+    return this;
+  }
+
+  @Override
+  public VertxHawkularOptions setMetricsBridgeEnabled(boolean metricsBridgeEnabled) {
+    super.setMetricsBridgeEnabled(metricsBridgeEnabled);
+    return this;
+  }
+
+  @Override
+  public VertxHawkularOptions setDisabledMetricsTypes(Set<MetricsType> disabledMetricsTypes) {
+    super.setDisabledMetricsTypes(disabledMetricsTypes);
+    return this;
+  }
+
+  @Override
+  public VertxHawkularOptions addDisabledMetricsType(MetricsType metricsType) {
+    super.addDisabledMetricsType(metricsType);
     return this;
   }
 

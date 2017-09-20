@@ -24,12 +24,12 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
- * Vert.x Hawkular monitoring configuration.
+ * Base options for metrics reporting.
  *
  * @author Thomas Segismont
  */
 @DataObject(generateConverter = true, inheritConverter = true)
-public class ExtendedMetricsOptions extends MetricsOptions {
+public abstract class MetricsOptionsBase extends MetricsOptions {
   /**
    * Default value for metric collection interval (in seconds) = 1.
    */
@@ -39,16 +39,6 @@ public class ExtendedMetricsOptions extends MetricsOptions {
    * The default metric name prefix (empty).
    */
   public static final String DEFAULT_PREFIX = "";
-
-  /**
-   * Default value for the maximum number of metrics in a batch = 50.
-   */
-  public static final int DEFAULT_BATCH_SIZE = 50;
-
-  /**
-   * Default value for the maximum delay between two consecutive batches (in seconds) = 1.
-   */
-  public static final int DEFAULT_BATCH_DELAY = 1;
 
   /**
    * Default event bus address where applications can send business-related metrics. The metrics are sent as JSON
@@ -63,36 +53,30 @@ public class ExtendedMetricsOptions extends MetricsOptions {
 
   private int schedule;
   private String prefix;
-  private int batchSize;
-  private int batchDelay;
   private boolean metricsBridgeEnabled;
   private String metricsBridgeAddress;
   private Set<MetricsType> disabledMetricsTypes;
 
-  public ExtendedMetricsOptions() {
+  public MetricsOptionsBase() {
     schedule = DEFAULT_SCHEDULE;
     prefix = DEFAULT_PREFIX;
-    batchSize = DEFAULT_BATCH_SIZE;
-    batchDelay = DEFAULT_BATCH_DELAY;
     metricsBridgeEnabled = DEFAULT_METRICS_BRIDGE_ENABLED;
     metricsBridgeAddress = DEFAULT_METRICS_BRIDGE_ADDRESS;
     disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
   }
 
-  public ExtendedMetricsOptions(ExtendedMetricsOptions other) {
+  public MetricsOptionsBase(MetricsOptionsBase other) {
     super(other);
     schedule = other.schedule;
     prefix = other.prefix;
-    batchSize = other.batchSize;
-    batchDelay = other.batchDelay;
     metricsBridgeAddress = other.metricsBridgeAddress;
     metricsBridgeEnabled = other.metricsBridgeEnabled;
     disabledMetricsTypes = other.disabledMetricsTypes != null ? EnumSet.copyOf(other.disabledMetricsTypes) : EnumSet.noneOf(MetricsType.class);
   }
 
-  public ExtendedMetricsOptions(JsonObject json) {
+  public MetricsOptionsBase(JsonObject json) {
     this();
-    ExtendedMetricsOptionsConverter.fromJson(json, this);
+    MetricsOptionsBaseConverter.fromJson(json, this);
   }
 
   /**
@@ -105,7 +89,7 @@ public class ExtendedMetricsOptions extends MetricsOptions {
   /**
    * Set the metric collection interval (in seconds). Defaults to {@code 1}.
    */
-  public ExtendedMetricsOptions setSchedule(int schedule) {
+  public MetricsOptionsBase setSchedule(int schedule) {
     this.schedule = schedule;
     return this;
   }
@@ -121,42 +105,8 @@ public class ExtendedMetricsOptions extends MetricsOptions {
    * Set the metric name prefix. Metric names are not prefixed by default. Prefixing metric names is required to
    * distinguish data sent by different Vert.x instances.
    */
-  public ExtendedMetricsOptions setPrefix(String prefix) {
+  public MetricsOptionsBase setPrefix(String prefix) {
     this.prefix = prefix;
-    return this;
-  }
-
-  /**
-   * @return the maximum number of metrics in a batch
-   */
-  public int getBatchSize() {
-    return batchSize;
-  }
-
-  /**
-   * Set the maximum number of metrics in a batch. To reduce the number of HTTP exchanges, metric data is sent to the
-   * Hawkular server in batches. A batch is sent as soon as the number of metrics collected reaches the configured
-   * {@code batchSize}, or after the {@code batchDelay} expires. Defaults to {@code 50}.
-   */
-  public ExtendedMetricsOptions setBatchSize(int batchSize) {
-    this.batchSize = batchSize;
-    return this;
-  }
-
-  /**
-   * @return the maximum delay between two consecutive batches
-   */
-  public int getBatchDelay() {
-    return batchDelay;
-  }
-
-  /**
-   * Set the maximum delay between two consecutive batches (in seconds). To reduce the number of HTTP exchanges, metric
-   * data is sent to the Hawkular server in batches. A batch is sent as soon as the number of metrics collected reaches
-   * the configured {@code batchSize}, or after the {@code batchDelay} expires. Defaults to {@code 1} second.
-   */
-  public ExtendedMetricsOptions setBatchDelay(int batchDelay) {
-    this.batchDelay = batchDelay;
     return this;
   }
 
@@ -164,7 +114,7 @@ public class ExtendedMetricsOptions extends MetricsOptions {
    * Set whether metrics will be enabled on the Vert.x instance. Metrics are not enabled by default.
    */
   @Override
-  public ExtendedMetricsOptions setEnabled(boolean enable) {
+  public MetricsOptionsBase setEnabled(boolean enable) {
     super.setEnabled(enable);
     return this;
   }
@@ -186,9 +136,9 @@ public class ExtendedMetricsOptions extends MetricsOptions {
    * Don't forget to also enable the bridge with {@code metricsBridgeEnabled}.
    *
    * @param metricsBridgeAddress the address
-   * @return the current {@link ExtendedMetricsOptions} instance
+   * @return a reference to this, so that the API can be used fluently
    */
-  public ExtendedMetricsOptions setMetricsBridgeAddress(String metricsBridgeAddress) {
+  public MetricsOptionsBase setMetricsBridgeAddress(String metricsBridgeAddress) {
     this.metricsBridgeAddress = metricsBridgeAddress;
     return this;
   }
@@ -206,9 +156,9 @@ public class ExtendedMetricsOptions extends MetricsOptions {
    * Sets whether or not the metrics bridge should be enabled. The metrics bridge is disabled by default.
    *
    * @param metricsBridgeEnabled {@code true} to enable the bridge, {@code false} to disable it.
-   * @return the current {@link ExtendedMetricsOptions} instance
+   * @return a reference to this, so that the API can be used fluently
    */
-  public ExtendedMetricsOptions setMetricsBridgeEnabled(boolean metricsBridgeEnabled) {
+  public MetricsOptionsBase setMetricsBridgeEnabled(boolean metricsBridgeEnabled) {
     this.metricsBridgeEnabled = metricsBridgeEnabled;
     return this;
   }
@@ -224,9 +174,11 @@ public class ExtendedMetricsOptions extends MetricsOptions {
    * Sets metrics types that are disabled.
    *
    * @param disabledMetricsTypes to specify the set of metrics types to be disabled.
+   * @return a reference to this, so that the API can be used fluently
    */
-  public void setDisabledMetricsTypes(Set<MetricsType> disabledMetricsTypes) {
+  public MetricsOptionsBase setDisabledMetricsTypes(Set<MetricsType> disabledMetricsTypes) {
     this.disabledMetricsTypes = disabledMetricsTypes;
+    return this;
   }
 
   /**
@@ -234,10 +186,10 @@ public class ExtendedMetricsOptions extends MetricsOptions {
    * registering metrics suppliers
    *
    * @param metricsType the type of metrics
-   * @return the current {@link ExtendedMetricsOptions} instance
+   * @return a reference to this, so that the API can be used fluently
    */
   @GenIgnore
-  public ExtendedMetricsOptions addDisabledMetricsType(MetricsType metricsType) {
+  public MetricsOptionsBase addDisabledMetricsType(MetricsType metricsType) {
     if (disabledMetricsTypes == null) {
       disabledMetricsTypes = EnumSet.noneOf(MetricsType.class);
     }

@@ -27,7 +27,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.metrics.collector.ExtendedMetricsOptions;
+import io.vertx.ext.metrics.collector.BatchingReporterOptions;
 import io.vertx.ext.metrics.collector.Reporter;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ import static java.util.stream.Collectors.*;
  * @author Thomas Segismont
  * @author Dan Kristensen
  */
-public abstract class HttpReporterBase<T extends ExtendedMetricsOptions> implements Reporter {
+public abstract class HttpReporterBase<T extends BatchingReporterOptions> implements Reporter {
   private static final Logger LOG = LoggerFactory.getLogger(HttpReporterBase.class);
 
   protected final Vertx vertx;
