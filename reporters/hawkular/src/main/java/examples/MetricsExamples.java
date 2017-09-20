@@ -20,10 +20,10 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.docgen.Source;
-import io.vertx.ext.metric.reporters.hawkular.AuthenticationOptions;
-import io.vertx.ext.metric.reporters.hawkular.MetricTagsMatch;
-import io.vertx.ext.metric.reporters.hawkular.MetricTagsMatch.MatchType;
-import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptions;
+import io.vertx.ext.hawkular.AuthenticationOptions;
+import io.vertx.ext.hawkular.MetricTagsMatch;
+import io.vertx.ext.hawkular.MetricTagsMatch.MatchType;
+import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 import java.util.Arrays;
 

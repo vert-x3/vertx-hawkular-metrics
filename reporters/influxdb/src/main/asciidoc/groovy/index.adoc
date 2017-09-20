@@ -39,7 +39,7 @@ compile 'io.vertx:vertx-influxdb-metrics:3.5.0-SNAPSHOT'
 ----
 <p>
 <p>
-Please refer to `link:../../apidocs/io/vertx/ext/metric/reporters/influxdb/VertxInfluxDbOptions.html[VertxInfluxDbOptions]` for an exhaustive list of options.
+Please refer to `link:../../apidocs/io/vertx/ext/influxdb/VertxInfluxDbOptions.html[VertxInfluxDbOptions]` for an exhaustive list of options.
 <p>
 == Vert.x core tools metrics
 <p>

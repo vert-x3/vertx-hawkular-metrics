@@ -196,7 +196,7 @@ WARNING: If you use regex match, a wrong regex can potentially match a lot of me
 NOTE: When evaluating tags to apply, metric specific tags have higher priority than global tags.
 In other words, a metric specific tag may overwrite a global tag.
 <p>
-Please refer to `link:../../apidocs/io/vertx/ext/metric/reporters/hawkular/VertxHawkularOptions.html[VertxHawkularOptions]` for an exhaustive list of options.
+Please refer to `link:../../apidocs/io/vertx/ext/hawkular/VertxHawkularOptions.html[VertxHawkularOptions]` for an exhaustive list of options.
 <p>
 == Vert.x core tools metrics
 <p>

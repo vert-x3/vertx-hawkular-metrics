@@ -14,4 +14,4 @@
 #  You may elect to redistribute this code under either of these licenses.
 #
 
-io.vertx.ext.metric.reporters.hawkular.impl.VertxMetricsFactoryImpl
+io.vertx.ext.hawkular.impl.VertxMetricsFactoryImpl

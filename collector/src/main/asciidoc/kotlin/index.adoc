@@ -39,7 +39,7 @@ compile 'io.vertx:vertx-metrics-collector:3.5.0-SNAPSHOT'
 ----
 <p>
 <p>
-Please refer to `link:../../apidocs/io/vertx/ext/metric/collect/ExtendedMetricsOptions.html[ExtendedMetricsOptions]` for an exhaustive list of options.
+Please refer to `link:../../apidocs/io/vertx/ext/metrics/collector/ExtendedMetricsOptions.html[ExtendedMetricsOptions]` for an exhaustive list of options.
 <p>
 == Vert.x core tools metrics
 <p>

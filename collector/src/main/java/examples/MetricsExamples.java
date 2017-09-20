@@ -19,7 +19,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.docgen.Source;
-import io.vertx.ext.metric.collect.ExtendedMetricsOptions;
+import io.vertx.ext.metrics.collector.ExtendedMetricsOptions;
 
 /**
  * @author Thomas Segismont

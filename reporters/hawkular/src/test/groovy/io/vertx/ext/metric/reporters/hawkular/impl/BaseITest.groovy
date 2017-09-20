@@ -20,6 +20,7 @@ import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
 import io.vertx.core.Vertx
 import io.vertx.core.impl.VertxImpl
+import io.vertx.ext.hawkular.impl.HawkularVertxMetrics
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.Timeout
 import io.vertx.ext.unit.junit.VertxUnitRunner
