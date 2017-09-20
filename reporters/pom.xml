@@ -27,6 +27,8 @@
   <artifactId>vertx-metrics-reporters</artifactId>
   <packaging>pom</packaging>
 
+  <name>Vert.x Metrics Reporters</name>
+
   <modules>
     <module>influxdb</module>
     <module>hawkular</module>

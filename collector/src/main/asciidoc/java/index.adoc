@@ -18,7 +18,7 @@ NOTE: You can use a standalone https://github.com/hawkular/hawkular-metrics[Hawk
 <p>
 == Getting started
 <p>
-The _vertx-metrics-collect_ module must be present in the classpath.
+The _vertx-metrics-collector_ module must be present in the classpath.
 <p>
 Maven users should add this to their project POM file:
 <p>
@@ -26,7 +26,7 @@ Maven users should add this to their project POM file:
 ----
 <dependency>
 <groupId>io.vertx</groupId>
-<artifactId>vertx-metrics-collect</artifactId>
+<artifactId>vertx-metrics-collector</artifactId>
 <version>3.5.0-SNAPSHOT</version>
 </dependency>
 ----
@@ -35,7 +35,7 @@ And Gradle users, to their build file:
 <p>
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-metrics-collect:3.5.0-SNAPSHOT'
+compile 'io.vertx:vertx-metrics-collector:3.5.0-SNAPSHOT'
 ----
 <p>
 <p>

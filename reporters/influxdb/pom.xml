@@ -26,18 +26,30 @@
 
   <artifactId>vertx-influxdb-metrics</artifactId>
 
-  <name>Vert.x InfluxDB Metrics Reporter</name>
-  <description>InfluxDB reporter implementation of the Vert.x Metrics SPI</description>
+  <name>Vert.x InfluxDB Metrics</name>
+  <description>InfluxDB implementation of the Vert.x Metrics SPI</description>
+
+  <properties>
+    <doc.skip>false</doc.skip>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-dependencies</artifactId>
+        <version>${stack.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-metric-collect</artifactId>
+      <artifactId>vertx-metrics-collector</artifactId>
       <version>3.5.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -80,7 +92,11 @@
       <artifactId>vertx-rx-java</artifactId>
       <optional>true</optional>
     </dependency>
-
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-rx-java2</artifactId>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -96,17 +112,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.codehaus.gmavenplus</groupId>
-        <artifactId>gmavenplus-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -125,9 +130,7 @@
             <include>**/*ITest*</include>
           </includes>
           <systemPropertyVariables>
-            <test.hawkular.server.base-url>${test.hawkular.server.base-url}</test.hawkular.server.base-url>
             <java.util.logging.config.file>${project.basedir}/log-test.properties</java.util.logging.config.file>
-            <test.hawkular.check.loops>${test.hawkular.check.loops}</test.hawkular.check.loops>
           </systemPropertyVariables>
         </configuration>
         <executions>
@@ -165,9 +168,7 @@
                 <include>**/*ITest*</include>
               </includes>
               <systemPropertyVariables>
-                <test.hawkular.server.base-url>${test.hawkular.server.base-url}</test.hawkular.server.base-url>
                 <java.util.logging.config.file>${project.basedir}/log-test.properties</java.util.logging.config.file>
-                <test.hawkular.check.loops>${test.hawkular.check.loops}</test.hawkular.check.loops>
               </systemPropertyVariables>
               <argLine>@{surefireArgLine}</argLine>
             </configuration>
