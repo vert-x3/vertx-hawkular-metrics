@@ -1,17 +1,5 @@
 package io.vertx.ext.metric.reporters.influxdb.impl;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -33,8 +21,18 @@ import io.vertx.ext.metric.collect.impl.DataPoint;
 import io.vertx.ext.metric.collect.impl.GaugePoint;
 import io.vertx.ext.metric.reporters.influxdb.AuthenticationOptions;
 import io.vertx.ext.metric.reporters.influxdb.VertxInfluxDbOptions;
-import io.vertx.ext.metric.reporters.influxdb.impl.InfluxDbSender;
 import io.vertx.ext.metric.reporters.influxdb.impl.Point.Builder;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.stream.Collectors.*;
 
 public class InfluxDbSender extends AbstractSender {
   private static final Logger LOG = LoggerFactory.getLogger(InfluxDbSender.class);
@@ -90,11 +88,11 @@ public class InfluxDbSender extends AbstractSender {
 
     database = options.getDatabase();
     prefix = options.getPrefix();
-    
+
     context.runOnContext(aVoid -> {
       HttpClientOptions httpClientOptions = options.getHttpOptions()
-          .setDefaultHost(options.getHost())
-          .setDefaultPort(options.getPort());
+        .setDefaultHost(options.getHost())
+        .setDefaultPort(options.getPort());
       httpClient = vertx.createHttpClient(httpClientOptions);
     });
   }
@@ -105,33 +103,33 @@ public class InfluxDbSender extends AbstractSender {
       Optional<?> optional = (Optional<?>) mixedData;
       optional.filter(BatchPoints.class::isInstance).ifPresent(b -> {
         HttpClientRequest request = httpClient.post(metricsDataUri, this::onResponse)
-            .exceptionHandler(err -> LOG.trace("Could not send metrics. Payload was: " + mixedData, err))
-            .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_TEXT_PLAIN);
+          .exceptionHandler(err -> LOG.trace("Could not send metrics. Payload was: " + mixedData, err))
+          .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_TEXT_PLAIN);
 
-          if (auth != null) {
-            request.putHeader(HttpHeaders.AUTHORIZATION, auth);
-          }
-          httpHeaders.forEach(request::putHeader);
-          String lineProtocol = ((BatchPoints)b).lineProtocol();
-          if (LOG.isTraceEnabled()) {
-            LOG.trace("Sending data to influxDb: \n" + lineProtocol);
-          }
-          request.end(lineProtocol, "UTF-8");
+        if (auth != null) {
+          request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+        }
+        httpHeaders.forEach(request::putHeader);
+        String lineProtocol = ((BatchPoints) b).lineProtocol();
+        if (LOG.isTraceEnabled()) {
+          LOG.trace("Sending data to influxDb: \n" + lineProtocol);
+        }
+        request.end(lineProtocol, "UTF-8");
       });
     }
   }
 
   @Override
   protected void getMetricsDataUri(Handler<AsyncResult<String>> handler) {
-      handler.handle(Future.succeededFuture(metricsServiceUri + "?db=" + database));
-      return;
+    handler.handle(Future.succeededFuture(metricsServiceUri + "?db=" + database));
+    return;
   }
 
   @Override
   protected Optional<BatchPoints> toMixedData(List<DataPoint> dataPoints) {
     BatchPoints batchPoints = BatchPoints.builder()
-        .tag("async", "true")
-        .build();
+      .tag("async", "true")
+      .build();
 
     Map<? extends Class<? extends DataPoint>, Map<String, List<DataPoint>>> mixedData;
     mixedData = dataPoints.stream().collect(groupingBy(DataPoint::getClass, groupingBy(DataPoint::getName)));
@@ -143,25 +141,25 @@ public class InfluxDbSender extends AbstractSender {
     }
     return Optional.of(batchPoints);
   }
-  
+
   private void addMixedData(BatchPoints batchPoints, String type, Map<String, List<DataPoint>> data) {
     if (data == null || data.isEmpty()) {
       return;
     }
-    data.forEach((id, points) -> points.forEach(point-> batchPoints.getPoints().add(toPoint(point))));
+    data.forEach((id, points) -> points.forEach(point -> batchPoints.getPoints().add(toPoint(point))));
   }
-  
+
   private Point toPoint(DataPoint dataPoint) {
     Builder pointBuilder = Point.measurement(prefix)
-          .time(dataPoint.getTimestamp(), TimeUnit.MILLISECONDS);
+      .time(dataPoint.getTimestamp(), TimeUnit.MILLISECONDS);
     if (dataPoint instanceof CounterPoint) {
-      pointBuilder.addField(dataPoint.getName(), ((CounterPoint)dataPoint).getValue());
+      pointBuilder.addField(dataPoint.getName(), ((CounterPoint) dataPoint).getValue());
     } else if (dataPoint instanceof GaugePoint) {
-      pointBuilder.addField(dataPoint.getName(), ((GaugePoint)dataPoint).getValue());
+      pointBuilder.addField(dataPoint.getName(), ((GaugePoint) dataPoint).getValue());
     } else {
       pointBuilder.addField(dataPoint.getName(), dataPoint.getValue().toString());
     }
-    
+
     return pointBuilder.build();
   }
 
@@ -172,7 +170,7 @@ public class InfluxDbSender extends AbstractSender {
       });
     }
   }
- 
+
   @Override
   public void stop() {
     super.stop();

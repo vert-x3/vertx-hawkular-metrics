@@ -17,23 +17,24 @@
 package io.vertx.ext.metric.reporters.influxdb;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
 
 /**
  * Converter for {@link io.vertx.ext.metric.reporters.influxdb.AuthenticationOptions}.
- * <p>
+ *
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.metric.reporters.influxdb.AuthenticationOptions} original class using Vert.x codegen.
  */
 public class AuthenticationOptionsConverter {
 
   public static void fromJson(JsonObject json, AuthenticationOptions obj) {
     if (json.getValue("enabled") instanceof Boolean) {
-      obj.setEnabled((Boolean) json.getValue("enabled"));
+      obj.setEnabled((Boolean)json.getValue("enabled"));
     }
     if (json.getValue("secret") instanceof String) {
-      obj.setSecret((String) json.getValue("secret"));
+      obj.setSecret((String)json.getValue("secret"));
     }
     if (json.getValue("username") instanceof String) {
-      obj.setUsername((String) json.getValue("username"));
+      obj.setUsername((String)json.getValue("username"));
     }
   }
 

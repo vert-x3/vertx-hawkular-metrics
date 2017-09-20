@@ -9,11 +9,10 @@ import java.util.TreeMap;
 
 /**
  * {Purpose of This Type}.
- *
+ * <p>
  * {Other Notes Relating to This Type (Optional)}
  *
  * @author stefan
- *
  */
 public class BatchPoints {
   private Map<String, String> tags;
@@ -26,8 +25,6 @@ public class BatchPoints {
   /**
    * Create a new BatchPoints build to create a new BatchPoints in a fluent manner.
    *
-   * @param database
-   *            the name of the Database
    * @return the Builder to be able to add further Builder calls.
    */
   public static Builder builder() {
@@ -47,10 +44,8 @@ public class BatchPoints {
     /**
      * Add a tag to this set of points.
      *
-     * @param tagName
-     *            the tag name
-     * @param value
-     *            the tag value
+     * @param tagName the tag name
+     * @param value   the tag value
      * @return the Builder instance.
      */
     public Builder tag(final String tagName, final String value) {
@@ -104,8 +99,7 @@ public class BatchPoints {
   }
 
   /**
-   * @param points
-   *            the points to set
+   * @param points the points to set
    */
   void setPoints(final List<Point> points) {
     this.points = points;
@@ -131,8 +125,7 @@ public class BatchPoints {
   }
 
   /**
-   * @param tags
-   *            the tags to set
+   * @param tags the tags to set
    */
   void setTags(final Map<String, String> tags) {
     this.tags = tags;
@@ -148,7 +141,7 @@ public class BatchPoints {
     }
     BatchPoints that = (BatchPoints) o;
     return Objects.equals(tags, that.tags)
-            && Objects.equals(points, that.points);
+      && Objects.equals(points, that.points);
   }
 
   @Override
@@ -171,6 +164,7 @@ public class BatchPoints {
   }
 
   // measurement[,tag=value,tag2=value2...] field=value[,field2=value2...] [unixnano]
+
   /**
    * calculate the lineprotocol for all Points.
    *

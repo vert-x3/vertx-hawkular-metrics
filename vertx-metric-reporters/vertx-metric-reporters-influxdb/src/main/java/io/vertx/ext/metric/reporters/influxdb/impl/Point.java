@@ -1,5 +1,7 @@
 package io.vertx.ext.metric.reporters.influxdb.impl;
 
+import io.vertx.codegen.annotations.Nullable;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -10,13 +12,10 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-import io.vertx.codegen.annotations.Nullable;
-
 /**
  * Representation of a InfluxDB database Point.
  *
  * @author stefan.majer [at] gmail.com
- *
  */
 public class Point {
   private String measurement;
@@ -33,8 +32,7 @@ public class Point {
   /**
    * Create a new Point Build build to create a new Point in a fluent manner.
    *
-   * @param measurement
-   *            the name of the measurement.
+   * @param measurement the name of the measurement.
    * @return the Builder to be able to add further Builder calls.
    */
 
@@ -46,7 +44,6 @@ public class Point {
    * Builder for a new Point.
    *
    * @author stefan.majer [at] gmail.com
-   *
    */
   public static final class Builder {
     private final String measurement;
@@ -65,10 +62,8 @@ public class Point {
     /**
      * Add a tag to this point.
      *
-     * @param tagName
-     *            the tag name
-     * @param value
-     *            the tag value
+     * @param tagName the tag name
+     * @param value   the tag value
      * @return the Builder instance.
      */
     public Builder tag(final String tagName, final String value) {
@@ -83,8 +78,7 @@ public class Point {
     /**
      * Add a Map of tags to add to this point.
      *
-     * @param tagsToAdd
-     *            the Map of tags to add
+     * @param tagsToAdd the Map of tags to add
      * @return the Builder instance.
      */
     public Builder tag(final Map<String, String> tagsToAdd) {
@@ -97,10 +91,8 @@ public class Point {
     /**
      * Add a field to this point.
      *
-     * @param field
-     *            the field name
-     * @param value
-     *            the value of this field
+     * @param field the field name
+     * @param value the value of this field
      * @return the Builder instance.
      */
     @SuppressWarnings("checkstyle:finalparameters")
@@ -160,8 +152,7 @@ public class Point {
     /**
      * Add a Map of fields to this point.
      *
-     * @param fieldsToAdd
-     *            the fields to add
+     * @param fieldsToAdd the fields to add
      * @return the Builder instance.
      */
     public Builder fields(final Map<String, Object> fieldsToAdd) {
@@ -189,17 +180,17 @@ public class Point {
      * @return the newly created Point.
      */
     public Point build() {
-          checkArgument(!(this.measurement == null || this.measurement.isEmpty()), "Point name must not be null or empty. Was: " + this.measurement);
-          checkArgument(this.fields.size() > 0,"Point must have at least one field specified.");
+      checkArgument(!(this.measurement == null || this.measurement.isEmpty()), "Point name must not be null or empty. Was: " + this.measurement);
+      checkArgument(this.fields.size() > 0, "Point must have at least one field specified.");
       Point point = new Point();
       point.setFields(this.fields);
       point.setMeasurement(this.measurement);
       if (this.time != null) {
-          point.setTime(this.time);
-          point.setPrecision(this.precision);
+        point.setTime(this.time);
+        point.setPrecision(this.precision);
       } else {
-          point.setTime(System.currentTimeMillis());
-          point.setPrecision(TimeUnit.MILLISECONDS);
+        point.setTime(System.currentTimeMillis());
+        point.setPrecision(TimeUnit.MILLISECONDS);
       }
       point.setTags(this.tags);
       return point;
@@ -207,24 +198,21 @@ public class Point {
   }
 
   /**
-   * @param measurement
-   *            the measurement to set
+   * @param measurement the measurement to set
    */
   void setMeasurement(final String measurement) {
     this.measurement = measurement;
   }
 
   /**
-   * @param time
-   *            the time to set
+   * @param time the time to set
    */
   void setTime(final Long time) {
     this.time = time;
   }
 
   /**
-   * @param tags
-   *            the tags to set
+   * @param tags the tags to set
    */
   void setTags(final Map<String, String> tags) {
     this.tags = tags;
@@ -238,16 +226,14 @@ public class Point {
   }
 
   /**
-   * @param precision
-   *            the precision to set
+   * @param precision the precision to set
    */
   void setPrecision(final TimeUnit precision) {
     this.precision = precision;
   }
 
   /**
-   * @param fields
-   *            the fields to set
+   * @param fields the fields to set
    */
   void setFields(final Map<String, Object> fields) {
     this.fields = fields;
@@ -263,10 +249,10 @@ public class Point {
     }
     Point point = (Point) o;
     return Objects.equals(measurement, point.measurement)
-            && Objects.equals(tags, point.tags)
-            && Objects.equals(time, point.time)
-            && precision == point.precision
-            && Objects.equals(fields, point.fields);
+      && Objects.equals(tags, point.tags)
+      && Objects.equals(time, point.time)
+      && precision == point.precision
+      && Objects.equals(fields, point.fields);
   }
 
   @Override
@@ -296,9 +282,9 @@ public class Point {
 
   /**
    * calculate the lineprotocol entry for a single Point.
-   *
+   * <p>
    * Documentation is WIP : https://github.com/influxdb/influxdb/pull/2997
-   *
+   * <p>
    * https://github.com/influxdb/influxdb/blob/master/tsdb/README.md
    *
    * @return the String without newLine.
@@ -345,8 +331,8 @@ public class Point {
 
       if (value instanceof String) {
         String stringValue = (String) value;
-        sb.append("\"").append(stringValue.replaceAll("\\", "\\\\").replaceAll("\"","\\\"")).append("\"");
-     } else if (value instanceof Number) {
+        sb.append("\"").append(stringValue.replaceAll("\\", "\\\\").replaceAll("\"", "\\\"")).append("\"");
+      } else if (value instanceof Number) {
         if (value instanceof Double || value instanceof Float || value instanceof BigDecimal) {
           sb.append(numberFormat.format(value));
         } else {
@@ -385,13 +371,13 @@ public class Point {
       throw new IllegalArgumentException();
     }
   }
-  
+
   /**
    * Ensures the truth of an expression involving one or more parameters to the calling method.
    *
-   * @param expression a boolean expression
+   * @param expression   a boolean expression
    * @param errorMessage the exception message to use if the check fails; will be converted to a
-   *     string using {@link String#valueOf(Object)}
+   *                     string using {@link String#valueOf(Object)}
    * @throws IllegalArgumentException if {@code expression} is false
    */
   public static void checkArgument(boolean expression, @Nullable Object errorMessage) {
@@ -399,13 +385,13 @@ public class Point {
       throw new IllegalArgumentException(String.valueOf(errorMessage));
     }
   }
-  
+
   /**
    * Ensures that an object reference passed as a parameter to the calling method is not null.
    *
-   * @param reference an object reference
+   * @param reference    an object reference
    * @param errorMessage the exception message to use if the check fails; will be converted to a
-   *     string using {@link String#valueOf(Object)}
+   *                     string using {@link String#valueOf(Object)}
    * @return the non-null reference that was validated
    * @throws NullPointerException if {@code reference} is null
    */

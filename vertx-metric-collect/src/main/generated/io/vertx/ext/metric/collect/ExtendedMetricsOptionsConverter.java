@@ -16,45 +16,45 @@
 
 package io.vertx.ext.metric.collect;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
 
 /**
  * Converter for {@link io.vertx.ext.metric.collect.ExtendedMetricsOptions}.
- * <p>
+ *
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.metric.collect.ExtendedMetricsOptions} original class using Vert.x codegen.
  */
 public class ExtendedMetricsOptionsConverter {
 
   public static void fromJson(JsonObject json, ExtendedMetricsOptions obj) {
     if (json.getValue("batchDelay") instanceof Number) {
-      obj.setBatchDelay(((Number) json.getValue("batchDelay")).intValue());
+      obj.setBatchDelay(((Number)json.getValue("batchDelay")).intValue());
     }
     if (json.getValue("batchSize") instanceof Number) {
-      obj.setBatchSize(((Number) json.getValue("batchSize")).intValue());
+      obj.setBatchSize(((Number)json.getValue("batchSize")).intValue());
     }
     if (json.getValue("disabledMetricsTypes") instanceof JsonArray) {
       java.util.HashSet<io.vertx.ext.metric.collect.MetricsType> list = new java.util.HashSet<>();
-      json.getJsonArray("disabledMetricsTypes").forEach(item -> {
+      json.getJsonArray("disabledMetricsTypes").forEach( item -> {
         if (item instanceof String)
-          list.add(io.vertx.ext.metric.collect.MetricsType.valueOf((String) item));
+          list.add(io.vertx.ext.metric.collect.MetricsType.valueOf((String)item));
       });
       obj.setDisabledMetricsTypes(list);
     }
     if (json.getValue("enabled") instanceof Boolean) {
-      obj.setEnabled((Boolean) json.getValue("enabled"));
+      obj.setEnabled((Boolean)json.getValue("enabled"));
     }
     if (json.getValue("metricsBridgeAddress") instanceof String) {
-      obj.setMetricsBridgeAddress((String) json.getValue("metricsBridgeAddress"));
+      obj.setMetricsBridgeAddress((String)json.getValue("metricsBridgeAddress"));
     }
     if (json.getValue("metricsBridgeEnabled") instanceof Boolean) {
-      obj.setMetricsBridgeEnabled((Boolean) json.getValue("metricsBridgeEnabled"));
+      obj.setMetricsBridgeEnabled((Boolean)json.getValue("metricsBridgeEnabled"));
     }
     if (json.getValue("prefix") instanceof String) {
-      obj.setPrefix((String) json.getValue("prefix"));
+      obj.setPrefix((String)json.getValue("prefix"));
     }
     if (json.getValue("schedule") instanceof Number) {
-      obj.setSchedule(((Number) json.getValue("schedule")).intValue());
+      obj.setSchedule(((Number)json.getValue("schedule")).intValue());
     }
   }
 

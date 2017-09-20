@@ -4,7 +4,7 @@
 == MetricsType
 
 ++++
-  Metrics types for each metrics.
+ Metrics types for each metrics.
 ++++
 '''
 

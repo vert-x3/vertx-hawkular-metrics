@@ -118,10 +118,10 @@ public class HawkularSender extends AbstractSender {
       .collect(toList());
     taggedMetricsCache = new TaggedMetricsCache(options.getTaggedMetricsCacheSize());
     context.runOnContext(aVoid -> {
-      HttpClientOptions httpClientOptions = options.getHttpOptions()
-        .setDefaultHost(options.getHost())
-        .setDefaultPort(options.getPort());
-      httpClient = vertx.createHttpClient(httpClientOptions);
+        HttpClientOptions httpClientOptions = options.getHttpOptions()
+          .setDefaultHost(options.getHost())
+          .setDefaultPort(options.getPort());
+        httpClient = vertx.createHttpClient(httpClientOptions);
       }
     );
   }
