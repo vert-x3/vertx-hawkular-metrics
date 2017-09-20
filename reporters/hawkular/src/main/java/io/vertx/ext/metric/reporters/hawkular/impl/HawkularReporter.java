@@ -20,24 +20,24 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.metric.collect.impl.ReporterBase;
+import io.vertx.ext.metric.collect.impl.AvailabilityPoint;
+import io.vertx.ext.metric.collect.impl.CounterPoint;
+import io.vertx.ext.metric.collect.impl.DataPoint;
+import io.vertx.ext.metric.collect.impl.GaugePoint;
+import io.vertx.ext.metric.collect.impl.HttpReporterBase;
 import io.vertx.ext.metric.reporters.hawkular.AuthenticationOptions;
 import io.vertx.ext.metric.reporters.hawkular.VertxHawkularOptions;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -50,7 +50,7 @@ import static java.util.stream.Collectors.*;
  *
  * @author Thomas Segismont
  */
-public class HawkularReporter extends ReporterBase {
+public class HawkularReporter extends HttpReporterBase<VertxHawkularOptions> {
   private static final Logger LOG = LoggerFactory.getLogger(HawkularReporter.class);
 
   private static final CharSequence MEDIA_TYPE_APPLICATION_JSON = HttpHeaders.createOptimized("application/json");
@@ -63,13 +63,10 @@ public class HawkularReporter extends ReporterBase {
   private final CharSequence tenant;
   private final CharSequence auth;
 
-  private final Map<CharSequence, Iterable<CharSequence>> httpHeaders;
-
   private final JsonObject tags;
   private final List<MetricTagsMatcher> metricTagsMatchers;
   private final TaggedMetricsCache taggedMetricsCache;
 
-  private HttpClient httpClient;
   private String metricsDataUri;
 
   /**
@@ -78,7 +75,8 @@ public class HawkularReporter extends ReporterBase {
    * @param context the metric collection and sending execution context
    */
   public HawkularReporter(Vertx vertx, VertxHawkularOptions options, Context context) {
-    super(vertx, options, context);
+    super(vertx, options, context, options.getHttpHeaders());
+
     metricsServiceUri = options.getMetricsServiceUri();
 
     tenant = options.isSendTenantHeader() ? HttpHeaders.createOptimized(options.getTenant()) : null;
@@ -94,58 +92,20 @@ public class HawkularReporter extends ReporterBase {
       auth = null;
     }
 
-    JsonObject httpHeaders = options.getHttpHeaders();
-    if (httpHeaders != null) {
-      this.httpHeaders = new HashMap<>(httpHeaders.size());
-      for (String headerName : httpHeaders.fieldNames()) {
-        CharSequence optimizedName = HttpHeaders.createOptimized(headerName);
-        Object value = httpHeaders.getValue(headerName);
-        List<String> values;
-        if (value instanceof JsonArray) {
-          values = ((JsonArray) value).stream().map(Object::toString).collect(toList());
-        } else {
-          values = Collections.singletonList(value.toString());
-        }
-        this.httpHeaders.put(optimizedName, values.stream().map(HttpHeaders::createOptimized).collect(toList()));
-      }
-    } else {
-      this.httpHeaders = Collections.emptyMap();
-    }
-
     tags = options.getTags();
     metricTagsMatchers = options.getMetricTagsMatches().stream()
       .map(MetricTagsMatcher::new)
       .collect(toList());
     taggedMetricsCache = new TaggedMetricsCache(options.getTaggedMetricsCacheSize());
-    context.runOnContext(aVoid -> {
-        HttpClientOptions httpClientOptions = options.getHttpOptions()
-          .setDefaultHost(options.getHost())
-          .setDefaultPort(options.getPort());
-        httpClient = vertx.createHttpClient(httpClientOptions);
-      }
-    );
+
+    onContextInit(options);
   }
 
   @Override
-  protected void sendDataTo(String metricsDataUri, Object mixedData, String encoding) {
-    HttpClientRequest request = httpClient.post(metricsDataUri, this::onResponse)
-      .exceptionHandler(err -> LOG.trace("Could not send metrics. Payload was: " + mixedData, err))
-      .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
-
-    if (tenant != null) {
-      request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
-    }
-    if (auth != null) {
-      request.putHeader(HttpHeaders.AUTHORIZATION, auth);
-    }
-    httpHeaders.forEach(request::putHeader);
-
-    request.end((String) mixedData, "UTF-8");
-
-    JsonObject hawkularMixedData = new JsonObject((String) mixedData);
-    tagMetrics(hawkularMixedData.getJsonArray("gauges"), "gauges");
-    tagMetrics(hawkularMixedData.getJsonArray("counters"), "counters");
-    tagMetrics(hawkularMixedData.getJsonArray("availabilities"), "availability");
+  protected HttpClientOptions createHttpClientOptions(VertxHawkularOptions options) {
+    return options.getHttpOptions()
+      .setDefaultHost(options.getHost())
+      .setDefaultPort(options.getPort());
   }
 
   @Override
@@ -178,12 +138,58 @@ public class HawkularReporter extends ReporterBase {
       .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON).end();
   }
 
-  private void onResponse(HttpClientResponse response) {
-    if (response.statusCode() != 200 && LOG.isTraceEnabled()) {
-      response.bodyHandler(msg -> {
-        LOG.trace("Could not send metrics: " + response.statusCode() + " : " + msg.toString());
-      });
+  @Override
+  protected void doSend(String metricsDataUri, List<DataPoint> dataPoints) {
+    JsonObject mixedData = toMixedData(dataPoints);
+
+    HttpClientRequest request = httpClient.post(metricsDataUri, this::onResponse)
+      .exceptionHandler(t -> handleException(mixedData, t))
+      .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_APPLICATION_JSON);
+
+    if (tenant != null) {
+      request.putHeader(HTTP_HEADER_HAWKULAR_TENANT, tenant);
     }
+    if (auth != null) {
+      request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+    }
+    httpHeaders.forEach(request::putHeader);
+
+    request.end(mixedData.toBuffer());
+
+    tagMetrics(mixedData.getJsonArray("gauges"), "gauges");
+    tagMetrics(mixedData.getJsonArray("counters"), "counters");
+    tagMetrics(mixedData.getJsonArray("availabilities"), "availability");
+  }
+
+  private JsonObject toMixedData(List<DataPoint> dataPoints) {
+    Map<? extends Class<? extends DataPoint>, Map<String, List<DataPoint>>> mixedData;
+    mixedData = dataPoints.stream().collect(groupingBy(DataPoint::getClass, groupingBy(DataPoint::getName)));
+
+    JsonObject json = new JsonObject();
+    addMixedData(json, "gauges", mixedData.get(GaugePoint.class));
+    addMixedData(json, "counters", mixedData.get(CounterPoint.class));
+    addMixedData(json, "availabilities", mixedData.get(AvailabilityPoint.class));
+
+    return json;
+  }
+
+  private void addMixedData(JsonObject json, String type, Map<String, List<DataPoint>> data) {
+    if (data == null) {
+      return;
+    }
+
+    JsonArray metrics = new JsonArray();
+    data.forEach((id, points) -> {
+      JsonArray jsonDataPoints = points.stream()
+        .map(this::toJsonDataPoint)
+        .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+      metrics.add(new JsonObject().put("id", id).put("data", jsonDataPoints));
+    });
+    json.put(type, metrics);
+  }
+
+  private JsonObject toJsonDataPoint(DataPoint dataPoint) {
+    return new JsonObject().put("timestamp", dataPoint.getTimestamp()).put("value", dataPoint.getValue());
   }
 
   private void tagMetrics(JsonArray metrics, String type) {
@@ -233,11 +239,5 @@ public class HawkularReporter extends ReporterBase {
           LOG.trace("Could not encode metric name", e);
         }
       });
-  }
-
-  @Override
-  public void stop() {
-    super.stop();
-    httpClient.close();
   }
 }

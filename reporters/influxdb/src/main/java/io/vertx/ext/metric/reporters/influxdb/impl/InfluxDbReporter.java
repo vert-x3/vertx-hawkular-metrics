@@ -5,28 +5,22 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.metric.collect.impl.AvailabilityPoint;
 import io.vertx.ext.metric.collect.impl.CounterPoint;
 import io.vertx.ext.metric.collect.impl.DataPoint;
 import io.vertx.ext.metric.collect.impl.GaugePoint;
-import io.vertx.ext.metric.collect.impl.ReporterBase;
+import io.vertx.ext.metric.collect.impl.HttpReporterBase;
 import io.vertx.ext.metric.reporters.influxdb.AuthenticationOptions;
 import io.vertx.ext.metric.reporters.influxdb.VertxInfluxDbOptions;
 import io.vertx.ext.metric.reporters.influxdb.impl.Point.Builder;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,18 +28,15 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.*;
 
-public class InfluxDbReporter extends ReporterBase {
+public class InfluxDbReporter extends HttpReporterBase<VertxInfluxDbOptions> {
   private static final Logger LOG = LoggerFactory.getLogger(InfluxDbReporter.class);
+
   private static final CharSequence MEDIA_TYPE_TEXT_PLAIN = HttpHeaders.createOptimized("text/plain");
 
-  private final String metricsServiceUri;
-  private final String database;
+  private final String metricsDataUri;
+  private final String prefix;
 
-
-  private final Map<CharSequence, Iterable<CharSequence>> httpHeaders;
-  private HttpClient httpClient;
   private final CharSequence auth;
-  private String prefix;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
@@ -53,7 +44,10 @@ public class InfluxDbReporter extends ReporterBase {
    * @param context the metric collection and sending execution context
    */
   public InfluxDbReporter(Vertx vertx, VertxInfluxDbOptions options, Context context) {
-    super(vertx, options, context);
+    super(vertx, options, context, options.getHttpHeaders());
+
+    metricsDataUri = options.getMetricsServiceUri() + "?db=" + options.getDatabase();
+    prefix = options.getPrefix();
 
     AuthenticationOptions authenticationOptions = options.getAuthenticationOptions();
     if (authenticationOptions.isEnabled()) {
@@ -66,67 +60,44 @@ public class InfluxDbReporter extends ReporterBase {
     } else {
       auth = null;
     }
-    JsonObject optionsHttpHeaders = options.getHttpHeaders();
-    if (optionsHttpHeaders != null) {
-      this.httpHeaders = new HashMap<>(optionsHttpHeaders.size());
-      for (String headerName : optionsHttpHeaders.fieldNames()) {
-        CharSequence optimizedName = HttpHeaders.createOptimized(headerName);
-        Object value = optionsHttpHeaders.getValue(headerName);
-        List<String> values;
-        if (value instanceof JsonArray) {
-          values = ((JsonArray) value).stream().map(Object::toString).collect(toList());
-        } else {
-          values = Collections.singletonList(value.toString());
-        }
-        this.httpHeaders.put(optimizedName, values.stream().map(HttpHeaders::createOptimized).collect(toList()));
-      }
-    } else {
-      this.httpHeaders = Collections.emptyMap();
-    }
 
-    metricsServiceUri = options.getMetricsServiceUri();
-
-    database = options.getDatabase();
-    prefix = options.getPrefix();
-
-    context.runOnContext(aVoid -> {
-      HttpClientOptions httpClientOptions = options.getHttpOptions()
-        .setDefaultHost(options.getHost())
-        .setDefaultPort(options.getPort());
-      httpClient = vertx.createHttpClient(httpClientOptions);
-    });
+    onContextInit(options);
   }
 
   @Override
-  protected void sendDataTo(String metricsDataUri, Object mixedData, String encoding) {
-    if (mixedData instanceof Optional) {
-      Optional<?> optional = (Optional<?>) mixedData;
-      optional.filter(BatchPoints.class::isInstance).ifPresent(b -> {
-        HttpClientRequest request = httpClient.post(metricsDataUri, this::onResponse)
-          .exceptionHandler(err -> LOG.trace("Could not send metrics. Payload was: " + mixedData, err))
-          .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_TEXT_PLAIN);
-
-        if (auth != null) {
-          request.putHeader(HttpHeaders.AUTHORIZATION, auth);
-        }
-        httpHeaders.forEach(request::putHeader);
-        String lineProtocol = ((BatchPoints) b).lineProtocol();
-        if (LOG.isTraceEnabled()) {
-          LOG.trace("Sending data to influxDb: \n" + lineProtocol);
-        }
-        request.end(lineProtocol, "UTF-8");
-      });
-    }
+  protected HttpClientOptions createHttpClientOptions(VertxInfluxDbOptions options) {
+    return options.getHttpOptions()
+      .setDefaultHost(options.getHost())
+      .setDefaultPort(options.getPort());
   }
 
   @Override
   protected void getMetricsDataUri(Handler<AsyncResult<String>> handler) {
-    handler.handle(Future.succeededFuture(metricsServiceUri + "?db=" + database));
-    return;
+    handler.handle(Future.succeededFuture(metricsDataUri));
   }
 
   @Override
-  protected Optional<BatchPoints> toMixedData(List<DataPoint> dataPoints) {
+  protected void doSend(String metricsDataUri, List<DataPoint> dataPoints) {
+    Optional<BatchPoints> optional = toBatchPoints(dataPoints);
+    optional.ifPresent(b -> {
+      HttpClientRequest request = httpClient.post(metricsDataUri, this::onResponse)
+        .exceptionHandler(t -> handleException(b, t))
+        .putHeader(HttpHeaders.CONTENT_TYPE, MEDIA_TYPE_TEXT_PLAIN);
+
+      if (auth != null) {
+        request.putHeader(HttpHeaders.AUTHORIZATION, auth);
+      }
+      httpHeaders.forEach(request::putHeader);
+      String lineProtocol = b.lineProtocol();
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Sending data to influxDb: \n" + lineProtocol);
+      }
+
+      request.end(lineProtocol, "UTF-8");
+    });
+  }
+
+  private Optional<BatchPoints> toBatchPoints(List<DataPoint> dataPoints) {
     BatchPoints batchPoints = BatchPoints.builder()
       .tag("async", "true")
       .build();
@@ -161,19 +132,5 @@ public class InfluxDbReporter extends ReporterBase {
     }
 
     return pointBuilder.build();
-  }
-
-  private void onResponse(HttpClientResponse response) {
-    if (response.statusCode() != 200 && LOG.isTraceEnabled()) {
-      response.bodyHandler(msg -> {
-        LOG.trace("Could not send metrics: " + response.statusCode() + " : " + msg.toString());
-      });
-    }
-  }
-
-  @Override
-  public void stop() {
-    super.stop();
-    httpClient.close();
   }
 }

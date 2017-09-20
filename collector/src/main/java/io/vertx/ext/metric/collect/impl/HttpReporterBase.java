@@ -19,6 +19,10 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -27,6 +31,8 @@ import io.vertx.ext.metric.collect.ExtendedMetricsOptions;
 import io.vertx.ext.metric.collect.Reporter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,40 +40,81 @@ import static java.util.concurrent.TimeUnit.*;
 import static java.util.stream.Collectors.*;
 
 /**
- * Sends collected metrics to external uri.
+ * Base class for reporters sending metrics data over HTTP.
  *
  * @author Thomas Segismont
  * @author Dan Kristensen
  */
-public abstract class ReporterBase implements Reporter {
-  private static final Logger LOG = LoggerFactory.getLogger(ReporterBase.class);
+public abstract class HttpReporterBase<T extends ExtendedMetricsOptions> implements Reporter {
+  private static final Logger LOG = LoggerFactory.getLogger(HttpReporterBase.class);
 
-  private final Vertx vertx;
+  protected final Vertx vertx;
+  private final Context context;
 
   private final int batchSize;
   private final long batchDelay;
   private final List<DataPoint> queue;
 
-  private long timerId;
+  protected final Map<CharSequence, Iterable<CharSequence>> httpHeaders;
 
+  private long timerId;
   private long sendTime;
+
+  protected HttpClient httpClient;
 
   /**
    * @param vertx   the {@link Vertx} managed instance
    * @param options Vertx Extended metrics options
    * @param context the metric collection and sending execution context
+   * @param httpHeaders custom HTTP headers to send with metrics data
    */
-  public ReporterBase(Vertx vertx, ExtendedMetricsOptions options, Context context) {
+  public HttpReporterBase(Vertx vertx, T options, Context context, JsonObject httpHeaders) {
     this.vertx = vertx;
-
+    this.context = context;
     batchSize = options.getBatchSize();
     batchDelay = NANOSECONDS.convert(options.getBatchDelay(), SECONDS);
     queue = new ArrayList<>(batchSize);
+    if (httpHeaders != null) {
+      this.httpHeaders = new HashMap<>(httpHeaders.size());
+      for (String headerName : httpHeaders.fieldNames()) {
+        CharSequence optimizedName = HttpHeaders.createOptimized(headerName);
+        Object value = httpHeaders.getValue(headerName);
+        List<String> values;
+        if (value instanceof JsonArray) {
+          values = ((JsonArray) value).stream().map(Object::toString).collect(toList());
+        } else {
+          values = Collections.singletonList(value.toString());
+        }
+        this.httpHeaders.put(optimizedName, values.stream().map(HttpHeaders::createOptimized).collect(toList()));
+      }
+    } else {
+      this.httpHeaders = Collections.emptyMap();
+    }
+  }
+
+  /**
+   * To be invoked by subclasses after object is initialized.
+   *
+   * @param options the metrics implementation options
+   */
+  protected void onContextInit(T options) {
     context.runOnContext(aVoid -> {
       timerId = vertx.setPeriodic(MILLISECONDS.convert(batchDelay, NANOSECONDS), tid -> flushIfIdle());
+      sendTime = System.nanoTime();
+      httpClient = vertx.createHttpClient(createHttpClientOptions(options));
     });
-    sendTime = System.nanoTime();
   }
+
+  private void flushIfIdle() {
+    if (System.nanoTime() - sendTime > batchDelay && !queue.isEmpty()) {
+      LOG.trace("Flushing queue with " + queue.size() + " elements");
+      List<DataPoint> dataPoints = new ArrayList<>(queue);
+      queue.clear();
+      send(dataPoints);
+    }
+  }
+
+  protected abstract HttpClientOptions createHttpClientOptions(T options);
 
   @Override
   public void handle(List<DataPoint> dataPoints) {
@@ -99,60 +146,35 @@ public abstract class ReporterBase implements Reporter {
   }
 
   private void send(List<DataPoint> dataPoints) {
-    Object mixedData = toMixedData(dataPoints);
     getMetricsDataUri(ar -> {
       if (ar.succeeded()) {
-        sendDataTo(ar.result(), mixedData, "UTF-8");
+        doSend(ar.result(), dataPoints);
         sendTime = System.nanoTime();
       }
     });
   }
 
-  protected abstract void sendDataTo(String metricsDataUri, Object mixedData, String encoding);
-
   protected abstract void getMetricsDataUri(Handler<AsyncResult<String>> handler);
 
-  protected Object toMixedData(List<DataPoint> dataPoints) {
-    Map<? extends Class<? extends DataPoint>, Map<String, List<DataPoint>>> mixedData;
-    mixedData = dataPoints.stream().collect(groupingBy(DataPoint::getClass, groupingBy(DataPoint::getName)));
+  protected abstract void doSend(String metricsDataUri, List<DataPoint> dataPoints);
 
-    JsonObject json = new JsonObject();
-    addMixedData(json, "gauges", mixedData.get(GaugePoint.class));
-    addMixedData(json, "counters", mixedData.get(CounterPoint.class));
-    addMixedData(json, "availabilities", mixedData.get(AvailabilityPoint.class));
-    return json.encode();
-  }
-
-  private void addMixedData(JsonObject json, String type, Map<String, List<DataPoint>> data) {
-    if (data == null) {
-      return;
+  protected void onResponse(HttpClientResponse response) {
+    if (response.statusCode() != 200 && LOG.isTraceEnabled()) {
+      response.bodyHandler(msg -> {
+        LOG.trace("Could not send metrics: " + response.statusCode() + " : " + msg.toString());
+      });
     }
-
-    JsonArray metrics = new JsonArray();
-    data.forEach((id, points) -> {
-      JsonArray jsonDataPoints = points.stream()
-        .map(this::toJsonDataPoint)
-        .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
-      metrics.add(new JsonObject().put("id", id).put("data", jsonDataPoints));
-    });
-    json.put(type, metrics);
   }
 
-  private JsonObject toJsonDataPoint(DataPoint dataPoint) {
-    return new JsonObject().put("timestamp", dataPoint.getTimestamp()).put("value", dataPoint.getValue());
-  }
-
-  private void flushIfIdle() {
-    if (System.nanoTime() - sendTime > batchDelay && !queue.isEmpty()) {
-      LOG.trace("Flushing queue with " + queue.size() + " elements");
-      List<DataPoint> dataPoints = new ArrayList<>(queue);
-      queue.clear();
-      send(dataPoints);
+  protected void handleException(Object payload, Throwable t) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Could not send metrics. Payload was: " + String.valueOf(payload), t);
     }
   }
 
   @Override
   public void stop() {
     vertx.cancelTimer(timerId);
+    httpClient.close();
   }
 }
