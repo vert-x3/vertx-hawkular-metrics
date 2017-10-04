@@ -1,0 +1,100 @@
+= Cheatsheets
+
+[[BatchingReporterOptions]]
+== BatchingReporterOptions
+
+++++
+ Common options for reporters sending metrics in batches.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[batchDelay]]`batchDelay`|`Number (int)`|
++++
+Set the maximum delay between two consecutive batches (in seconds). To reduce the number of HTTP exchanges, metric
+ data is sent to the Hawkular server in batches. A batch is sent as soon as the number of metrics collected reaches
+ the configured <code>batchSize</code>, or after the <code>batchDelay</code> expires. Defaults to <code>1</code> second.
++++
+|[[batchSize]]`batchSize`|`Number (int)`|
++++
+Set the maximum number of metrics in a batch. To reduce the number of HTTP exchanges, metric data is sent to the
+ Hawkular server in batches. A batch is sent as soon as the number of metrics collected reaches the configured
+ <code>batchSize</code>, or after the <code>batchDelay</code> expires. Defaults to <code>50</code>.
++++
+|[[disabledMetricsTypes]]`disabledMetricsTypes`|`Array of link:enums.html#MetricsType[MetricsType]`|
++++
+Sets metrics types that are disabled.
++++
+|[[enabled]]`enabled`|`Boolean`|
++++
+Set whether metrics will be enabled on the Vert.x instance. Metrics are not enabled by default.
++++
+|[[metricsBridgeAddress]]`metricsBridgeAddress`|`String`|
++++
+Sets the metric bridge address on which the application is sending the custom metrics. Application can send
+ metrics to this event bus address. The message is a JSON object specifying at least the <code>id</code> and
+ <code>value</code> fields.
+ <p/>
+ Don't forget to also enable the bridge with <code>metricsBridgeEnabled</code>.
++++
+|[[metricsBridgeEnabled]]`metricsBridgeEnabled`|`Boolean`|
++++
+Sets whether or not the metrics bridge should be enabled. The metrics bridge is disabled by default.
++++
+|[[prefix]]`prefix`|`String`|
++++
+Set the metric name prefix. Metric names are not prefixed by default. Prefixing metric names is required to
+ distinguish data sent by different Vert.x instances.
++++
+|[[schedule]]`schedule`|`Number (int)`|
++++
+Set the metric collection interval (in seconds). Defaults to <code>1</code>.
++++
+|===
+
+[[MetricsOptionsBase]]
+== MetricsOptionsBase
+
+++++
+ Base options for metrics reporting.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[disabledMetricsTypes]]`disabledMetricsTypes`|`Array of link:enums.html#MetricsType[MetricsType]`|
++++
+Sets metrics types that are disabled.
++++
+|[[enabled]]`enabled`|`Boolean`|
++++
+Set whether metrics will be enabled on the Vert.x instance. Metrics are not enabled by default.
++++
+|[[metricsBridgeAddress]]`metricsBridgeAddress`|`String`|
++++
+Sets the metric bridge address on which the application is sending the custom metrics. Application can send
+ metrics to this event bus address. The message is a JSON object specifying at least the <code>id</code> and
+ <code>value</code> fields.
+ <p/>
+ Don't forget to also enable the bridge with <code>metricsBridgeEnabled</code>.
++++
+|[[metricsBridgeEnabled]]`metricsBridgeEnabled`|`Boolean`|
++++
+Sets whether or not the metrics bridge should be enabled. The metrics bridge is disabled by default.
++++
+|[[prefix]]`prefix`|`String`|
++++
+Set the metric name prefix. Metric names are not prefixed by default. Prefixing metric names is required to
+ distinguish data sent by different Vert.x instances.
++++
+|[[schedule]]`schedule`|`Number (int)`|
++++
+Set the metric collection interval (in seconds). Defaults to <code>1</code>.
++++
+|===
+
