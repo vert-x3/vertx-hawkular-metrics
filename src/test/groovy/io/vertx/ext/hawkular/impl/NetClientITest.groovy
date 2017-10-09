@@ -69,6 +69,8 @@ class NetClientITest extends BaseITest {
 
   private void runClient(NetClient netClient, int sentCount, String requestContent, TestContext context) {
     (1..sentCount).collect { i ->
+      // Helps to pass on OSX otherwise we get connection reset by peer because the number of concurrent connections is too large
+      Thread.sleep(10)
       def async = context.async()
       netClient.connect(testPort, testHost, { res ->
         if (res.failed()) {
