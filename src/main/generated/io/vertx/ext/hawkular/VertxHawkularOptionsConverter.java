@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Red Hat, Inc.
+ * Copyright (c) 2014 Red Hat, Inc. and others
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -37,7 +37,7 @@ public class VertxHawkularOptionsConverter {
       obj.setBatchSize(((Number)json.getValue("batchSize")).intValue());
     }
     if (json.getValue("disabledMetricsTypes") instanceof JsonArray) {
-      java.util.HashSet<io.vertx.ext.hawkular.MetricsType> list = new java.util.HashSet<>();
+      java.util.LinkedHashSet<io.vertx.ext.hawkular.MetricsType> list = new java.util.LinkedHashSet<>();
       json.getJsonArray("disabledMetricsTypes").forEach( item -> {
         if (item instanceof String)
           list.add(io.vertx.ext.hawkular.MetricsType.valueOf((String)item));
