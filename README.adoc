@@ -1,8 +1,6 @@
 = vertx-hawkular-metrics
 :source-language: java
 
-image::https://vertx.ci.cloudbees.com/buildStatus/icon?job=vert.x3-hawkular-metrics[link=https://vertx.ci.cloudbees.com/job/vert.x3-hawkular-metrics/]
-
 Hawkular is an http://www.hawkular.org[open source monitoring and management solution].
 
 The http://vertx.io/docs/vertx-core/java/index.html#_metrics_spi[Vert.x Metrics SPI] allows implementers to
