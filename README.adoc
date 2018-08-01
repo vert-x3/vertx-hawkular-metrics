@@ -1,3 +1,7 @@
+= Project status
+
+This project is retired.
+
 = vertx-hawkular-metrics
 :source-language: java
 
